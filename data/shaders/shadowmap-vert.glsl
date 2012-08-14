@@ -27,5 +27,5 @@ void main(void) {
 	
 	v_normal = (u_projTrans * vec4(a_normal, 0.0)).xyz;
 	gl_Position = u_projTrans * vec4(pos,1.0) ;
-	v_lightSpacePosition  = u_lightProjTrans * vec4(a_position,1.0) ;
+	v_lightSpacePosition  = u_lightProjTrans * vec4(pos,1.0) ;
 }
