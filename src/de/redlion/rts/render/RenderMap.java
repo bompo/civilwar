@@ -16,7 +16,9 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.OrthoCamController;
@@ -28,6 +30,9 @@ public class RenderMap {
 	StillModel modelRocksObj;	
 	StillModel modelBigRockObj;
 	StillModel modelHouseObj;
+	
+	StillModel modelSoldierObj;
+	Texture texSoldierDiff;	
 	
 	Texture texAOMap;	
 	Texture imageLightning;	
@@ -83,12 +88,12 @@ public class RenderMap {
 		texAOMap = new Texture(Gdx.files.internal("data/ao_map.png"), true);
 		texAOMap.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
-		modelRocksObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rocks.g3dt"));
-			
-		modelBigRockObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/bigrock.g3dt"));
-	
+		modelRocksObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rocks.g3dt"));			
+		modelBigRockObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/bigrock.g3dt"));	
 		modelWaterObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/water.g3dt"));
 		
+		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
+		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);
 		
 		imageLightning = new Texture(Gdx.files.internal("data/beach_probe_diffuse.png"), true);
 		imageLightning.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
@@ -133,6 +138,12 @@ public class RenderMap {
 		
 		time += Gdx.graphics.getDeltaTime();
 		
+		
+		lightCam.position.x = cam.position.x + 9;
+		lightCam.position.y = cam.position.y + 5;
+		lightCam.position.z = cam.position.z - 10;
+		lightCam.update();
+		
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 
@@ -140,18 +151,33 @@ public class RenderMap {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glClearColor(0, 0, 0, 0);
-		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
 		shadowGenShader.begin();
 		shadowGenShader.setUniformMatrix("u_projTrans", lightCam.combined);
+		model.idt();
+		shadowGenShader.setUniformMatrix("u_model", model);
 		
 		modelWaterObj.render(shadowGenShader);
 		modelHouseObj.render(shadowGenShader);
 		modelRocksObj.render(shadowGenShader);
 		modelBigRockObj.render(shadowGenShader);
 		
-		shadowGenShader.end();
-		shadowMap.end();
+		
+		for(int i=0; i< 20; i++) {
+			tmp.idt();
+			model.idt();
+			tmp.setToTranslation(-0.7f,0.f,0);
+			model.mul(tmp);
+			tmp.setToTranslation(MathUtils.sin(i)*1.f + i*0.1f,0, MathUtils.sin(i)/4.f +  i*0.1f);
+			model.mul(tmp);
+
+			shadowGenShader.setUniformMatrix("u_model", model);
+			
+			shadowMapShader.setUniformf("u_waterOn", 0);
+			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
+			modelSoldierObj.render(shadowGenShader);
+		}
 
 
 		//Gdx.gl.glDisable(GL20.GL_CULL_FACE);
@@ -166,12 +192,14 @@ public class RenderMap {
 		shadowMapShader.setUniformi("s_diffMap", 1);
 		shadowMapShader.setUniformi("s_IrradianceMap", 2);
 		shadowMapShader.setUniformf("u_time", time);
+		model.idt();
+		shadowMapShader.setUniformMatrix("u_model", model);
 		
 		shadowMapShader.setUniformf("u_viewerPosition", cam.position);
 		shadowMapShader.setUniformMatrix("u_projTrans", cam.combined);
 		shadowMapShader.setUniformMatrix("u_lightProjTrans", lightCam.combined);
 		
-		texAOMap.bind(1);		
+		texAOMap.bind(1);	
 
 		shadowMapShader.setUniformf("u_waterOn", 1);
 		shadowMapShader.setUniformf("u_color", 0.86f, 1.0f, 0.98f);
@@ -184,6 +212,24 @@ public class RenderMap {
 		modelRocksObj.render(shadowMapShader);
 		shadowMapShader.setUniformf("u_color", 0.8f, 0.58f, 0.28f);
 		modelBigRockObj.render(shadowMapShader);
+		
+		//render soldier
+		texSoldierDiff.bind(1);
+		
+		for(int i=0; i< 20; i++) {
+			tmp.idt();
+			model.idt();
+			tmp.setToTranslation(-0.7f,0.f,0);
+			model.mul(tmp);
+			tmp.setToTranslation(MathUtils.sin(i)*1.f + i*0.1f,0, MathUtils.sin(i)/4.f +  i*0.1f);
+			model.mul(tmp);
+
+			shadowMapShader.setUniformMatrix("u_model", model);
+			
+			shadowMapShader.setUniformf("u_waterOn", 0);
+			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
+			modelSoldierObj.render(shadowMapShader);
+		}
 		
 		shadowMapShader.end();
 		
