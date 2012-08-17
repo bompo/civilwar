@@ -18,10 +18,10 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.OrthoCamController;
+import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
 
 public class RenderMap {
@@ -41,8 +41,6 @@ public class RenderMap {
 
 	Bloom bloom = new Bloom();
 
-	Mesh plane;
-	Mesh cube;
 	Texture whiteTex;
 
 	// GLES20
@@ -66,7 +64,7 @@ public class RenderMap {
 	public RenderMap() {
 		setupScene();
 		setupShadowMap();
-
+		
 		camController = new OrthoCamController(cam);
 		multiplexer = new InputMultiplexer();
 		multiplexer.addProcessor(camController);
@@ -79,11 +77,6 @@ public class RenderMap {
 	}
 
 	private void setupScene() {
-		plane = new Mesh(true, 4, 4, new VertexAttribute(Usage.Position, 3,
-				ShaderProgram.POSITION_ATTRIBUTE));
-		plane.setVertices(new float[] { -10, -1, 10, 10, -1, 10, 10, -1, -10,
-				-10, -1, -10 });
-		plane.setIndices(new short[] { 3, 2, 1, 0 });
 		modelHouseObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/building.g3dt"));
 		texAOMap = new Texture(Gdx.files.internal("data/ao_map.png"), true);
 		texAOMap.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -91,6 +84,8 @@ public class RenderMap {
 		modelRocksObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rocks.g3dt"));			
 		modelBigRockObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/bigrock.g3dt"));	
 		modelWaterObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/water.g3dt"));
+		
+		HeightMap hm = new HeightMap(modelRocksObj);
 		
 		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
 		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);
@@ -178,6 +173,8 @@ public class RenderMap {
 			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
 			modelSoldierObj.render(shadowGenShader);
 		}
+		
+		shadowMap.end();
 
 
 		//Gdx.gl.glDisable(GL20.GL_CULL_FACE);
