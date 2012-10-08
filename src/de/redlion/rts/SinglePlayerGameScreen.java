@@ -109,12 +109,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		
 		if(paused) {
+			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
 			multiplexer.addProcessor(drawController);
+			Gdx.input.setInputProcessor(multiplexer);
 		}
 		else {
+			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
+			Gdx.input.setInputProcessor(multiplexer);
 		}
 		
 	}
