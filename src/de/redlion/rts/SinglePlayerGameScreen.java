@@ -1,5 +1,9 @@
 package de.redlion.rts;
 
+import java.awt.PointerInfo;
+import java.util.Iterator;
+import java.util.ListIterator;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -10,7 +14,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import de.redlion.rts.render.LinePath2D;
+import de.redlion.rts.render.PathPoint;
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
 import de.redlion.rts.units.Soldier;
@@ -39,7 +47,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	OrthographicCamera camera;
 	InputMultiplexer multiplexer;
 	
+	ShapeRenderer r;
+	
 	public static boolean paused = false;
+	
+	public static LinePath2D path;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -63,7 +75,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		font = Resources.getInstance().font;
 		font.setScale(1);
 		
-		
+		r = new ShapeRenderer();
+		path = new LinePath2D();
 
 		initRender();
 	}
@@ -168,6 +181,15 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			batch.begin();
 			font.draw(batch, "PAUSED", 700, 35);
 			batch.end();
+			
+			r.setColor(1, 0, 0, 1);
+			r.begin(ShapeType.Point);
+			Iterator<PathPoint> it = path.points.iterator();
+			while(it.hasNext()) {
+				PathPoint temp = it.next();
+				r.point(temp.x, temp.y, 0);
+			}
+			r.end();
 		}
 	}
 	
