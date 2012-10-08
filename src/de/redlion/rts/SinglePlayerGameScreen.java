@@ -127,6 +127,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		}
 		else {
+			path.points.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
@@ -183,11 +184,22 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			batch.end();
 			
 			r.setColor(1, 0, 0, 1);
-			r.begin(ShapeType.Point);
+			r.begin(ShapeType.Line);
 			Iterator<PathPoint> it = path.points.iterator();
+			PathPoint temp3 = new PathPoint(0, 0);
+			if(it.hasNext()) {
+				temp3 = it.next();
+			}
 			while(it.hasNext()) {
-				PathPoint temp = it.next();
-				r.point(temp.x, temp.y, 0);
+				PathPoint temp1 = it.next();
+				r.line(temp3.x, temp3.y,temp1.x, temp1.y);
+				if(it.hasNext()) {
+					
+					PathPoint temp2 = it.next();
+					r.line(temp1.x, temp1.y,temp2.x, temp2.y);
+					temp3 = temp2;
+				}
+				
 			}
 			r.end();
 		}

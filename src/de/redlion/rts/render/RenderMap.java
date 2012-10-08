@@ -31,6 +31,10 @@ public class RenderMap {
 	Texture texSoldierDiff;
 	Texture texEnemySoldierDiff;	
 	
+	StillModel modelWeaponObj;
+	Texture texWeaponDiff;
+	
+	
 	Texture texAOMap;	
 	Texture imageLightning;	
 	
@@ -74,9 +78,11 @@ public class RenderMap {
 		heightMap = new HeightMap(modelLandscapeObj);
 		
 		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
-		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);
-		
+		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);		
 		texEnemySoldierDiff = new Texture(Gdx.files.internal("data/enemy_soldier_diff.png"), true);
+		
+		modelWeaponObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rifle.g3dt"));
+		texWeaponDiff = new Texture(Gdx.files.internal("data/rifle_diff.png"), true);
 		
 		imageLightning = new Texture(Gdx.files.internal("data/beach_probe_diffuse.png"), true);
 		imageLightning.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
@@ -147,8 +153,6 @@ public class RenderMap {
 		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
 			tmp.idt();
 			model.idt();
-			tmp.setToRotation(Vector3.Z, soldier.angle);
-			model.mul(tmp);
 			
 			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
@@ -156,6 +160,9 @@ public class RenderMap {
 			}
 			
 			tmp.setToTranslation(localIntersection);
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 
 			shadowGenShader.setUniformMatrix("u_model", model);
@@ -169,16 +176,16 @@ public class RenderMap {
 		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
 			tmp.idt();
 			model.idt();
-			tmp.setToRotation(Vector3.Z, soldier.angle);
-			model.mul(tmp);
-			
 			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
 			
 			tmp.setToTranslation(localIntersection);
-			model.mul(tmp);
+			model.mul(tmp);		
+
+			tmp.setToRotation(Vector3.Z, soldier.angle);
+			model.mul(tmp);		
 
 			shadowGenShader.setUniformMatrix("u_model", model);
 			
@@ -218,8 +225,9 @@ public class RenderMap {
 		shadowMapShader.setUniformf("u_color", 0.96f, 0.75f, 0.47f);
 		
 		//render soldier
-		texSoldierDiff.bind(1);
 		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+			texSoldierDiff.bind(1);
+			
 			tmp.idt();
 			model.idt();			
 			
@@ -239,10 +247,15 @@ public class RenderMap {
 			shadowMapShader.setUniformf("u_waterOn", 0);
 			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
 			modelSoldierObj.render(shadowMapShader);
+
+			texWeaponDiff.bind(1);
+			modelWeaponObj.render(shadowMapShader);			
 		}
 		
-		texEnemySoldierDiff.bind(1);
+		
 		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+			texEnemySoldierDiff.bind(1);
+			
 			tmp.idt();
 			model.idt();			
 			
@@ -265,6 +278,9 @@ public class RenderMap {
 			shadowMapShader.setUniformf("u_waterOn", 0);
 			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
 			modelSoldierObj.render(shadowMapShader);
+
+			texWeaponDiff.bind(1);
+			modelWeaponObj.render(shadowMapShader);
 		}
 		
 		shadowMapShader.end();

@@ -25,6 +25,8 @@ public class DrawController extends InputAdapter{
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {
+		y = -y + Gdx.graphics.getHeight();
+		
 		if(SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ) {
 			delta.set(x, y).sub(last);
 			delta.mul(0.01f);
