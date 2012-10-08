@@ -19,6 +19,7 @@ package de.redlion.rts;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -36,7 +37,11 @@ public class OrthoCamController extends InputAdapter {
 	public boolean touchDragged (int x, int y, int pointer) {
 		delta.set(x, y).sub(last);
 		delta.mul(0.01f);
-		camera.position.add(delta.x, delta.y, 0);
+		Vector3 temp = new Vector3(-delta.x,delta.y,0);
+		Quaternion rotation = new Quaternion();
+		camera.combined.getRotation(rotation);
+		rotation.transform(temp);
+		camera.translate(temp);
 		camera.update();
 		last.set(x, y);
 		return true;
