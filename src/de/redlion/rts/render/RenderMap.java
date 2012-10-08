@@ -1,7 +1,6 @@
 package de.redlion.rts.render;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -20,7 +19,6 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.GameSession;
-import de.redlion.rts.OrthoCamController;
 import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
 import de.redlion.rts.units.Soldier;
@@ -47,30 +45,21 @@ public class RenderMap {
 	Matrix4 normal = new Matrix4().idt();
 	Matrix4 tmp = new Matrix4().idt();
 
-	OrthographicCamera cam;
+	public OrthographicCamera cam;
 	PerspectiveCamera lightCam;
 	PerspectiveCamera currCam;
-
-	OrthoCamController camController;
 
 	ShaderProgram flatShader;
 	ShaderProgram shadowGenShader;
 	ShaderProgram shadowMapShader;
 	ShaderProgram currShader;
 	FrameBuffer shadowMap;
-	InputMultiplexer multiplexer;
-	
 	HeightMap heightMap;
-
+	
 	public RenderMap() {
 		setupScene();
 		setupShadowMap();
 		
-		camController = new OrthoCamController(cam);
-		multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(camController);
-
-		Gdx.input.setInputProcessor(multiplexer);
 		bloom = new Bloom();
 		bloom.setBloomIntesity(1.5f);
 		bloom.setTreshold(0.65f);
@@ -131,8 +120,7 @@ public class RenderMap {
 
 	public void render() {
 		
-		time += Gdx.graphics.getDeltaTime();
-		
+		time += Gdx.graphics.getDeltaTime();		
 		
 		lightCam.position.x = cam.position.x + 9;
 		lightCam.position.y = cam.position.y + 10;
@@ -280,7 +268,6 @@ public class RenderMap {
 		
 		
 		bloom.render();
-
 
 	}
 

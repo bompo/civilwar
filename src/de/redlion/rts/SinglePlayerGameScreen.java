@@ -2,13 +2,13 @@ package de.redlion.rts;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector3;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
@@ -17,7 +17,6 @@ import de.redlion.rts.units.Soldier;
 public class SinglePlayerGameScreen extends DefaultScreen {
 
 	float startTime = 0;
-	PerspectiveCamera cam;
 
 	SpriteBatch batch;
 	SpriteBatch fadeBatch;
@@ -32,6 +31,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	boolean finished = false;
 
 	float delta;
+	
+	OrthoCamController camController;
+	DrawController  drawController;
+	KeyController keyController;
+	OrthographicCamera camera;
+	InputMultiplexer multiplexer;
+	
+	public static boolean paused = false;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -54,6 +61,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		font = Resources.getInstance().font;
 		font.setScale(1);
+		
+		
 
 		initRender();
 	}
@@ -69,22 +78,18 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
-		Vector3 oldPosition = new Vector3();
-		Vector3 oldDirection = new Vector3();
-		if (cam != null) {
-			oldPosition.set(cam.position);
-			oldDirection.set(cam.direction);
-			cam = new PerspectiveCamera(7, Gdx.graphics.getWidth(),	Gdx.graphics.getHeight());
-			cam.position.set(oldPosition);
-			cam.lookAt(0, 0, 0.5f);
-		} else {
-			cam = new PerspectiveCamera(7, Gdx.graphics.getWidth(),	Gdx.graphics.getHeight());
-			cam.position.set(-0.6f, 7.2f, 38.8f);
-			cam.lookAt(0, -0.2f, -1.1f);
-		}
-		
+	
 		initRender();
 		renderMap = new RenderMap();
+		
+		camController = new OrthoCamController(renderMap.cam);
+		keyController = new KeyController();
+		drawController = new DrawController(renderMap.cam);
+		multiplexer = new InputMultiplexer();
+		multiplexer.addProcessor(camController);
+		multiplexer.addProcessor(keyController);
+
+		Gdx.input.setInputProcessor(multiplexer);
 	}
 
 	@Override
@@ -99,28 +104,31 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			deltaCount = 0;
 			renderFrame(0.02f);
 		}
+		
+		if(paused) {
+			multiplexer.removeProcessor(camController);
+			multiplexer.addProcessor(drawController);
+		}
+		else {
+			multiplexer.removeProcessor(drawController);
+			multiplexer.addProcessor(camController);
+		}
+		
 	}
 
 	public void renderFrame(float deltaTime) {
+
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		delta = Math.min(0.1f, deltaTime);
 
 		startTime += delta;
 
-		cam.update();
-		
-		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
-			soldier.update(delta);
-		}
-		
-		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
-			soldier.update(delta);
-		}
+		if(!paused)
+			updateUnits();
 
 		collisionTest();
 		updateAI();
 		
-		renderMap.updateCamera(cam);
 		renderMap.render();
 
 		if (Configuration.getInstance().debug) {
@@ -147,6 +155,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			if (fade >= 1) {
 				Gdx.app.exit();
 			}
+		}
+		
+		if(paused) {
+			batch.begin();
+			font.draw(batch, "PAUSED", 700, 35);
+			batch.end();
+		}
+	}
+	
+	private void updateUnits() {
+		
+		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+			soldier.update(delta);
+		}
+		
+		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+			soldier.update(delta);
 		}
 	}
 
