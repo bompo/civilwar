@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -14,6 +16,8 @@ public class DrawController extends InputAdapter{
 	final Vector3 curr = new Vector3();
 	final Vector2 last = new Vector2(0, 0);
 	final Vector2 delta = new Vector2();
+	
+	ShapeRenderer r = new ShapeRenderer();
 
 	public DrawController (OrthographicCamera camera) {
 		this.camera = camera;
@@ -32,18 +36,25 @@ public class DrawController extends InputAdapter{
 			camera.update();
 			last.set(x, y);
 		}
+		else {
+			Vector2 temp = new Vector2(x, y);
+			SinglePlayerGameScreen.path.appendPoint(temp);
+		}
 		return true;
 	}
 
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		last.set(0, 0);
+		
+		
 		return true;
 	}
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
 		last.set(x, y);
+		
 		return true;
 	}
 	
