@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
+import de.redlion.rts.units.Soldier;
 
 public class SinglePlayerGameScreen extends DefaultScreen {
 
@@ -107,6 +108,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		startTime += delta;
 
 		cam.update();
+		
+		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+			soldier.update(delta);
+		}
+		
+		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+			soldier.update(delta);
+		}
 
 		collisionTest();
 		updateAI();

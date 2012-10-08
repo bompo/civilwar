@@ -3,36 +3,35 @@ package de.redlion.rts.render;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+import de.redlion.rts.GameSession;
 import de.redlion.rts.OrthoCamController;
+import de.redlion.rts.PerspectiveCamController;
 import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
+import de.redlion.rts.units.Soldier;
 
 public class RenderMap {
 
-	StillModel modelWaterObj;
-	StillModel modelRocksObj;	
-	StillModel modelBigRockObj;
-	StillModel modelHouseObj;
+	StillModel modelLandscapeObj;
 	
 	StillModel modelSoldierObj;
-	Texture texSoldierDiff;	
+	Texture texSoldierDiff;
+	Texture texEnemySoldierDiff;	
 	
 	Texture texAOMap;	
 	Texture imageLightning;	
@@ -77,18 +76,15 @@ public class RenderMap {
 	}
 
 	private void setupScene() {
-		modelHouseObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/building.g3dt"));
-		texAOMap = new Texture(Gdx.files.internal("data/ao_map.png"), true);
+		texAOMap = new Texture(Gdx.files.internal("data/landscape_diff.png"), true);
 		texAOMap.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
-		modelRocksObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rocks.g3dt"));			
-		modelBigRockObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/bigrock.g3dt"));	
-		modelWaterObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/water.g3dt"));
-		
-		HeightMap hm = new HeightMap(modelRocksObj);
+		modelLandscapeObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/landscape.g3dt"));	
 		
 		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
 		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);
+		
+		texEnemySoldierDiff = new Texture(Gdx.files.internal("data/enemy_soldier_diff.png"), true);
 		
 		imageLightning = new Texture(Gdx.files.internal("data/beach_probe_diffuse.png"), true);
 		imageLightning.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
@@ -135,7 +131,7 @@ public class RenderMap {
 		
 		
 		lightCam.position.x = cam.position.x + 9;
-		lightCam.position.y = cam.position.y + 5;
+		lightCam.position.y = cam.position.y + 10;
 		lightCam.position.z = cam.position.z - 10;
 		lightCam.update();
 		
@@ -153,18 +149,37 @@ public class RenderMap {
 		model.idt();
 		shadowGenShader.setUniformMatrix("u_model", model);
 		
-		modelWaterObj.render(shadowGenShader);
-		modelHouseObj.render(shadowGenShader);
-		modelRocksObj.render(shadowGenShader);
-		modelBigRockObj.render(shadowGenShader);
+		modelLandscapeObj.render(shadowGenShader);
 		
 		
-		for(int i=0; i< 20; i++) {
+		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
 			tmp.idt();
 			model.idt();
+			tmp.setToRotation(Vector3.Z, soldier.angle);
+			model.mul(tmp);
+			
 			tmp.setToTranslation(-0.7f,0.f,0);
 			model.mul(tmp);
-			tmp.setToTranslation(MathUtils.sin(i)*1.f + i*0.1f,0, MathUtils.sin(i)/4.f +  i*0.1f);
+			tmp.setToTranslation(soldier.position);
+			model.mul(tmp);
+
+			shadowGenShader.setUniformMatrix("u_model", model);
+			
+			shadowMapShader.setUniformf("u_waterOn", 0);
+			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
+			modelSoldierObj.render(shadowGenShader);
+		}
+		
+		
+		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+			tmp.idt();
+			model.idt();
+			tmp.setToRotation(Vector3.Z, soldier.angle);
+			model.mul(tmp);
+			
+			tmp.setToTranslation(-0.7f,0.f,0);
+			model.mul(tmp);
+			tmp.setToTranslation(soldier.position);
 			model.mul(tmp);
 
 			shadowGenShader.setUniformMatrix("u_model", model);
@@ -198,27 +213,44 @@ public class RenderMap {
 		
 		texAOMap.bind(1);	
 
-		shadowMapShader.setUniformf("u_waterOn", 1);
-		shadowMapShader.setUniformf("u_color", 0.86f, 1.0f, 0.98f);
-		modelWaterObj.render(shadowMapShader);
-		
 		shadowMapShader.setUniformf("u_waterOn", 0);
 		shadowMapShader.setUniformf("u_color", 1.0f, 0.93f, 0.9f);
-		modelHouseObj.render(shadowMapShader);
+		
+		modelLandscapeObj.render(shadowMapShader);
 		shadowMapShader.setUniformf("u_color", 0.96f, 0.75f, 0.47f);
-		modelRocksObj.render(shadowMapShader);
-		shadowMapShader.setUniformf("u_color", 0.8f, 0.58f, 0.28f);
-		modelBigRockObj.render(shadowMapShader);
 		
 		//render soldier
 		texSoldierDiff.bind(1);
-		
-		for(int i=0; i< 20; i++) {
+		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
 			tmp.idt();
-			model.idt();
+			model.idt();			
+			
 			tmp.setToTranslation(-0.7f,0.f,0);
 			model.mul(tmp);
-			tmp.setToTranslation(MathUtils.sin(i)*1.f + i*0.1f,0, MathUtils.sin(i)/4.f +  i*0.1f);
+			tmp.setToTranslation(soldier.position);
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Z, soldier.angle);
+			model.mul(tmp);
+
+			shadowMapShader.setUniformMatrix("u_model", model);
+			
+			shadowMapShader.setUniformf("u_waterOn", 0);
+			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
+			modelSoldierObj.render(shadowMapShader);
+		}
+		
+		texEnemySoldierDiff.bind(1);
+		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+			tmp.idt();
+			model.idt();			
+			
+			tmp.setToTranslation(-0.7f,0.f,0);
+			model.mul(tmp);
+			tmp.setToTranslation(soldier.position);
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 
 			shadowMapShader.setUniformMatrix("u_model", model);
