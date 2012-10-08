@@ -13,14 +13,14 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.GameSession;
 import de.redlion.rts.OrthoCamController;
-import de.redlion.rts.PerspectiveCamController;
 import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
 import de.redlion.rts.units.Soldier;
@@ -59,6 +59,8 @@ public class RenderMap {
 	ShaderProgram currShader;
 	FrameBuffer shadowMap;
 	InputMultiplexer multiplexer;
+	
+	HeightMap heightMap;
 
 	public RenderMap() {
 		setupScene();
@@ -80,6 +82,7 @@ public class RenderMap {
 		texAOMap.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 		modelLandscapeObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/landscape.g3dt"));	
+		heightMap = new HeightMap(modelLandscapeObj);
 		
 		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
 		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);
@@ -102,6 +105,7 @@ public class RenderMap {
 		lightCam = new PerspectiveCamera(40, shadowMap.getWidth(),	shadowMap.getHeight());
 		lightCam.position.set(-1, 20, 0);
 		lightCam.lookAt(0, 0, 0);
+		
 		lightCam.update();
 
 		shadowGenShader = new ShaderProgram(Gdx.files.internal(
@@ -158,9 +162,12 @@ public class RenderMap {
 			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 			
-			tmp.setToTranslation(-0.7f,0.f,0);
-			model.mul(tmp);
-			tmp.setToTranslation(soldier.position);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Vector3 localIntersection = new Vector3();
+			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
+			}
+			
+			tmp.setToTranslation(localIntersection);
 			model.mul(tmp);
 
 			shadowGenShader.setUniformMatrix("u_model", model);
@@ -177,9 +184,12 @@ public class RenderMap {
 			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 			
-			tmp.setToTranslation(-0.7f,0.f,0);
-			model.mul(tmp);
-			tmp.setToTranslation(soldier.position);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Vector3 localIntersection = new Vector3();
+			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
+			}
+			
+			tmp.setToTranslation(localIntersection);
 			model.mul(tmp);
 
 			shadowGenShader.setUniformMatrix("u_model", model);
@@ -214,7 +224,7 @@ public class RenderMap {
 		texAOMap.bind(1);	
 
 		shadowMapShader.setUniformf("u_waterOn", 0);
-		shadowMapShader.setUniformf("u_color", 1.0f, 0.93f, 0.9f);
+		shadowMapShader.setUniformf("u_color", 1.0f, 1f, 1f);
 		
 		modelLandscapeObj.render(shadowMapShader);
 		shadowMapShader.setUniformf("u_color", 0.96f, 0.75f, 0.47f);
@@ -225,9 +235,12 @@ public class RenderMap {
 			tmp.idt();
 			model.idt();			
 			
-			tmp.setToTranslation(-0.7f,0.f,0);
-			model.mul(tmp);
-			tmp.setToTranslation(soldier.position);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Vector3 localIntersection = new Vector3();
+			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
+			}
+			
+			tmp.setToTranslation(localIntersection);
 			model.mul(tmp);
 			
 			tmp.setToRotation(Vector3.Z, soldier.angle);
@@ -245,9 +258,12 @@ public class RenderMap {
 			tmp.idt();
 			model.idt();			
 			
-			tmp.setToTranslation(-0.7f,0.f,0);
-			model.mul(tmp);
-			tmp.setToTranslation(soldier.position);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Vector3 localIntersection = new Vector3();
+			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
+			}
+			
+			tmp.setToTranslation(localIntersection);
 			model.mul(tmp);
 			
 			tmp.setToRotation(Vector3.Z, soldier.angle);
