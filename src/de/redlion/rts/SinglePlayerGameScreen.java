@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
@@ -185,6 +186,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	}
 
 	private void collisionTest() {
+		for(Soldier playerSoldier:GameSession.getInstance().playerSoldiers) {
+			for(Soldier enemySoldier:GameSession.getInstance().enemySoldiers) {
+				if(playerSoldier.position.dst2(enemySoldier.position) < 0.1f) {
+					enemySoldier.hit();
+				}
+			}	
+		}
+		
+		for(Soldier enemySoldier:GameSession.getInstance().enemySoldiers) {
+			for(Soldier playerSoldier:GameSession.getInstance().playerSoldiers) {
+				if(enemySoldier.position.dst2(playerSoldier.position) < 0.1f) {
+					playerSoldier.hit();
+				}
+			}	
+		}
+		
+		
 	}
 
 	@Override

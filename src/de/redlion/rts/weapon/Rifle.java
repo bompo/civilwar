@@ -1,21 +1,15 @@
-package de.redlion.rts.units;
+package de.redlion.rts.weapon;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 
-public class Soldier {
+public class Rifle {
 
-	public int id;
-	public Vector3 position;
-	public Vector3 direction;
 	public float angle = MathUtils.random(-90, 90);
 	public int angleSpin = 1;
 	
 	public boolean death = false;
 
-	public Soldier(int id, Vector3 position) {
-		this.id = id;
-		this.position = position;
+	public Rifle() {
 	}
 	
 	public void update(float delta) {
@@ -29,10 +23,10 @@ public class Soldier {
 		}
 		
 		angle = angle + delta * 20.f * angleSpin;
-		if(angle > 15) {
+		if(angle > 10) {
 			angleSpin = -1;
 		}
-		if(angle < -15) {
+		if(angle < -10) {
 			angleSpin = 1;
 		}
 		

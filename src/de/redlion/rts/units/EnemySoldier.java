@@ -11,6 +11,8 @@ public class EnemySoldier extends Soldier {
 	
 	public void update(float delta) {
 		super.update(delta);
+		if(death) return;
+		
 		position.add(Vector3.Z.tmp().mul(-delta));
 	}
 

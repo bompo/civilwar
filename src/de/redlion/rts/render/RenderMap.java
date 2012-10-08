@@ -257,7 +257,7 @@ public class RenderMap {
 			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 
-			tmp.setToRotation(Vector3.X, 90);
+			tmp.setToRotation(Vector3.Y, 180);
 			model.mul(tmp);
 			
 			shadowMapShader.setUniformMatrix("u_model", model);
