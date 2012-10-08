@@ -31,7 +31,6 @@ public class DrawController extends InputAdapter{
 			camera.translate(temp);
 			camera.update();
 			last.set(x, y);
-			Gdx.app.log("", "das");
 		}
 		return true;
 	}
