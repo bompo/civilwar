@@ -85,7 +85,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		r = new ShapeRenderer();
 		path = new ArrayList<Vector2>();
 		
-		dollar = new Dollar();
+		dollar = new Dollar(4);
 		dollarListener = new DollarListener() {
 			
 			@Override

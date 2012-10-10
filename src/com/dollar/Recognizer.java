@@ -26,7 +26,8 @@ public class Recognizer
 
 	public static final int GESTURES_DEFAULT = 1;
 	public static final int GESTURES_SIMPLE = 2;
-	public static final int GESTURES_CIRCLES = 3;	
+	public static final int GESTURES_CIRCLES = 3;
+	public static final int GESTURES_CIVIL_WAR = 4;
 	
 	public Recognizer()
 	{
@@ -45,6 +46,8 @@ public class Recognizer
 
 			case GESTURES_CIRCLES:
 				loadTemplatesCircles();	break;
+			case GESTURES_CIVIL_WAR:
+				loadTemplatesCivilWar(); break;
 		}
 	}
 	
@@ -83,6 +86,13 @@ public class Recognizer
 	{
 		Templates.addElement(loadTemplate("circle CCW", TemplateData.circlePointsCCW));
 		Templates.addElement(loadTemplate("circle CW", TemplateData.circlePointsCW));
+	}
+	
+	void loadTemplatesCivilWar()
+	{
+		Templates.addElement(loadTemplate("circle CCW", TemplateData.circlePointsCCW));
+		Templates.addElement(loadTemplate("circle CW", TemplateData.circlePointsCW));
+		Templates.addElement(loadTemplate("arrow", TemplateData.arrowPoints));
 	}
 	
 	Template loadTemplate(String name, int[] array)

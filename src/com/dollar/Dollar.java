@@ -41,6 +41,7 @@ public class Dollar
 	public static final int GESTURES_DEFAULT = 1;
 	public static final int GESTURES_SIMPLE = 2;
 	public static final int GESTURES_CIRCLES = 3;
+	public static final int GESTURES_CIVIL_WAR = 4;
 	
 	protected int gestureSet;
 	
