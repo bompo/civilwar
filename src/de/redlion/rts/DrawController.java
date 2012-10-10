@@ -62,7 +62,7 @@ public class DrawController extends InputAdapter{
 	
 	@Override
 	public boolean scrolled (int amount) {
-		camera.zoom -= -amount * Gdx.graphics.getDeltaTime() / 100;
+		camera.zoom -= -amount * Gdx.graphics.getDeltaTime() / 50;
 		camera.update();
 		return true;
 	}
