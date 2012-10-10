@@ -17,6 +17,8 @@ public class DrawController extends InputAdapter{
 	final Vector2 last = new Vector2(0, 0);
 	final Vector2 delta = new Vector2();
 	
+	final Vector2 lastPoint = new Vector2();
+	
 	ShapeRenderer r = new ShapeRenderer();
 
 	public DrawController (OrthographicCamera camera) {
@@ -40,7 +42,10 @@ public class DrawController extends InputAdapter{
 		}
 		else {
 			Vector2 temp = new Vector2(x, y);
-			SinglePlayerGameScreen.path.appendPoint(temp);
+			if(temp.dst(lastPoint) > 10) {
+				SinglePlayerGameScreen.path.add(temp);
+				lastPoint.set(temp);
+			}
 		}
 		return true;
 	}
@@ -49,6 +54,10 @@ public class DrawController extends InputAdapter{
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		last.set(0, 0);
 		
+		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+			//add dummy point
+			SinglePlayerGameScreen.path.add(new Vector2(-1,-1));
+		}
 		
 		return true;
 	}

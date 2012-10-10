@@ -1,6 +1,7 @@
 package de.redlion.rts;
 
 import java.awt.PointerInfo;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -13,12 +14,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import de.redlion.rts.render.LinePath2D;
-import de.redlion.rts.render.PathPoint;
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
 import de.redlion.rts.units.Soldier;
@@ -51,7 +52,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static boolean paused = false;
 	
-	public static LinePath2D path;
+	public static ArrayList<Vector2> path;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -76,7 +77,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		font.setScale(1);
 		
 		r = new ShapeRenderer();
-		path = new LinePath2D();
+		path = new ArrayList<Vector2>();
 
 		initRender();
 	}
@@ -127,7 +128,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		}
 		else {
-			path.points.clear();
+			path.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
@@ -185,18 +186,20 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			r.setColor(1, 0, 0, 1);
 			r.begin(ShapeType.Line);
-			Iterator<PathPoint> it = path.points.iterator();
-			PathPoint temp3 = new PathPoint(0, 0);
+			Iterator<Vector2> it = path.iterator();
+			Vector2 temp3 = new Vector2(0, 0);
 			if(it.hasNext()) {
 				temp3 = it.next();
 			}
 			while(it.hasNext()) {
-				PathPoint temp1 = it.next();
-				r.line(temp3.x, temp3.y,temp1.x, temp1.y);
+				Vector2 temp1 = it.next();
+				if(temp3.x != -1 && temp1.x != -1)
+					r.line(temp3.x, temp3.y,temp1.x, temp1.y);
 				if(it.hasNext()) {
 					
-					PathPoint temp2 = it.next();
-					r.line(temp1.x, temp1.y,temp2.x, temp2.y);
+					Vector2 temp2 = it.next();
+					if(temp2.x != -1 && temp1.x != -1)
+						r.line(temp1.x, temp1.y,temp2.x, temp2.y);
 					temp3 = temp2;
 				}
 				
