@@ -19,6 +19,9 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.dollar.Dollar;
+import com.dollar.DollarListener;
+import com.dollar.Recognizer;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
@@ -53,6 +56,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 	
 	public static ArrayList<Vector2> path;
+	
+	Dollar dollar;
+	DollarListener dollarListener; 
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -78,6 +84,17 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		r = new ShapeRenderer();
 		path = new ArrayList<Vector2>();
+		
+		dollar = new Dollar();
+		dollarListener = new DollarListener() {
+			
+			@Override
+			public void dollarDetected(Dollar dollar) {
+				// TODO Auto-generated method stub
+				Gdx.app.log("", dollar.getName());
+			}
+		};
+		dollar.setListener(dollarListener);
 
 		initRender();
 	}
@@ -129,6 +146,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		else {
 			path.clear();
+			dollar.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
@@ -193,6 +211,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			while(it.hasNext()) {
 				Vector2 temp1 = it.next();
+				dollar.addPoint((int)temp1.x, (int)temp1.y);
+				
 				if(temp3.x != -1 && temp1.x != -1)
 					r.line(temp3.x, temp3.y,temp1.x, temp1.y);
 				if(it.hasNext()) {
@@ -205,6 +225,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			}
 			r.end();
+			dollar.setActive(true);
+			dollar.recognize();
 		}
 	}
 	

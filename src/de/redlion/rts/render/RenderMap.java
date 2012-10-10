@@ -89,7 +89,7 @@ public class RenderMap {
 		imageLightning.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.zoom = 0.012f;
+		cam.zoom = 0.008f;
 		cam.position.set(-10, 10, 10);
 		cam.lookAt(0, 0, 0);
 		cam.update();
