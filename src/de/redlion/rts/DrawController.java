@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.dollar.Dollar;
+import com.dollar.DollarListener;
 
 public class DrawController extends InputAdapter{
 
@@ -19,10 +21,22 @@ public class DrawController extends InputAdapter{
 	
 	final Vector2 lastPoint = new Vector2();
 	
+	final Dollar dollar = new Dollar(4);
+	final DollarListener listener;
 	ShapeRenderer r = new ShapeRenderer();
 
 	public DrawController (OrthographicCamera camera) {
 		this.camera = camera;
+		listener  = new DollarListener() {
+			
+			@Override
+			public void dollarDetected(Dollar dollar) {
+				// TODO Auto-generated method stub
+				Gdx.app.log("", dollar.getName());
+			}
+		};
+		
+		dollar.setListener(listener);
 	}
 
 	@Override
@@ -45,6 +59,7 @@ public class DrawController extends InputAdapter{
 			if(temp.dst(lastPoint) > 10) {
 				SinglePlayerGameScreen.path.add(temp);
 				lastPoint.set(temp);
+				dollar.pointerDragged(x, y);
 			}
 		}
 		return true;
@@ -57,6 +72,8 @@ public class DrawController extends InputAdapter{
 		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
 			//add dummy point
 			SinglePlayerGameScreen.path.add(new Vector2(-1,-1));
+			dollar.pointerReleased(x, y);
+			dollar.setActive(false);
 		}
 		
 		return true;
@@ -65,7 +82,8 @@ public class DrawController extends InputAdapter{
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
 		last.set(x, y);
-		
+		dollar.pointerPressed(x, y);
+		dollar.setActive(true);
 		return true;
 	}
 	

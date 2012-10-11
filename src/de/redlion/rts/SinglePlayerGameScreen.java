@@ -56,9 +56,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 	
 	public static ArrayList<Vector2> path;
-	
-	Dollar dollar;
-	DollarListener dollarListener; 
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -85,17 +82,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		r = new ShapeRenderer();
 		path = new ArrayList<Vector2>();
 		
-		dollar = new Dollar(4);
-		dollarListener = new DollarListener() {
-			
-			@Override
-			public void dollarDetected(Dollar dollar) {
-				// TODO Auto-generated method stub
-				Gdx.app.log("", dollar.getName());
-			}
-		};
-		dollar.setListener(dollarListener);
-
 		initRender();
 	}
 
@@ -146,7 +132,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		else {
 			path.clear();
-			dollar.clear();
+//			dollar.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
@@ -211,22 +197,24 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			while(it.hasNext()) {
 				Vector2 temp1 = it.next();
-				dollar.addPoint((int)temp1.x, (int)temp1.y);
 				
-				if(temp3.x != -1 && temp1.x != -1)
+				if(temp3.x != -1 && temp1.x != -1) {
 					r.line(temp3.x, temp3.y,temp1.x, temp1.y);
+
+				}
 				if(it.hasNext()) {
 					
 					Vector2 temp2 = it.next();
-					if(temp2.x != -1 && temp1.x != -1)
+					if(temp2.x != -1 && temp1.x != -1) {
 						r.line(temp1.x, temp1.y,temp2.x, temp2.y);
+
+					}
 					temp3 = temp2;
 				}
 				
 			}
 			r.end();
-			dollar.setActive(true);
-			dollar.recognize();
+
 		}
 	}
 	
