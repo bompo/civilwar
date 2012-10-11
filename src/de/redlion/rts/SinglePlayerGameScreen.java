@@ -2,7 +2,9 @@ package de.redlion.rts;
 
 import java.awt.PointerInfo;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
 import com.badlogic.gdx.Game;
@@ -15,8 +17,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.dollar.Dollar;
@@ -55,7 +59,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static boolean paused = false;
 	
-	public static ArrayList<Vector2> path;
+	public static HashMap<Vector2,Vector3> path;
+	public static Circle circle; 
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -80,7 +85,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		font.setScale(1);
 		
 		r = new ShapeRenderer();
-		path = new ArrayList<Vector2>();
+		path = new LinkedHashMap<Vector2,Vector3>();
+		circle = new Circle(-1, -1, 0);
 		
 		initRender();
 	}
@@ -190,7 +196,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			r.setColor(1, 0, 0, 1);
 			r.begin(ShapeType.Line);
-			Iterator<Vector2> it = path.iterator();
+			Iterator<Vector2> it = path.keySet().iterator();
 			Vector2 temp3 = new Vector2(0, 0);
 			if(it.hasNext()) {
 				temp3 = it.next();
@@ -200,7 +206,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				if(temp3.x != -1 && temp1.x != -1) {
 					r.line(temp3.x, temp3.y,temp1.x, temp1.y);
-
+					
 				}
 				if(it.hasNext()) {
 					
@@ -214,7 +220,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			}
 			r.end();
-
+			if(circle.x != -1) {
+				Vector3 pos = GameSession.getInstance().playerSoldiers.get(0).position;
+				if(circle.contains(new Vector2(pos.x,pos.y)));
+					Gdx.app.log("", circle.radius + " " + circle.y);
+					circle = new Circle(-1,-1, 0);
+			}
 		}
 	}
 	

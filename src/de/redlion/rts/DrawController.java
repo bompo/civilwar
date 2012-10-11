@@ -6,7 +6,9 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.dollar.Dollar;
@@ -23,16 +25,30 @@ public class DrawController extends InputAdapter{
 	
 	final Dollar dollar = new Dollar(4);
 	final DollarListener listener;
-	ShapeRenderer r = new ShapeRenderer();
+	final double MINSCORE = 0.6;
 
-	public DrawController (OrthographicCamera camera) {
+	public DrawController (final OrthographicCamera camera) {
 		this.camera = camera;
 		listener  = new DollarListener() {
 			
 			@Override
 			public void dollarDetected(Dollar dollar) {
 				// TODO Auto-generated method stub
-				Gdx.app.log("", dollar.getName());
+//				Gdx.app.log("", dollar.getName() + " " + dollar.getScore());
+				
+				if((dollar.getName().equals("circle CW") || dollar.getName().equals("circle CCW")) && dollar.getScore() > MINSCORE) {
+//					int[] rec = dollar.getBounds();
+					Rectangle rec = dollar.getBoundingBox();
+//					for(int i=0; i<rec.length;i++) {
+//						Gdx.app.log("", rec[i] + "");
+//					}
+					
+					//TODO: the bounds are x,y,x1,y1 ->project
+					double rad = Math.sqrt((rec.height*rec.height)+(rec.width * rec.width)) / 2;
+					Vector3 temp = new Vector3();
+					camera.unproject(temp.set(dollar.getPosition().x,dollar.getPosition().y,0));
+					SinglePlayerGameScreen.circle = new Circle(new Vector2(temp.x,temp.y),(float) rad);
+				}
 			}
 		};
 		
@@ -57,7 +73,11 @@ public class DrawController extends InputAdapter{
 		else {
 			Vector2 temp = new Vector2(x, y);
 			if(temp.dst(lastPoint) > 10) {
-				SinglePlayerGameScreen.path.add(temp);
+//				Gdx.app.log("point", temp.toString());
+				Vector3 projected = new Vector3();
+				camera.unproject(projected.set(temp.x,temp.y,0));
+//				Gdx.app.log("proj", projected.toString());		
+				SinglePlayerGameScreen.path.put(temp,projected);
 				lastPoint.set(temp);
 				dollar.pointerDragged(x, y);
 			}
@@ -71,7 +91,7 @@ public class DrawController extends InputAdapter{
 		
 		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
 			//add dummy point
-			SinglePlayerGameScreen.path.add(new Vector2(-1,-1));
+			SinglePlayerGameScreen.path.put(new Vector2(-1,-1),new Vector3(-1,-1,-1));
 			dollar.pointerReleased(x, y);
 			dollar.setActive(false);
 		}
