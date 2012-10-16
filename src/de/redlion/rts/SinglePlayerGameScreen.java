@@ -1,11 +1,8 @@
 package de.redlion.rts;
 
-import java.awt.PointerInfo;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.ListIterator;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -16,16 +13,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
+import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.dollar.Dollar;
-import com.dollar.DollarListener;
-import com.dollar.Recognizer;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
@@ -55,7 +52,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	OrthographicCamera camera;
 	InputMultiplexer multiplexer;
 	
+	// GLES20
+	Matrix4 model = new Matrix4().idt();
+	Matrix4 normal = new Matrix4().idt();
+	Matrix4 tmp = new Matrix4().idt();
+	
 	ShapeRenderer r;
+	ShaderProgram flatShader;
+	StillModel sphere;
 	
 	public static boolean paused = false;
 	
@@ -72,6 +76,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderMap = new RenderMap();
 		renderDebug = new RenderDebug();
 		
+		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));
+		
+		flatShader = new ShaderProgram(Gdx.files.internal(
+				"data/shaders/default.vert").readString(), Gdx.files
+				.internal("data/shaders/default.frag").readString());
+		if (!flatShader.isCompiled())
+			throw new GdxRuntimeException(
+					"Couldn't compile shadow map shader: "
+							+ flatShader.getLog());
+		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
 		batch = new SpriteBatch();
@@ -85,6 +99,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		font.setScale(1);
 		
 		r = new ShapeRenderer();
+		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
 		path = new LinkedHashMap<Vector2,Vector3>();
 		circle = new Circle(-1, -1, 0);
 		
@@ -220,7 +235,30 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			}
 			r.end();
+			
+
 			if(circle.x != -1) {
+				System.out.println(circle.x + " " + circle.y + " " + circle.radius);
+				
+				flatShader.begin();
+				flatShader.setUniformMatrix("u_projView", renderMap.cam.combined);
+				flatShader.setUniformf("v_color", 1 , 0 ,0, 0.1f);
+				
+				tmp.idt();
+				model.idt();
+				
+				tmp.setToTranslation(circle.x, 1, circle.y);
+				model.mul(tmp);
+	
+				tmp.setToScaling(circle.radius, circle.radius, circle.radius);
+				model.mul(tmp);
+	
+				
+				flatShader.setUniformMatrix("u_model", model);
+				
+				sphere.render(flatShader);
+				flatShader.end();
+				
 				Vector3 pos = GameSession.getInstance().playerSoldiers.get(0).position;
 				if(circle.contains(new Vector2(pos.x,pos.y))) {
 					Gdx.app.log("", "x:" + circle.x + " y:" + circle.y);

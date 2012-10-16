@@ -38,8 +38,8 @@ public class DrawController extends InputAdapter{
 				
 				if((dollar.getName().equals("circle CW") || dollar.getName().equals("circle CCW")) && dollar.getScore() > MINSCORE) {
 					int[] rec = dollar.getBounds();
-//					Rectangle rec = dollar.getBoundingBox();
 					
+//					Rectangle rec = dollar.getBoundingBox();
 					
 					int x = rec[0];
 					int y = rec[1];
@@ -57,7 +57,7 @@ public class DrawController extends InputAdapter{
 					double rad = Math.sqrt(d) / 2;
 					Vector3 temp = new Vector3();
 					camera.unproject(temp.set(dollar.getPosition().x,dollar.getPosition().y,0));
-					SinglePlayerGameScreen.circle = new Circle(new Vector2(temp.x,temp.y),(float) rad);
+					SinglePlayerGameScreen.circle = new Circle(new Vector2(p2.x - p1.x, p2.y - p1.y),(float) rad);
 				}
 			}
 		};

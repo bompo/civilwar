@@ -53,7 +53,6 @@ public class RenderMap {
 	PerspectiveCamera lightCam;
 	PerspectiveCamera currCam;
 
-	ShaderProgram flatShader;
 	ShaderProgram shadowGenShader;
 	ShaderProgram shadowMapShader;
 	ShaderProgram currShader;
