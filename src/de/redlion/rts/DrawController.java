@@ -59,6 +59,11 @@ public class DrawController extends InputAdapter{
 					camera.unproject(p1);
 					camera.unproject(p2);
 					
+					Quaternion rotation = new Quaternion();
+					camera.combined.getRotation(rotation);
+					rotation.transform(p1);
+					rotation.transform(p2);
+					
 //					Gdx.app.log("", "" + x + " " + y);
 					
 //					float width = rec.width;
@@ -68,8 +73,12 @@ public class DrawController extends InputAdapter{
 					double d = p1.dst(p2);
 					
 					double rad = Math.sqrt(d) / 2;
+					float width = p2.x - p1.x;
+					float height = p2.y - p1.y;
 					
 					SinglePlayerGameScreen.circleRadius = (float) rad;
+					SinglePlayerGameScreen.sphereHeight = height;
+					SinglePlayerGameScreen.sphereWidth = width;
 					
 				}
 			}

@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.math.collision.Sphere;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.render.RenderDebug;
@@ -67,6 +68,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Vector2,Vector3> path;
 	public static Ray circleRay;
 	public static float circleRadius;
+	public static float sphereHeight;
+	public static float sphereWidth;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -254,7 +257,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				tmp.setToTranslation(localIntersection);
 				model.mul(tmp);
 	
-				tmp.setToScaling(circleRadius,circleRadius,circleRadius);
+				tmp.setToScaling(circleRadius,sphereHeight,sphereWidth);
 				model.mul(tmp);
 	
 				
@@ -263,13 +266,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				sphere.render(flatShader);
 				flatShader.end();
 				
-				Vector3 pos = GameSession.getInstance().playerSoldiers.get(0).position;
-//				if(circle.contains(new Vector2(pos.x,pos.y))) {
-//					Gdx.app.log("", "x:" + circle.x + " y:" + circle.y);
-//					Gdx.app.log("", "radius:" + circle.radius);
-//					
-//					circle = new Circle(-1,-1, 0);
-//				}
+				
+				
+				for(Soldier s : GameSession.getInstance().playerSoldiers ) {
+					
+					if(s.position.dst(localIntersection) < circleRadius) {
+						Gdx.app.log("", "" + s.id);
+					}
+				}
 			}
 		}
 	}
