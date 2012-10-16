@@ -1,5 +1,6 @@
 package de.redlion.rts.units;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
 public class PlayerSoldier extends Soldier {

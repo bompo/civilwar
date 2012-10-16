@@ -222,9 +222,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			r.end();
 			if(circle.x != -1) {
 				Vector3 pos = GameSession.getInstance().playerSoldiers.get(0).position;
-				if(circle.contains(new Vector2(pos.x,pos.y)));
-					Gdx.app.log("", circle.radius + " " + circle.y);
+				if(circle.contains(new Vector2(pos.x,pos.y))) {
+					Gdx.app.log("", "x:" + circle.x + " y:" + circle.y);
+					Gdx.app.log("", "radius:" + circle.radius);
+					
 					circle = new Circle(-1,-1, 0);
+				}
 			}
 		}
 	}

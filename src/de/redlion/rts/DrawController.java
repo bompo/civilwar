@@ -37,14 +37,24 @@ public class DrawController extends InputAdapter{
 //				Gdx.app.log("", dollar.getName() + " " + dollar.getScore());
 				
 				if((dollar.getName().equals("circle CW") || dollar.getName().equals("circle CCW")) && dollar.getScore() > MINSCORE) {
-//					int[] rec = dollar.getBounds();
-					Rectangle rec = dollar.getBoundingBox();
-//					for(int i=0; i<rec.length;i++) {
-//						Gdx.app.log("", rec[i] + "");
-//					}
+					int[] rec = dollar.getBounds();
+//					Rectangle rec = dollar.getBoundingBox();
 					
-					//TODO: the bounds are x,y,x1,y1 ->project
-					double rad = Math.sqrt((rec.height*rec.height)+(rec.width * rec.width)) / 2;
+					
+					int x = rec[0];
+					int y = rec[1];
+					int x1 = rec[2];
+					int y1 = rec[3];
+					
+					Vector3 p1 = new Vector3(x,y,0);
+					Vector3 p2 = new Vector3(x1,y1,0);
+					
+					camera.unproject(p1);
+					camera.unproject(p2);
+					
+					double d = p1.dst(p2);
+					
+					double rad = Math.sqrt(d) / 2;
 					Vector3 temp = new Vector3();
 					camera.unproject(temp.set(dollar.getPosition().x,dollar.getPosition().y,0));
 					SinglePlayerGameScreen.circle = new Circle(new Vector2(temp.x,temp.y),(float) rad);
