@@ -57,7 +57,7 @@ public class RenderMap {
 	ShaderProgram shadowMapShader;
 	ShaderProgram currShader;
 	FrameBuffer shadowMap;
-	HeightMap heightMap;
+	public HeightMap heightMap;
 	
 	public RenderMap() {
 		setupScene();

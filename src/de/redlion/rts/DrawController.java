@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -46,18 +47,18 @@ public class DrawController extends InputAdapter{
 					int x1 = rec[2];
 					int y1 = rec[3];
 					
+					SinglePlayerGameScreen.circleRay = camera.getPickRay(dollar.getPosition().x,-dollar.getPosition().y+Gdx.graphics.getHeight());
+					
+					
 					Vector3 p1 = new Vector3(x,y,0);
 					Vector3 p2 = new Vector3(x1,y1,0);
-					
-					camera.unproject(p1);
-					camera.unproject(p2);
 					
 					double d = p1.dst(p2);
 					
 					double rad = Math.sqrt(d) / 2;
-					Vector3 temp = new Vector3();
-					camera.unproject(temp.set(dollar.getPosition().x,dollar.getPosition().y,0));
-					SinglePlayerGameScreen.circle = new Circle(new Vector2(p2.x - p1.x, p2.y - p1.y),(float) rad);
+					
+					SinglePlayerGameScreen.circleRadius = (float) rad;
+					
 				}
 			}
 		};

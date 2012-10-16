@@ -19,9 +19,11 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.render.RenderDebug;
@@ -64,7 +66,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 	
 	public static HashMap<Vector2,Vector3> path;
-	public static Circle circle; 
+	public static Ray circleRay;
+	public static float circleRadius;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -101,7 +104,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		r = new ShapeRenderer();
 		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
 		path = new LinkedHashMap<Vector2,Vector3>();
-		circle = new Circle(-1, -1, 0);
+		
 		
 		initRender();
 	}
@@ -237,8 +240,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			r.end();
 			
 
-			if(circle.x != -1) {
-				System.out.println(circle.x + " " + circle.y + " " + circle.radius);
+			if(circleRay != null) {
+				Vector3 localIntersection = new Vector3();
+				if (Intersector.intersectRayTriangles(circleRay, renderMap.heightMap.map, localIntersection)) {
+				}
 				
 				flatShader.begin();
 				flatShader.setUniformMatrix("u_projView", renderMap.cam.combined);
@@ -247,10 +252,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				tmp.idt();
 				model.idt();
 				
-				tmp.setToTranslation(circle.x, 1, circle.y);
+				tmp.setToTranslation(localIntersection);
 				model.mul(tmp);
 	
-				tmp.setToScaling(circle.radius, circle.radius, circle.radius);
+				tmp.setToScaling(circleRadius,circleRadius,circleRadius);
 				model.mul(tmp);
 	
 				
@@ -260,12 +265,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				flatShader.end();
 				
 				Vector3 pos = GameSession.getInstance().playerSoldiers.get(0).position;
-				if(circle.contains(new Vector2(pos.x,pos.y))) {
-					Gdx.app.log("", "x:" + circle.x + " y:" + circle.y);
-					Gdx.app.log("", "radius:" + circle.radius);
-					
-					circle = new Circle(-1,-1, 0);
-				}
+//				if(circle.contains(new Vector2(pos.x,pos.y))) {
+//					Gdx.app.log("", "x:" + circle.x + " y:" + circle.y);
+//					Gdx.app.log("", "radius:" + circle.radius);
+//					
+//					circle = new Circle(-1,-1, 0);
+//				}
 			}
 		}
 	}
