@@ -47,12 +47,24 @@ public class DrawController extends InputAdapter{
 					int x1 = rec[2];
 					int y1 = rec[3];
 					
+					y = -y + Gdx.graphics.getHeight();
+					y1 = -y1 + Gdx.graphics.getHeight();
+					
 					SinglePlayerGameScreen.circleRay = camera.getPickRay(dollar.getPosition().x,-dollar.getPosition().y+Gdx.graphics.getHeight());
 					
 					
 					Vector3 p1 = new Vector3(x,y,0);
 					Vector3 p2 = new Vector3(x1,y1,0);
+				
+					camera.unproject(p1);
+					camera.unproject(p2);
 					
+//					Gdx.app.log("", "" + x + " " + y);
+					
+//					float width = rec.width;
+//					float height = rec.height;
+					
+//					double d = (width * width) + (height * height);
 					double d = p1.dst(p2);
 					
 					double rad = Math.sqrt(d) / 2;
