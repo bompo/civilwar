@@ -95,10 +95,7 @@ public class DrawController extends InputAdapter{
 			delta.set(x, y).sub(last);
 			delta.mul(0.01f);
 			Vector3 temp = new Vector3(-delta.x,delta.y,0);
-			Quaternion rotation = new Quaternion();
-			camera.combined.getRotation(rotation);
-			rotation.transform(temp);
-			camera.translate(temp);
+			temp.rot(camera.combined);
 			camera.update();
 			last.set(x, y);
 		}
