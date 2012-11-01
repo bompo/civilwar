@@ -267,47 +267,29 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				flatShader.end();
 				
 				
-				
-				for(Soldier s : GameSession.getInstance().playerSoldiers ) {
-					
-					if(s.position.dst(localIntersection) < circleRadius) {
-						Gdx.app.log("", "" + s.id);
-					}
-				}
+				//TODO fix me for Vector2 usage instead of Vector3
+//				for(Soldier s : GameSession.getInstance().playerSoldiers ) {
+//					
+//					if(s.position.dst(localIntersection) < circleRadius) {
+//						Gdx.app.log("", "" + s.id);
+//					}
+//				}
 			}
 		}
 	}
 	
 	private void updateUnits() {
 		
-		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+		for(Soldier soldier:GameSession.getInstance().soldiers) {
 			soldier.update(delta);
 		}
-		
-		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
-			soldier.update(delta);
-		}
+	
 	}
 
 	private void updateAI() {		
 	}
 
 	private void collisionTest() {
-		for(Soldier playerSoldier:GameSession.getInstance().playerSoldiers) {
-			for(Soldier enemySoldier:GameSession.getInstance().enemySoldiers) {
-				if(playerSoldier.position.dst2(enemySoldier.position) < 0.1f) {
-					enemySoldier.hit();
-				}
-			}	
-		}
-		
-		for(Soldier enemySoldier:GameSession.getInstance().enemySoldiers) {
-			for(Soldier playerSoldier:GameSession.getInstance().playerSoldiers) {
-				if(enemySoldier.position.dst2(playerSoldier.position) < 0.1f) {
-					playerSoldier.hit();
-				}
-			}	
-		}
 		
 		
 	}

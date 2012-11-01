@@ -21,6 +21,8 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import de.redlion.rts.GameSession;
 import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
+import de.redlion.rts.units.EnemySoldier;
+import de.redlion.rts.units.PlayerSoldier;
 import de.redlion.rts.units.Soldier;
 
 public class RenderMap {
@@ -149,11 +151,13 @@ public class RenderMap {
 		modelLandscapeObj.render(shadowGenShader);
 		
 		
-		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+		for(Soldier soldier:GameSession.getInstance().soldiers) {
+			if(!(soldier instanceof PlayerSoldier)) continue;
+			
 			tmp.idt();
 			model.idt();
 			
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
@@ -172,10 +176,12 @@ public class RenderMap {
 		}
 		
 		
-		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+		for(Soldier soldier:GameSession.getInstance().soldiers) {
+			if(!(soldier instanceof EnemySoldier)) continue;
+			
 			tmp.idt();
 			model.idt();
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
@@ -224,18 +230,25 @@ public class RenderMap {
 		shadowMapShader.setUniformf("u_color", 0.96f, 0.75f, 0.47f);
 		
 		//render soldier
-		for(Soldier soldier:GameSession.getInstance().playerSoldiers) {
+		for(Soldier soldier:GameSession.getInstance().soldiers) {
+			if(!(soldier instanceof PlayerSoldier)) continue;
 			texSoldierDiff.bind(1);
 			
 			tmp.idt();
 			model.idt();			
 			
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
 			
 			tmp.setToTranslation(localIntersection);
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Y, soldier.facing.angle());
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Y, -90);
 			model.mul(tmp);
 			
 			tmp.setToRotation(Vector3.Z, soldier.angle);
@@ -252,13 +265,14 @@ public class RenderMap {
 		}
 		
 		
-		for(Soldier soldier:GameSession.getInstance().enemySoldiers) {
+		for(Soldier soldier:GameSession.getInstance().soldiers) {
+			if(!(soldier instanceof EnemySoldier)) continue;
 			texEnemySoldierDiff.bind(1);
 			
 			tmp.idt();
 			model.idt();			
 			
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.z), Vector3.Y);
+			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
@@ -266,10 +280,13 @@ public class RenderMap {
 			tmp.setToTranslation(localIntersection);
 			model.mul(tmp);
 			
-			tmp.setToRotation(Vector3.Z, soldier.angle);
-			model.mul(tmp);
+			tmp.setToRotation(Vector3.Y, soldier.facing.angle());
+			model.mul(tmp);			
 
-			tmp.setToRotation(Vector3.Y, 180);
+			tmp.setToRotation(Vector3.Y, -90);
+			model.mul(tmp);
+			
+			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
 			
 			shadowMapShader.setUniformMatrix("u_model", model);

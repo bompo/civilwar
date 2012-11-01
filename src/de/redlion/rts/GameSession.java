@@ -1,19 +1,18 @@
 package de.redlion.rts;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 import de.redlion.rts.units.EnemySoldier;
 import de.redlion.rts.units.PlayerSoldier;
+import de.redlion.rts.units.Soldier;
 
 public class GameSession {
 
 	public static GameSession instance;
 
-	public ArrayList<PlayerSoldier> playerSoldiers = new ArrayList<PlayerSoldier>();
-	public ArrayList<EnemySoldier> enemySoldiers = new ArrayList<EnemySoldier>();
+	public Array<Soldier> soldiers = new Array<Soldier>();
 
 	public static GameSession getInstance() {
 		if (instance == null) {
@@ -23,16 +22,16 @@ public class GameSession {
 	}
 
 	public void newSinglePlayerGame() {
-		playerSoldiers = new ArrayList<PlayerSoldier>();
-		enemySoldiers = new ArrayList<EnemySoldier>();
+		soldiers = new Array<Soldier>();
 
 		for (int i = 0; i < 20; i++) {
-			playerSoldiers.add(new PlayerSoldier(i, new Vector3(MathUtils.sin(i) * 1.f + i * 0.1f, 0, -20.f + MathUtils.sin(i) / 4.f + i * 0.1f)));
+			soldiers.add(new PlayerSoldier(1, new Vector2(MathUtils.sin(i) * 1.f + i * 0.1f,-20.f + MathUtils.sin(i) / 4.f + i * 0.1f), new Vector2(0, 1)));
 		}
 		
 		for (int i = 0; i < 20; i++) {
-			enemySoldiers.add(new EnemySoldier(i, new Vector3(MathUtils.sin(i) * 1.f + i * 0.1f, 0, 20.f + MathUtils.sin(i) / 4.f + i * 0.1f)));
+			soldiers.add(new EnemySoldier(2, new Vector2(MathUtils.sin(i) * 1.f + i * 0.1f, 20.f + MathUtils.sin(i) / 4.f + i * 0.1f), new Vector2(0, -1)));
 		}
+		
 	}
 
 }
