@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -28,6 +29,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.render.RenderDebug;
 import de.redlion.rts.render.RenderMap;
+import de.redlion.rts.units.PlayerSoldier;
 import de.redlion.rts.units.Soldier;
 
 public class SinglePlayerGameScreen extends DefaultScreen {
@@ -40,7 +42,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	BitmapFont font;
 	
-	RenderMap renderMap;
+	public static RenderMap renderMap;
 	RenderDebug renderDebug;
 
 	float fade = 1.0f;
@@ -66,6 +68,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 	
 	public static HashMap<Vector2,Vector3> path;
+	public static Polygon pathPolygon;
 	public static Ray circleRay;
 	public static float circleRadius;
 	public static float sphereHeight;
@@ -158,6 +161,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		else {
 			path.clear();
+			float[] clr = new float[6];
+			pathPolygon = new Polygon(clr);
 //			dollar.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
@@ -241,39 +246,48 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			r.end();
 			
+//			for(Soldier s : GameSession.getInstance().soldiers) {
+//				if(s instanceof PlayerSoldier) {
+//					
+//				Gdx.app.log("", s.position.toString());
+//				}
+//			}
+			
 
 			if(circleRay != null) {
 				Vector3 localIntersection = new Vector3();
-				if (Intersector.intersectRayTriangles(circleRay, renderMap.heightMap.map, localIntersection)) {
-				}
+				Intersector.intersectRayTriangles(circleRay, renderMap.heightMap.map, localIntersection);
 				
-				flatShader.begin();
-				flatShader.setUniformMatrix("u_projView", renderMap.cam.combined);
-				flatShader.setUniformf("v_color", 1 , 0 ,0, 0.1f);
-				
-				tmp.idt();
-				model.idt();
-				
-				tmp.setToTranslation(localIntersection);
-				model.mul(tmp);
-	
-				tmp.setToScaling(circleRadius,sphereHeight,sphereWidth);
-				model.mul(tmp);
-	
-				
-				flatShader.setUniformMatrix("u_model", model);
-				
-				sphere.render(flatShader);
-				flatShader.end();
+//				flatShader.begin();
+//				flatShader.setUniformMatrix("u_projView", renderMap.cam.combined);
+//				flatShader.setUniformf("v_color", 1 , 0 ,0, 0.1f);
+//				
+//				tmp.idt();
+//				model.idt();
+//				
+//				tmp.setToTranslation(localIntersection);
+//				model.mul(tmp);
+//	
+//				tmp.setToScaling(circleRadius,sphereHeight,sphereWidth);
+//				model.mul(tmp);
+//	
+//				
+//				flatShader.setUniformMatrix("u_model", model);
+//				
+//				sphere.render(flatShader);
+//				flatShader.end();
 				
 				
 				//TODO fix me for Vector2 usage instead of Vector3
-//				for(Soldier s : GameSession.getInstance().playerSoldiers ) {
-//					
+				for(Soldier s : GameSession.getInstance().soldiers) {
+					if(s instanceof PlayerSoldier) {
+						if(pathPolygon.contains(s.position.x, s.position.y))
+							Gdx.app.log("", s.id + "");
+					}
 //					if(s.position.dst(localIntersection) < circleRadius) {
 //						Gdx.app.log("", "" + s.id);
 //					}
-//				}
+				}
 			}
 		}
 	}

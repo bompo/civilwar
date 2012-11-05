@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.dollar.Dollar;
 import com.dollar.DollarListener;
 
@@ -27,6 +29,8 @@ public class DrawController extends InputAdapter{
 	final Dollar dollar = new Dollar(4);
 	final DollarListener listener;
 	final double MINSCORE = 0.6;
+	
+	Ray picker;
 
 	public DrawController (final OrthographicCamera camera) {
 		this.camera = camera;
@@ -38,31 +42,53 @@ public class DrawController extends InputAdapter{
 //				Gdx.app.log("", dollar.getName() + " " + dollar.getScore());
 				
 				if((dollar.getName().equals("circle CW") || dollar.getName().equals("circle CCW")) && dollar.getScore() > MINSCORE) {
-					int[] rec = dollar.getBounds();
+//					int[] rec = dollar.getBounds();
 					
 //					Rectangle rec = dollar.getBoundingBox();
 					
-					int x = rec[0];
-					int y = rec[1];
-					int x1 = rec[2];
-					int y1 = rec[3];
+//					int x = rec[0];
+//					int y = rec[1];
+//					int x1 = rec[2];
+//					int y1 = rec[3];
 					
-					y = -y + Gdx.graphics.getHeight();
-					y1 = -y1 + Gdx.graphics.getHeight();
+//					y = -y + Gdx.graphics.getHeight();
+//					y1 = -y1 + Gdx.graphics.getHeight();
 					
 					SinglePlayerGameScreen.circleRay = camera.getPickRay(dollar.getPosition().x,-dollar.getPosition().y+Gdx.graphics.getHeight());
 					
+					Vector3[] tmpArray = new Vector3[SinglePlayerGameScreen.path.values().size()];
+					SinglePlayerGameScreen.path.values().toArray(tmpArray);
 					
-					Vector3 p1 = new Vector3(x,y,0);
-					Vector3 p2 = new Vector3(x1,y1,0);
-				
-					camera.unproject(p1);
-					camera.unproject(p2);
+					float[] polyArray = new float[tmpArray.length * 2 - 2];
 					
-					Quaternion rotation = new Quaternion();
-					camera.combined.getRotation(rotation);
-					rotation.transform(p1);
-					rotation.transform(p2);
+					//don't consider the last dummy point
+					int j = 0;
+					for(int i=0;i<tmpArray.length - 1;i++) {
+						Vector3 tmp = tmpArray[i];
+
+						polyArray[j] = tmp.x;
+						polyArray[j+1] = tmp.z;
+						
+						j+=2;
+						
+					}
+					
+					Polygon poly = new Polygon(polyArray);
+
+					
+					SinglePlayerGameScreen.pathPolygon = poly;
+					
+					
+//					Vector3 p1 = new Vector3(x,y,0);
+//					Vector3 p2 = new Vector3(x1,y1,0);
+//				
+//					camera.unproject(p1);
+//					camera.unproject(p2);
+//					
+//					Quaternion rotation = new Quaternion();
+//					camera.combined.getRotation(rotation);
+//					rotation.transform(p1);
+//					rotation.transform(p2);
 					
 //					Gdx.app.log("", "" + x + " " + y);
 					
@@ -70,15 +96,15 @@ public class DrawController extends InputAdapter{
 //					float height = rec.height;
 					
 //					double d = (width * width) + (height * height);
-					double d = p1.dst(p2);
-					
-					double rad = Math.sqrt(d) / 2;
-					float width = p2.x - p1.x;
-					float height = p2.y - p1.y;
-					
-					SinglePlayerGameScreen.circleRadius = (float) rad;
-					SinglePlayerGameScreen.sphereHeight = height;
-					SinglePlayerGameScreen.sphereWidth = width;
+//					double d = p1.dst(p2);
+//					
+//					double rad = Math.sqrt(d) / 2;
+//					float width = p2.x - p1.x;
+//					float height = p2.y - p1.y;
+//					
+//					SinglePlayerGameScreen.circleRadius = (float) rad;
+//					SinglePlayerGameScreen.sphereHeight = height;
+//					SinglePlayerGameScreen.sphereWidth = width;
 					
 				}
 			}
@@ -104,8 +130,12 @@ public class DrawController extends InputAdapter{
 			if(temp.dst(lastPoint) > 10) {
 //				Gdx.app.log("point", temp.toString());
 				Vector3 projected = new Vector3();
-				camera.unproject(projected.set(temp.x,temp.y,0));
-//				Gdx.app.log("proj", projected.toString());		
+//				camera.unproject(projected.set(temp.x,temp.y,0));
+
+				picker = camera.getPickRay(temp.x, temp.y);
+				
+				Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+				
 				SinglePlayerGameScreen.path.put(temp,projected);
 				lastPoint.set(temp);
 				dollar.pointerDragged(x, y);
