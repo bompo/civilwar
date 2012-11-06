@@ -1,5 +1,10 @@
 package de.redlion.rts;
 
+import java.awt.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -14,8 +19,12 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.utils.Array;
 import com.dollar.Dollar;
 import com.dollar.DollarListener;
+
+import de.redlion.rts.units.PlayerSoldier;
+import de.redlion.rts.units.Soldier;
 
 public class DrawController extends InputAdapter{
 
@@ -28,7 +37,7 @@ public class DrawController extends InputAdapter{
 	
 	final Dollar dollar = new Dollar(4);
 	final DollarListener listener;
-	final double MINSCORE = 0.6;
+	final double MINSCORE = 0.82;
 	
 	Ray picker;
 
@@ -75,8 +84,41 @@ public class DrawController extends InputAdapter{
 					
 					Polygon poly = new Polygon(polyArray);
 
+					boolean addpoly = false;
 					
-					SinglePlayerGameScreen.pathPolygon = poly;
+					for(Soldier s : GameSession.getInstance().soldiers) {
+						if(s instanceof PlayerSoldier) {
+							if(poly.contains(s.position.x, s.position.y)) {
+								addpoly = true;
+							}
+						}
+					}
+					
+					if(addpoly)
+						SinglePlayerGameScreen.circles.add(poly);
+					else if (SinglePlayerGameScreen.circles.isEmpty())
+						SinglePlayerGameScreen.path.clear();
+					else if (!SinglePlayerGameScreen.circles.isEmpty()){
+						int pos = 0;
+						for(int i=0;i<SinglePlayerGameScreen.path.keySet().size();i++) {
+							Vector2 v = (Vector2) SinglePlayerGameScreen.path.keySet().toArray()[i];
+							if(v.x == -1 && i >pos)
+								pos = i + 1;
+						}
+						Object[] delete = new Object[SinglePlayerGameScreen.path.keySet().size() - pos];
+						ArrayList tempList = new ArrayList();
+						int k=0;
+						for(int i=pos;i<SinglePlayerGameScreen.path.keySet().size();i++) {
+							delete[k] = SinglePlayerGameScreen.path.keySet().toArray()[i];
+							tempList.add(delete[k]);
+							j++;
+						}
+						Gdx.app.log("", "NOT EMPTY");
+					}
+						
+						
+						
+					Gdx.app.log("", "" + SinglePlayerGameScreen.circles.size());
 					
 					
 //					Vector3 p1 = new Vector3(x,y,0);
@@ -107,6 +149,32 @@ public class DrawController extends InputAdapter{
 //					SinglePlayerGameScreen.sphereWidth = width;
 					
 				}
+				else {
+
+					if(SinglePlayerGameScreen.circles.isEmpty()) {
+						SinglePlayerGameScreen.path.clear();
+					}
+					else {
+						int pos = 0;
+						for(int i=0;i<SinglePlayerGameScreen.path.keySet().size();i++) {
+							Vector2 v = (Vector2) SinglePlayerGameScreen.path.keySet().toArray()[i];
+							if(v.x == -1 && i >pos)
+								pos = i + 1;
+						}
+						Object[] delete = new Object[SinglePlayerGameScreen.path.keySet().size() - pos];
+						ArrayList tempList = new ArrayList();
+						int j=0;
+						for(int i=pos;i<SinglePlayerGameScreen.path.keySet().size();i++) {
+							delete[j] = SinglePlayerGameScreen.path.keySet().toArray()[i];
+							tempList.add(delete[j]);
+							j++;
+						}
+						SinglePlayerGameScreen.path.keySet().removeAll(tempList);
+					}
+						
+					
+				}
+				
 			}
 		};
 		
@@ -115,17 +183,20 @@ public class DrawController extends InputAdapter{
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {
-		y = -y + Gdx.graphics.getHeight();
 		
 		if(SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ) {
 			delta.set(x, y).sub(last);
 			delta.mul(0.01f);
 			Vector3 temp = new Vector3(-delta.x,delta.y,0);
-			temp.rot(camera.combined);
+			Quaternion rotation = new Quaternion();
+			camera.combined.getRotation(rotation);
+			rotation.transform(temp);
+			camera.translate(temp);
 			camera.update();
 			last.set(x, y);
 		}
 		else {
+			y = -y + Gdx.graphics.getHeight();
 			Vector2 temp = new Vector2(x, y);
 			if(temp.dst(lastPoint) > 10) {
 //				Gdx.app.log("point", temp.toString());

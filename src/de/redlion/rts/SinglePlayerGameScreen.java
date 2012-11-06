@@ -1,5 +1,6 @@
 package de.redlion.rts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -68,11 +69,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 	
 	public static HashMap<Vector2,Vector3> path;
-	public static Polygon pathPolygon;
+	//TODO: statt <Vector2,Vector3> ein <ArrayList<Vector2>,Polygon> oder so
+	public static ArrayList<Polygon> circles;
 	public static Ray circleRay;
-	public static float circleRadius;
-	public static float sphereHeight;
-	public static float sphereWidth;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -110,6 +109,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
 		path = new LinkedHashMap<Vector2,Vector3>();
 		
+		circles = new ArrayList<Polygon>();
 		
 		initRender();
 	}
@@ -161,8 +161,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		else {
 			path.clear();
-			float[] clr = new float[6];
-			pathPolygon = new Polygon(clr);
+//			float[] clr = new float[6];
+//			circlePolygon = new Polygon(clr);
 //			dollar.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
@@ -226,6 +226,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			if(it.hasNext()) {
 				temp3 = it.next();
 			}
+			else
+				r.end();
 			while(it.hasNext()) {
 				Vector2 temp1 = it.next();
 				
@@ -279,15 +281,17 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 				//TODO fix me for Vector2 usage instead of Vector3
-				for(Soldier s : GameSession.getInstance().soldiers) {
-					if(s instanceof PlayerSoldier) {
-						if(pathPolygon.contains(s.position.x, s.position.y))
-							Gdx.app.log("", s.id + "");
-					}
+//				for(Soldier s : GameSession.getInstance().soldiers) {
+//					if(s instanceof PlayerSoldier) {
+//						for(Polygon pathPolygon : circles) {
+//							if(pathPolygon.contains(s.position.x, s.position.y))
+//								Gdx.app.log("", s.id + "");
+//						}
+//					}
 //					if(s.position.dst(localIntersection) < circleRadius) {
 //						Gdx.app.log("", "" + s.id);
 //					}
-				}
+//				}
 			}
 		}
 	}

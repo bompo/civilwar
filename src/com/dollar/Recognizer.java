@@ -92,7 +92,7 @@ public class Recognizer
 	{
 		Templates.addElement(loadTemplate("circle CCW", TemplateData.circlePointsCCW));
 		Templates.addElement(loadTemplate("circle CW", TemplateData.circlePointsCW));
-		Templates.addElement(loadTemplate("arrow", TemplateData.arrowPoints));
+//		Templates.addElement(loadTemplate("arrow", TemplateData.arrowPoints));
 	}
 	
 	Template loadTemplate(String name, int[] array)
