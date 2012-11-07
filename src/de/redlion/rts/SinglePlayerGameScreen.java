@@ -67,11 +67,13 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	StillModel sphere;
 	
 	public static boolean paused = false;
+
+	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
+	public static HashMap<Polygon,ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
+	public static ArrayList<ArrayList<Vector2>> doodles; //what has been drawn on screen
+	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
 	
-	public static HashMap<Vector2,Vector3> path;
-	//TODO: statt <Vector2,Vector3> ein <ArrayList<Vector2>,Polygon> oder so
-	public static ArrayList<Polygon> circles;
-	public static Ray circleRay;
+//	public static Ray circleRay;
 
 	public SinglePlayerGameScreen(Game game) {
 		super(game);
@@ -107,9 +109,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		r = new ShapeRenderer();
 		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
-		path = new LinkedHashMap<Vector2,Vector3>();
 		
-		circles = new ArrayList<Polygon>();
+		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
+		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
+		doodles = new ArrayList<ArrayList<Vector2>>();
+		currentDoodle = new ArrayList<Vector2>();
 		
 		initRender();
 	}
@@ -160,10 +164,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		}
 		else {
-			path.clear();
+			
 //			float[] clr = new float[6];
 //			circlePolygon = new Polygon(clr);
 //			dollar.clear();
+			doodles.clear();
+			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.addProcessor(camController);
@@ -219,80 +225,56 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			font.draw(batch, "PAUSED", 700, 35);
 			batch.end();
 			
-			r.setColor(1, 0, 0, 1);
-			r.begin(ShapeType.Line);
-			Iterator<Vector2> it = path.keySet().iterator();
-			Vector2 temp3 = new Vector2(0, 0);
-			if(it.hasNext()) {
-				temp3 = it.next();
-			}
-			else
-				r.end();
-			while(it.hasNext()) {
-				Vector2 temp1 = it.next();
+			for(ArrayList<Vector2> doodle : doodles) {
 				
-				if(temp3.x != -1 && temp1.x != -1) {
-					r.line(temp3.x, temp3.y,temp1.x, temp1.y);
+				if(!doodle.isEmpty()) {
+					r.setColor(1, 0, 0, 1);
+					r.begin(ShapeType.Line);
 					
-				}
-				if(it.hasNext()) {
+					Vector2 v0 = doodle.get(0);
 					
-					Vector2 temp2 = it.next();
-					if(temp2.x != -1 && temp1.x != -1) {
-						r.line(temp1.x, temp1.y,temp2.x, temp2.y);
-
+					for(Vector2 v1 : doodle) {
+						
+						r.line(v0.x, v0.y, v1.x, v1.y);
+						v0 = v1;
+						
 					}
-					temp3 = temp2;
 				}
 				
+				r.end();
 			}
-			r.end();
 			
-//			for(Soldier s : GameSession.getInstance().soldiers) {
-//				if(s instanceof PlayerSoldier) {
-//					
-//				Gdx.app.log("", s.position.toString());
-//				}
-//			}
-			
+			if(!currentDoodle.isEmpty()) {
+				r.setColor(1, 0, 0, 1);
+				r.begin(ShapeType.Line);
+				
+				Vector2 v0 = currentDoodle.get(0);
+				
+				for(Vector2 v1 : currentDoodle) {
+					
+					r.line(v0.x, v0.y, v1.x, v1.y);
+					v0 = v1;
+					
+				}
+				
+				r.end();
+			}			
 
-			if(circleRay != null) {
-				Vector3 localIntersection = new Vector3();
-				Intersector.intersectRayTriangles(circleRay, renderMap.heightMap.map, localIntersection);
-				
-//				flatShader.begin();
-//				flatShader.setUniformMatrix("u_projView", renderMap.cam.combined);
-//				flatShader.setUniformf("v_color", 1 , 0 ,0, 0.1f);
+//			if(circleRay != null) {	
 //				
-//				tmp.idt();
-//				model.idt();
-//				
-//				tmp.setToTranslation(localIntersection);
-//				model.mul(tmp);
-//	
-//				tmp.setToScaling(circleRadius,sphereHeight,sphereWidth);
-//				model.mul(tmp);
-//	
-//				
-//				flatShader.setUniformMatrix("u_model", model);
-//				
-//				sphere.render(flatShader);
-//				flatShader.end();
-				
-				
-				//TODO fix me for Vector2 usage instead of Vector3
-//				for(Soldier s : GameSession.getInstance().soldiers) {
-//					if(s instanceof PlayerSoldier) {
-//						for(Polygon pathPolygon : circles) {
-//							if(pathPolygon.contains(s.position.x, s.position.y))
-//								Gdx.app.log("", s.id + "");
-//						}
-//					}
-//					if(s.position.dst(localIntersection) < circleRadius) {
-//						Gdx.app.log("", "" + s.id);
-//					}
-//				}
-			}
+//				//TODO fix me for Vector2 usage instead of Vector3
+////				for(Soldier s : GameSession.getInstance().soldiers) {
+////					if(s instanceof PlayerSoldier) {
+////						for(Polygon pathPolygon : circles) {
+////							if(pathPolygon.contains(s.position.x, s.position.y))
+////								Gdx.app.log("", s.id + "");
+////						}
+////					}
+////					if(s.position.dst(localIntersection) < circleRadius) {
+////						Gdx.app.log("", "" + s.id);
+////					}
+////				}
+//			}
 		}
 	}
 	
