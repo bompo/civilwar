@@ -123,7 +123,7 @@ public class DrawController extends InputAdapter{
 					ArrayList<PlayerSoldier> so = soldierTest(poly);
 					
 					if(!so.isEmpty()) {
-						SinglePlayerGameScreen.doodles.add((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+						SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 						SinglePlayerGameScreen.circles.put(poly, so);
 						
 						Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
@@ -157,7 +157,7 @@ public class DrawController extends InputAdapter{
 						if(disjoint) {
 							ArrayList<PlayerSoldier> so = soldierTest(poly);
 							if(!so.isEmpty()) {
-								SinglePlayerGameScreen.doodles.add((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+								SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 								SinglePlayerGameScreen.circles.put(poly, so);
 								
 								Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
@@ -172,7 +172,7 @@ public class DrawController extends InputAdapter{
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
-								SinglePlayerGameScreen.doodles.add((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+								SinglePlayerGameScreen.doodles.put(p,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 								SinglePlayerGameScreen.paths.put(p, tempList);
 
 								Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
@@ -250,13 +250,28 @@ public class DrawController extends InputAdapter{
 			}
 		}
 		
+		ArrayList<Polygon> contained = new ArrayList<Polygon>();
 		for(Polygon po : SinglePlayerGameScreen.circles.keySet()) {
 			list = po.getWorldVertices();
 			for(int j=0;j<list.length;j+=2) {
 				if(polygon.contains(list[j], list[j+1]))
-					return false;
+					contained.add(po);
 			}
 		}
+		
+		if(!contained.isEmpty()) {
+			for(Polygon pop : contained) {
+				list = polygon.getWorldVertices();
+				for(int j=0;j<list.length;j+=2) {
+					if(pop.contains(list[j], list[j+1]))
+						return false;
+				}
+				SinglePlayerGameScreen.circles.remove(pop);
+				SinglePlayerGameScreen.doodles.remove(pop);
+			}
+			
+		}
+		
 		return true;
 		
 	}

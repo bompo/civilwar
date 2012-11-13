@@ -70,7 +70,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
 	public static HashMap<Polygon,ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
-	public static ArrayList<ArrayList<Vector2>> doodles; //what has been drawn on screen
+	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
 	
 //	public static Ray circleRay;
@@ -112,7 +112,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
-		doodles = new ArrayList<ArrayList<Vector2>>();
+		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		currentDoodle = new ArrayList<Vector2>();
 		
 		initRender();
@@ -225,7 +225,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			font.draw(batch, "PAUSED", 700, 35);
 			batch.end();
 			
-			for(ArrayList<Vector2> doodle : doodles) {
+			for(ArrayList<Vector2> doodle : doodles.values()) {
 				
 				if(!doodle.isEmpty()) {
 					r.setColor(1, 0, 0, 1);
