@@ -1,28 +1,16 @@
 package de.redlion.rts;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-
-import javax.swing.plaf.basic.BasicScrollPaneUI.HSBChangeListener;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.utils.Array;
-
 import de.redlion.rts.units.PlayerSoldier;
 import de.redlion.rts.units.Soldier;
 
@@ -39,6 +27,8 @@ public class DrawController extends InputAdapter{
 //	final DollarListener listener;
 //	final double MINSCORE = 0.82;
 	final float MAX_DISTANCE = 45.0f;
+	
+	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
 	
 	Ray picker;
 
@@ -60,18 +50,34 @@ public class DrawController extends InputAdapter{
 			camera.update();
 			last.set(x, y);
 		}
-		else {
+		else if(!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)){
 			y = -y + Gdx.graphics.getHeight();
 			
 			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
 			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
 			
-			Gdx.app.log("", x + " " + y);
 			Vector2 temp = new Vector2(x, y);
 			if(temp.dst(lastPoint) > 10 || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 			}
+		}
+		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+			y = -y + Gdx.graphics.getHeight();
+			
+			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
+			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
+			
+			Vector2 temp = new Vector2(x, y);
+			
+			Vector3 projected = new Vector3();
+			
+			picker = camera.getPickRay(temp.x, temp.y);
+			
+			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+			
+			deletePath.add(projected);
+			lastPoint.set(temp);
 		}
 		return true;
 	}
@@ -81,7 +87,7 @@ public class DrawController extends InputAdapter{
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		last.set(0, 0);
 		
-		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
 
 			if(SinglePlayerGameScreen.currentDoodle.size()%2 != 0)
 				SinglePlayerGameScreen.currentDoodle.add(SinglePlayerGameScreen.currentDoodle.get(SinglePlayerGameScreen.currentDoodle.size() - 1));
@@ -172,7 +178,8 @@ public class DrawController extends InputAdapter{
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
-								SinglePlayerGameScreen.doodles.put(p,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+								Polygon pCopy = new Polygon(p.getWorldVertices());
+								SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 								SinglePlayerGameScreen.paths.put(p, tempList);
 
 								Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
@@ -194,6 +201,48 @@ public class DrawController extends InputAdapter{
 			
 			tempList.clear();
 		}
+		else if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {			
+				
+			
+			ArrayList<Polygon> toDelete = new ArrayList<Polygon>();
+			
+			//deletePath must start and end outside polygon but must contain at least one point inside polygon
+			boolean checkPoly = false;
+				
+			if(!deletePath.isEmpty()) {
+				
+				for(Polygon pol : SinglePlayerGameScreen.circles.keySet()) {
+					
+					if(!pol.contains(deletePath.get(0).x, deletePath.get(0).z) && !pol.contains(deletePath.get(deletePath.size()-1).x, deletePath.get(deletePath.size()-1).z))
+						checkPoly = true;
+					
+					if(checkPoly) {
+						for(Vector3 vec : deletePath) {
+							
+							if(pol.contains(vec.x, vec.z) && deletePath.indexOf(vec) != 0 && deletePath.indexOf(vec) != deletePath.size() -1) {
+								toDelete.add(pol);
+								Gdx.app.log("", "Circle deleted :(");
+								break;
+							}
+							
+						}
+					}
+					
+				}
+				
+			}
+			
+			if(!toDelete.isEmpty()) {
+				for(Polygon pop : toDelete) {
+					SinglePlayerGameScreen.circles.remove(pop);
+					SinglePlayerGameScreen.doodles.remove(pop);
+					SinglePlayerGameScreen.paths.remove(pop);
+				}
+				
+			}
+			
+				
+		}
 		
 		return true;
 	}
@@ -203,6 +252,8 @@ public class DrawController extends InputAdapter{
 		last.set(x, y);
 	
 		SinglePlayerGameScreen.currentDoodle.clear();
+		deletePath.clear();
+		
 
 		return true;
 	}
@@ -268,6 +319,7 @@ public class DrawController extends InputAdapter{
 				}
 				SinglePlayerGameScreen.circles.remove(pop);
 				SinglePlayerGameScreen.doodles.remove(pop);
+				SinglePlayerGameScreen.paths.remove(pop);
 			}
 			
 		}
