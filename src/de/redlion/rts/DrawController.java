@@ -178,9 +178,13 @@ public class DrawController extends InputAdapter{
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
+								//workaround because same polygon can't be in doodles twice
 								Polygon pCopy = new Polygon(p.getWorldVertices());
+								SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
 								SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-								SinglePlayerGameScreen.paths.put(p, tempList);
+								SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
+								
+								
 
 								Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
 								Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
@@ -205,6 +209,7 @@ public class DrawController extends InputAdapter{
 				
 			
 			ArrayList<Polygon> toDelete = new ArrayList<Polygon>();
+			ArrayList<Polygon> pathsToDelete = new ArrayList<Polygon>();
 			
 			//deletePath must start and end outside polygon but must contain at least one point inside polygon
 			boolean checkPoly = false;
@@ -230,6 +235,26 @@ public class DrawController extends InputAdapter{
 					
 				}
 				
+				for(Polygon polyg : SinglePlayerGameScreen.paths.keySet()) {
+					
+					ArrayList<Vector3> trail = SinglePlayerGameScreen.paths.get(polyg);	
+					if(!trail.isEmpty()) {
+						
+						Vector2 start = new Vector2(deletePath.get(0).x,deletePath.get(0).z);
+						Vector2 end = new Vector2(deletePath.get(deletePath.size()-1).x,deletePath.get(deletePath.size()-1).z);
+						
+						for(int i=0; i<trail.size();i+=2) {
+							
+							Vector2 point1 = new Vector2(trail.get(i).x,trail.get(i).z);
+							Vector2 point2 = new Vector2(trail.get(i+1).x,trail.get(i+1).z);
+							
+							if(Intersector.intersectSegments(point1, point2, start, end, new Vector2()))
+								pathsToDelete.add(polyg);
+							
+						}						
+					}					
+				}
+				
 			}
 			
 			if(!toDelete.isEmpty()) {
@@ -238,7 +263,12 @@ public class DrawController extends InputAdapter{
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 				}
-				
+			}
+			if(!pathsToDelete.isEmpty()) {
+				for(Polygon pop : pathsToDelete) {
+					SinglePlayerGameScreen.doodles.remove(pop);
+					SinglePlayerGameScreen.paths.remove(pop);
+				}
 			}
 			
 				
