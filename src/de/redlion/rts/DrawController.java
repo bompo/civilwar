@@ -49,6 +49,10 @@ public class DrawController extends InputAdapter{
 			camera.translate(temp);
 			camera.update();
 			last.set(x, y);
+			
+			updateDoodles();
+			
+			
 		}
 		else if(!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)){
 			y = -y + Gdx.graphics.getHeight();
@@ -292,10 +296,31 @@ public class DrawController extends InputAdapter{
 	public boolean scrolled (int amount) {
 		camera.zoom -= -amount * Gdx.graphics.getDeltaTime() / 50;
 		camera.update();
+		
+		Gdx.app.log("", amount + "");
+		
+		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
+			
+			
+			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+			for(Vector2 v : doodle) {
+				
+				v.add(amount,amount);
+				
+				newDoodle.add(v);
+				
+			}
+			
+			doodle.clear();
+			doodle.addAll(newDoodle);
+			
+		}
+		
+		
 		return true;
 	}
 	
-	public boolean circleTest(ArrayList<Vector2> doodle) {
+	boolean circleTest(ArrayList<Vector2> doodle) {
 		
 		if(doodle.get(0).dst(doodle.get(doodle.size() -1)) < MAX_DISTANCE)
 			return true;
@@ -303,7 +328,7 @@ public class DrawController extends InputAdapter{
 			return false;
 	}
 	
-	public ArrayList<PlayerSoldier> soldierTest(Polygon polygon) {
+	ArrayList<PlayerSoldier> soldierTest(Polygon polygon) {
 		
 		ArrayList<PlayerSoldier> soldiers = new ArrayList<PlayerSoldier>();
 		
@@ -320,7 +345,7 @@ public class DrawController extends InputAdapter{
 		return soldiers;
 	}
 	
-	public boolean checkDisjoint(Polygon polygon) {
+	boolean checkDisjoint(Polygon polygon) {
 		
 		float[] list = polygon.getWorldVertices();
 		
@@ -355,6 +380,33 @@ public class DrawController extends InputAdapter{
 		}
 		
 		return true;
+	}
+	
+	void updateDoodles() {
+		
+//		y = -y + Gdx.graphics.getHeight();
+		
+		Vector2 trans = delta.mul(100);
+		trans.y = -trans.y;
+//		trans.sub(last);
+//		trans.mul(0.01f);
+		
+		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
+			
+			
+			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+			for(Vector2 v : doodle) {
+				
+				v.add(trans);
+				
+				newDoodle.add(v);
+				
+			}
+			
+			doodle.clear();
+			doodle.addAll(newDoodle);
+			
+		}
 		
 	}
 	
