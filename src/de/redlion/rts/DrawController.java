@@ -1,5 +1,6 @@
 package de.redlion.rts;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -182,18 +183,21 @@ public class DrawController extends InputAdapter{
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
-								//workaround because same polygon can't be in doodles twice
-								Polygon pCopy = new Polygon(p.getWorldVertices());
-								SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
-								SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-								SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
 								
-								
-
-								Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
-								Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
-								deletedoodle = false;
-								break;
+								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
+									//workaround because same polygon can't be in doodles twice
+									
+									Polygon pCopy = new Polygon(p.getWorldVertices());
+									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
+									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());			
+									SinglePlayerGameScreen.circleHasPath.add(p);
+									
+									Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
+									Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
+									deletedoodle = false;
+									break;
+								}
 							}
 						}
 						if(deletedoodle)

@@ -71,6 +71,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
 	public static HashMap<Polygon,ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
+	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
 	
 //	public static Ray circleRay;
@@ -113,6 +114,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
 		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
+		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
 		
 		initRender();
@@ -225,7 +227,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			font.draw(batch, "PAUSED", 700, 35);
 			batch.end();
 			
-			for(ArrayList<Vector2> doodle : doodles.values()) {
+			for(Polygon pol : doodles.keySet()) {
+				
+				ArrayList<Vector2> doodle = doodles.get(pol);
 				
 				if(!doodle.isEmpty()) {
 					r.setColor(1, 0, 0, 1);
@@ -239,9 +243,64 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						v0 = v1;
 						
 					}
+					r.end();
+					
+					if(paths.containsKey(pol)) {
+						Sprite arrowhead = Resources.getInstance().arrowhead;
+						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
+
+						Vector2 a = doodle.get(doodle.size()-1).cpy();
+						Vector2 b = doodle.get(doodle.size()-3).cpy();
+						Vector2 c = a.cpy().sub(b);
+						c = a.cpy().add(c);
+						
+						float dot = Math.abs(a.cpy().dot(c));
+						float angle = dot / (a.len() * c.len());
+						
+						angle = (float) Math.acos(angle);
+						angle = (float) Math.toDegrees(angle);
+						
+//						if(Float.isNaN(angle))
+//							angle = 0;
+						
+//						r.end();
+//						r.begin(ShapeType.Circle);
+//						r.circle(a.x, a.y, 7);
+//						r.circle(b.x, b.y, 7);
+						
+						
+						if(a.x < b.x) {
+							if(a.y < b.y)
+								angle+=90;
+							if(a.y == b.y)
+								angle+=45;
+						}
+						else if(a.x > b.x){
+							if(a.y < b.y)
+								angle+=180;
+							else if(a.y > b.y)
+								angle+=270;
+							
+							if(a.y == b.y)
+								angle+=225;
+						}
+						else {
+							if(a.y > b.y)
+								angle+=315;
+							else
+								angle+=135;
+						}
+						
+						
+//						Gdx.app.log("", angle + "");
+						arrowhead.setRotation(angle);
+						batch.begin();
+						arrowhead.draw(batch);
+						batch.end();
+					}
 				}
 				
-				r.end();
+				
 			}
 			
 			if(!currentDoodle.isEmpty()) {
