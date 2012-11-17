@@ -1,5 +1,8 @@
 package de.redlion.rts.render;
 
+import java.util.ArrayList;
+import java.util.Map.Entry;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -14,11 +17,13 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.rts.GameSession;
+import de.redlion.rts.SinglePlayerGameScreen;
 import de.redlion.rts.collision.HeightMap;
 import de.redlion.rts.shader.Bloom;
 import de.redlion.rts.units.EnemySoldier;
@@ -91,7 +96,7 @@ public class RenderMap {
 		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.zoom = 0.008f;
-		cam.position.set(-10, 10, 10);
+		cam.position.set(-17, 18, 6);
 		cam.lookAt(0, 0, 0);
 		cam.update();
 	}
@@ -151,9 +156,7 @@ public class RenderMap {
 		modelLandscapeObj.render(shadowGenShader);
 		
 		
-		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			if(!(soldier instanceof PlayerSoldier)) continue;
-			
+		for(Soldier soldier:GameSession.getInstance().soldiers) {			
 			tmp.idt();
 			model.idt();
 			
@@ -167,30 +170,6 @@ public class RenderMap {
 			
 			tmp.setToRotation(Vector3.Z, soldier.angle);
 			model.mul(tmp);
-
-			shadowGenShader.setUniformMatrix("u_model", model);
-			
-			shadowMapShader.setUniformf("u_waterOn", 0);
-			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
-			modelSoldierObj.render(shadowGenShader);
-		}
-		
-		
-		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			if(!(soldier instanceof EnemySoldier)) continue;
-			
-			tmp.idt();
-			model.idt();
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
-			Vector3 localIntersection = new Vector3();
-			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
-			}
-			
-			tmp.setToTranslation(localIntersection);
-			model.mul(tmp);		
-
-			tmp.setToRotation(Vector3.Z, soldier.angle);
-			model.mul(tmp);		
 
 			shadowGenShader.setUniformMatrix("u_model", model);
 			
@@ -231,8 +210,30 @@ public class RenderMap {
 		
 		//render soldier
 		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			if(!(soldier instanceof PlayerSoldier)) continue;
-			texSoldierDiff.bind(1);
+			if((soldier instanceof PlayerSoldier)) {
+				texSoldierDiff.bind(1);	
+			}
+			
+			if((soldier instanceof EnemySoldier)) {
+				texEnemySoldierDiff.bind(1);
+			}
+			
+			
+			shadowMapShader.setUniformf("u_time", time);
+			
+			//search in all circles if current soldier is selected... TODO cache this...
+			int selected = 0;
+			for (Entry<Polygon, ArrayList<PlayerSoldier>> entry : SinglePlayerGameScreen.circles.entrySet()) {
+			    for(Soldier soldierToSelect: entry.getValue()) {
+			    	if(soldier.equals(soldierToSelect)) {
+			    		selected = 1;
+			    		break;
+			    	}
+			    	
+			    }
+			}
+			shadowMapShader.setUniformf("u_selected", selected);
+			
 			
 			tmp.idt();
 			model.idt();			
@@ -262,41 +263,6 @@ public class RenderMap {
 
 			texWeaponDiff.bind(1);
 			modelWeaponObj.render(shadowMapShader);			
-		}
-		
-		
-		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			if(!(soldier instanceof EnemySoldier)) continue;
-			texEnemySoldierDiff.bind(1);
-			
-			tmp.idt();
-			model.idt();			
-			
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
-			Vector3 localIntersection = new Vector3();
-			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
-			}
-			
-			tmp.setToTranslation(localIntersection);
-			model.mul(tmp);
-			
-			tmp.setToRotation(Vector3.Y, soldier.facing.angle());
-			model.mul(tmp);			
-
-			tmp.setToRotation(Vector3.Y, -90);
-			model.mul(tmp);
-			
-			tmp.setToRotation(Vector3.Z, soldier.angle);
-			model.mul(tmp);
-			
-			shadowMapShader.setUniformMatrix("u_model", model);
-			
-			shadowMapShader.setUniformf("u_waterOn", 0);
-			shadowMapShader.setUniformf("u_color", 1.0f, 1.0f, 1.0f);
-			modelSoldierObj.render(shadowMapShader);
-
-			texWeaponDiff.bind(1);
-			modelWeaponObj.render(shadowMapShader);
 		}
 		
 		shadowMapShader.end();

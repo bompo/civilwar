@@ -8,6 +8,8 @@ varying vec3 v_normal;
 
 uniform vec3 u_viewerPosition;
 uniform vec3 u_color;
+uniform float u_selected;
+uniform float u_time;
 uniform sampler2D s_IrradianceMap;
 
 uniform sampler2D s_shadowMap;
@@ -49,4 +51,6 @@ void main(void) {
     gl_FragColor = textureColor;
     gl_FragColor.rgb = gl_FragColor.rgb * color.rgb;
     gl_FragColor.rgb /= 0.4+dot(gl_FragColor.rgb ,vec3(0.4,0.5,0.1));
+    
+    gl_FragColor.rgb =  mix(gl_FragColor.rgb, vec3(0.4,0.5,0.1), u_selected * sin(u_time));
 }
