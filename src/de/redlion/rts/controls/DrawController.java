@@ -91,7 +91,6 @@ public class DrawController extends InputAdapter{
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		last.set(0, 0);
