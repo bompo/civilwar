@@ -199,6 +199,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderMap.render();
 
 		if (Configuration.getInstance().debug) {
+
 			renderDebug.render();
 		}
 
