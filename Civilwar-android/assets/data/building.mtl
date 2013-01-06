@@ -1,0 +1,13 @@
+# Blender MTL File: 'replicate_dribble_realtime.blend'
+# Material Count: 1
+newmtl Material.004_building_bake
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.634323 0.547698
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd replicate_dribble_realtime.blend/bulding_bake.png
+
+
