@@ -40,7 +40,7 @@ public class OrthoCamController extends InputAdapter {
 		
 		delta.set(x, y).sub(last);
 		delta.mul(0.01f * Constants.MOVESPEED);
-		Vector3 temp = new Vector3(-delta.x, delta.y, 0);
+		Vector3 temp = new Vector3(delta.y, 0, -delta.x);
 		Quaternion rotation = new Quaternion();
 		camera.combined.getRotation(rotation);
 		rotation.transform(temp);

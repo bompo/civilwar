@@ -2,31 +2,24 @@ package de.redlion.civilwar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.math.collision.Sphere;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.OrthoCamController;
@@ -56,7 +49,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	OrthoCamController camController;
 	DrawController  drawController;
 	KeyController keyController;
-	OrthographicCamera camera;
 	InputMultiplexer multiplexer;
 	
 	// GLES20
@@ -87,8 +79,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderMap = new RenderMap();
 		renderDebug = new RenderDebug();
 		
-		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));
-		
+		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
 		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
@@ -117,9 +108,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public void initRender() {
 		Gdx.graphics.getGL20().glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
-		Gdx.gl.glActiveTexture(GL20.GL_TEXTURE1);
-		Gdx.gl.glActiveTexture(GL20.GL_TEXTURE2);
+		
 	}
 
 	@Override
@@ -158,12 +147,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(keyController);
 			Gdx.input.setInputProcessor(multiplexer);
-		}
-		else {
-			
-//			float[] clr = new float[6];
-//			circlePolygon = new Polygon(clr);
-//			dollar.clear();
+		} else {
 			doodles.clear();
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();

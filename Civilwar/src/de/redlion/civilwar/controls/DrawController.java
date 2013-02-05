@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.collision.Ray;
 import de.redlion.civilwar.Constants;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
+import de.redlion.civilwar.units.EnemySoldier;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -47,7 +48,7 @@ public class DrawController extends InputAdapter{
 		if(SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ) {
 			delta.set(x, y).sub(last);
 			delta.mul(0.01f * Constants.MOVESPEED);
-			Vector3 temp = new Vector3(-delta.x,delta.y,0);
+			Vector3 temp = new Vector3(delta.y, 0, -delta.x);
 			Quaternion rotation = new Quaternion();
 			camera.combined.getRotation(rotation);
 			rotation.transform(temp);
@@ -295,6 +296,16 @@ public class DrawController extends InputAdapter{
 		SinglePlayerGameScreen.currentDoodle.clear();
 		deletePath.clear();
 		
+//		y = -y + Gdx.graphics.getHeight();
+//		
+//		x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
+//		y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
+		
+		Vector2 temp = new Vector2(x, y);
+		Vector3 projected = new Vector3();
+		picker = camera.getPickRay(temp.x, temp.y);
+		Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+		GameSession.getInstance().soldiers.add(new EnemySoldier(2, new Vector2(projected.x, projected.z), new Vector2(1,0)));
 
 		return true;
 	}

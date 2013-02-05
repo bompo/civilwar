@@ -157,6 +157,7 @@ public class RenderMap {
 	}
 
 	public void render() {
+		Gdx.gl.glClearColor(0.6f, 0.7f, 1, 1);
 		
 		time += Gdx.graphics.getDeltaTime();		
 		
@@ -172,7 +173,6 @@ public class RenderMap {
 		
 		//render soldier
 		for(Soldier soldier:GameSession.getInstance().soldiers) {
-
 			
 			//search in all circles if current soldier is selected... TODO cache this...
 			int selected = 0;
