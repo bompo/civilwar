@@ -94,7 +94,7 @@ public class RenderMap {
 		lightManager.dirLight.color.set(1f, 1f, 1f, 1);
 		lightManager.dirLight.direction.set(-0.4f, -1.0f, 0.03f).nor();
 
-		lightManager.ambientLight.set(0.0f, 0.0f, 0.0f, 0.0f);
+		lightManager.ambientLight.set(0.2f, 0.2f, 0.21f, 0.0f);
 		
 		protoRenderer = new PrototypeRendererGL20(lightManager);
 
