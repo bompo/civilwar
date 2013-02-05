@@ -66,6 +66,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
+	public static ArrayList<Vector2> currentDoodleCollisionPoints; //doodle coordinates in real screen values
 	
 //	public static Ray circleRay;
 
@@ -101,6 +102,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
+		currentDoodleCollisionPoints = new ArrayList<Vector2>();
 		
 		initRender();
 	}
