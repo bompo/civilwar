@@ -83,7 +83,7 @@ public class DrawController extends InputAdapter{
 			}
 		}
 		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
-			y = -y + Gdx.graphics.getHeight();
+//			y = -y + Gdx.graphics.getHeight();
 			
 			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
 			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
@@ -117,8 +117,10 @@ public class DrawController extends InputAdapter{
 			for(Vector2 temp : SinglePlayerGameScreen.currentDoodle) {
 			
 				Vector3 projected = new Vector3();
+				
+				float yTemp = -temp.y + Gdx.graphics.getHeight();
 	
-				picker = camera.getPickRay(temp.x, temp.y);
+				picker = camera.getPickRay(temp.x, yTemp);
 				
 				Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
 				
