@@ -288,7 +288,10 @@ public class DrawController extends InputAdapter{
 			
 			if(!toDelete.isEmpty()) {
 				for(Polygon pop : toDelete) {
-					SinglePlayerGameScreen.circles.remove(pop);
+
+					for(PlayerSoldier a : SinglePlayerGameScreen.circles.remove(pop)) {
+						a.circled  = false;
+					}
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 				}
@@ -373,6 +376,7 @@ public class DrawController extends InputAdapter{
 				PlayerSoldier p = (PlayerSoldier) s;
 				if(polygon.contains(p.position.x, p.position.y)) {
 					Gdx.app.log("", p.dogTag + "");
+					p.circled = true;
 					soldiers.add(p);
 				}
 			}
