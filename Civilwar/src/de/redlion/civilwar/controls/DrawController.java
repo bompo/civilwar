@@ -54,9 +54,10 @@ public class DrawController extends InputAdapter{
 			rotation.transform(temp);
 			camera.translate(temp);
 			camera.update();
-			last.set(x, y);
 			
-			updateDoodles();
+			
+			updateDoodles(x,y);
+			last.set(x, y);
 			
 			
 		}
@@ -103,14 +104,16 @@ public class DrawController extends InputAdapter{
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		last.set(0, 0);
 		
 		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
 
-			if(SinglePlayerGameScreen.currentDoodle.size()%2 != 0)
-				SinglePlayerGameScreen.currentDoodle.add(SinglePlayerGameScreen.currentDoodle.get(SinglePlayerGameScreen.currentDoodle.size() - 1));
+//			!! commenting this might crash the game !!
+//			if(SinglePlayerGameScreen.currentDoodle.size()%2 != 0)
+//				SinglePlayerGameScreen.currentDoodle.add(SinglePlayerGameScreen.currentDoodle.get(SinglePlayerGameScreen.currentDoodle.size() - 1));
 			
 			ArrayList<Vector3> tempList = new ArrayList<Vector3>();
 			
@@ -143,8 +146,7 @@ public class DrawController extends InputAdapter{
 					}
 					
 					points[i] = tempList.get(0).x;
-					points[i+1] = tempList.get(0).z;
-					
+					points[i+1] = tempList.get(0).z;				
 					
 					Polygon poly = new Polygon(points);
 					
@@ -270,6 +272,9 @@ public class DrawController extends InputAdapter{
 					
 					ArrayList<Vector3> trail = SinglePlayerGameScreen.paths.get(polyg);	
 					if(!trail.isEmpty()) {
+						
+						if(trail.size()%2 != 0)
+							trail.add(trail.get(trail.size() - 1));
 						
 						Vector2 start = new Vector2(deletePath.get(0).x,deletePath.get(0).z);
 						Vector2 end = new Vector2(deletePath.get(deletePath.size()-1).x,deletePath.get(deletePath.size()-1).z);
@@ -424,14 +429,12 @@ public class DrawController extends InputAdapter{
 		return true;
 	}
 	
-	void updateDoodles() {
+	void updateDoodles(int x, int y) {
 		
-//		y = -y + Gdx.graphics.getHeight();
+		Vector2 trans = new Vector2();
 		
-		Vector2 trans = delta.mul(100);
-		trans.y = -trans.y;
-//		trans.sub(last);
-//		trans.mul(0.01f);
+		trans.set(x,y).sub(last);
+		trans.y *= -1;
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
 			

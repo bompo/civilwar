@@ -226,6 +226,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					}
 					r.end();
 					
+					
 					if(paths.containsKey(pol)) {
 						Sprite arrowhead = Resources.getInstance().arrowhead;
 						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
