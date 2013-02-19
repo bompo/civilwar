@@ -12,8 +12,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.StillModelInstance;
+import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
+import com.badlogic.gdx.graphics.g3d.materials.Material;
+import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
+import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
@@ -81,6 +87,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderDebug = new RenderDebug();
 		
 		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
+		
+		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/white.png"), true), 0, TextureAttribute.diffuseTexture));
+		sphere.setMaterial(mat);
 		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
@@ -203,6 +212,25 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 		}
 		
+		//draw waypoints for debugging
+		for(ArrayList<Vector3> pathPoints : paths.values()) {
+			
+			if(!pathPoints.isEmpty()) {
+				
+				for(Vector3 pPoint : pathPoints) {
+
+					StillModelNode node = new StillModelNode();
+					node.matrix.translate(pPoint);
+					node.matrix.scl(0.05f);
+					RenderMap.protoRenderer.draw(sphere, node);
+					
+				}
+				
+			}
+			
+		}
+		
+		
 		if(paused) {
 			batch.begin();
 			font.draw(batch, "PAUSED", 700, 35);
@@ -323,6 +351,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		for(Soldier soldier:GameSession.getInstance().soldiers) {
 			soldier.update(delta);
+		}
+		
+		for(Polygon pol : circles.keySet()) {
+			
+			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
+			
+			for(PlayerSoldier playerSoldier : soldiers) {
+				
+				ArrayList<Vector3> wayPoints = paths.get(pol);
+				
+				if(wayPoints != null) {
+					Gdx.app.log("", wayPoints.get(wayPoints.size() -1).toString());
+					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
+				}
+				
+			}
+			
 		}
 	
 	}

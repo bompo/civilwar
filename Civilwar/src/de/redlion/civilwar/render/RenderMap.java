@@ -45,7 +45,7 @@ public class RenderMap {
 	boolean highQuality = true;
 
 	LightManager lightManager;
-	PrototypeRendererGL20 protoRenderer;
+	public static PrototypeRendererGL20 protoRenderer;
 
 	StillModel modelLandscapeObj;
 	
