@@ -1,14 +1,29 @@
 package de.redlion.civilwar.units;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 import de.redlion.civilwar.Targeting;
 
-public class EnemyAI extends DefaultAI {
+public class DefaultAI {
+	// shot range
+	protected float shot_range = 1;
 
-	public EnemyAI(Soldier soldier) {
-		super(soldier);
+	// try to stay this far away when you're out of ammo
+	protected float run_distance = 1.1f;
+
+	// true when we've shot everything and want to make a distance, false means
+	// we're approaching to attack
+	protected boolean running = false;
+
+	public Soldier target;
+	
+	//recycle vars
+	Vector2 to_target = new Vector2();
+
+	protected Soldier soldier;
+
+	public DefaultAI(Soldier soldier) {
+		this.soldier = soldier;
 		retarget();
 	}
 
@@ -16,12 +31,14 @@ public class EnemyAI extends DefaultAI {
 		target = Targeting.getNearestOfType(soldier, 0);
 	}
 
+	public void target(Soldier soldier) {
+		target = soldier;
+	}
+	
 	public void update() {
-		if (target == null || !target.alive || MathUtils.random() < 0.005f) {
-			retarget();
-		}
 
-		if (target != null) {			
+		if (target != null) {
+			
 			to_target.set(target.position.x - soldier.position.x, target.position.y - soldier.position.y);
 			float dist_squared = to_target.dot(to_target);
 

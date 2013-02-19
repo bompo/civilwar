@@ -36,7 +36,7 @@ public class Soldier {
 	public Vector2 facing = new Vector2();
 	public float height = 0;
 	
-	public EnemyAI ai = new EnemyAI(this);
+	public DefaultAI ai = new DefaultAI(this);
 	
 	public boolean alive = true;
 	

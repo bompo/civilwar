@@ -8,8 +8,9 @@ public class PlayerSoldier extends Soldier {
 
 	public PlayerSoldier(int id, Vector2 position, Vector2 facing, int dogTag) {
 		super(id, position, facing);
-		// TODO Auto-generated constructor stub
 		this.dogTag =  dogTag;
+		
+		this.ai = new DefaultAI(this);
 	}
 	
 	public void update(float delta) {
