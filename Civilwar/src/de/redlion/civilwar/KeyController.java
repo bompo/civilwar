@@ -9,7 +9,7 @@ public class KeyController extends InputAdapter{
 	public boolean keyDown(int keycode) {
 	
 		
-		if(keycode == Input.Keys.SPACE) {
+		if(keycode == Input.Keys.SPACE || keycode == Input.Keys.VOLUME_UP) {
 			
 			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
 			

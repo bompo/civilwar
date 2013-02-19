@@ -60,6 +60,9 @@ public class RenderMap {
 	Texture texAOMap;	
 	Texture imageLightning;	
 	
+	Material circledSoldier; /* debug */
+	Material materialSoldier;
+	
 	float time;
 
 	Texture whiteTex;
@@ -131,10 +134,15 @@ public class RenderMap {
 		
 		MaterialAttribute materialAttributeLandscapeDiffTex = new TextureAttribute(texAOMap, 0, TextureAttribute.diffuseTexture);
 		
-		Material materialSoldier = new Material("soldier", materialAttributeSoldierDiffTex);
+		materialSoldier = new Material("soldier", materialAttributeSoldierDiffTex);
 		Material materialEnemySoldier = new Material("enemySoldier", materialAttributeEnemySoldierDiffTex);
 		Material materialLandscape = new Material("landscape", materialAttributeLandscapeDiffTex);
 		Material materialWeapon = new Material("weapon", materialAttributeWeaponDiffTex);
+		
+		//debug
+		Texture texCircledSoldierDiff = new Texture(Gdx.files.internal("data/white.png"), true);
+		MaterialAttribute materialAttributeCircledSoldierDiffTex = new TextureAttribute(texCircledSoldierDiff, 0, TextureAttribute.diffuseTexture);
+		circledSoldier = new Material("circledSoldier", materialAttributeCircledSoldierDiffTex);
 		
 		modelWeaponObj.setMaterial(materialWeapon);
 		modelSoldierObj.setMaterial(materialSoldier);
@@ -205,7 +213,14 @@ public class RenderMap {
 			
 			
 			if((soldier instanceof PlayerSoldier)) {
-				protoRenderer.draw(modelSoldierObj, soldier.instance);
+				if(!((PlayerSoldier) soldier).circled) {
+					modelSoldierObj.setMaterial(materialSoldier);
+					protoRenderer.draw(modelSoldierObj, soldier.instance);
+				}
+				else {
+					modelSoldierObj.setMaterial(circledSoldier);
+					protoRenderer.draw(modelSoldierObj, soldier.instance);
+				}
 			}
 			
 			if((soldier instanceof EnemySoldier)) {
