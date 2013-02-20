@@ -209,7 +209,13 @@ public class DrawController extends InputAdapter{
 									Polygon pCopy = new Polygon(p.getTransformedVertices());
 									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
 									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());			
+									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
+									
+									for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
+										pS.wayPoints.clear();
+										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(pCopy));
+									}
+									
 									SinglePlayerGameScreen.circleHasPath.add(p);
 									
 									Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
@@ -298,15 +304,22 @@ public class DrawController extends InputAdapter{
 
 					for(PlayerSoldier a : SinglePlayerGameScreen.circles.remove(pop)) {
 						a.circled  = false;
+						a.wayPoints.clear();
 					}
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
+					
 				}
 			}
 			if(!pathsToDelete.isEmpty()) {
 				for(Polygon pop : pathsToDelete) {
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
+					
+					for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(pop)) {
+						pS.wayPoints.clear();
+					}
+					
 				}
 			}
 			

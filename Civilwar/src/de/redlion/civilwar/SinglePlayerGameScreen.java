@@ -357,16 +357,15 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
 			
-			for(PlayerSoldier playerSoldier : soldiers) {
-				
-				ArrayList<Vector3> wayPoints = paths.get(pol);
-				
-				if(wayPoints != null) {
-					Gdx.app.log("", wayPoints.get(wayPoints.size() -1).toString());
-					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
-				}
-				
-			}
+//			for(PlayerSoldier playerSoldier : soldiers) {
+//				
+//				ArrayList<Vector3> wayPoints = paths.get(pol);
+//				
+//				if(wayPoints != null) {
+//					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
+//				}
+//				
+//			}
 			
 		}
 	
