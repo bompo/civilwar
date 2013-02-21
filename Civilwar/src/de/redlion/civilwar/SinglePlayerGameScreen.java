@@ -24,6 +24,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -61,6 +62,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	Matrix4 model = new Matrix4().idt();
 	Matrix4 normal = new Matrix4().idt();
 	Matrix4 tmp = new Matrix4().idt();
+	
+	float edgeScrollingSpeed;
 	
 	ShapeRenderer r;
 	StillModel sphere;
@@ -105,6 +108,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		r = new ShapeRenderer();
 		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+		
+		edgeScrollingSpeed = 1.0f;
 		
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
@@ -327,23 +332,207 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				}
 				
 				r.end();
+				
+				
+				/* edge scrolling */
+				
+				if(v0.x > Gdx.graphics.getWidth() - 50) {
+					
+					Vector3 temp = new Vector3(Vector3.Z);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp);
+					drawController.camera.update();
+					
+					if(edgeScrollingSpeed < 25)
+						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
+					
+					for(ArrayList<Vector2> doodle : doodles.values()) {
+						
+						
+						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+						for(Vector2 v : doodle) {
+							
+							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+									
+							newDoodle.add(v);
+							
+						}
+						
+						doodle.clear();
+						doodle.addAll(newDoodle);
+						
+					}
+					
+					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+					for(int i = 0; i<currentDoodle.size() -1; i++) {
+						
+						Vector2 v = currentDoodle.get(i);
+						
+						v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+						
+						newCurrentDoodle.add(v);
+						
+					}
+					
+					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+					currentDoodle.clear();
+					currentDoodle.addAll(newCurrentDoodle);
+					
+				}
+				
+				if(v0.x < 50) {
+					
+					Vector3 temp = new Vector3(Vector3.Z);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.update();
+					
+					if(edgeScrollingSpeed < 25)
+						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
+					
+					for(ArrayList<Vector2> doodle : doodles.values()) {
+						
+						
+						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+						for(Vector2 v : doodle) {
+							
+							v.add(new Vector2(edgeScrollingSpeed,0));
+									
+							newDoodle.add(v);
+							
+						}
+						
+						doodle.clear();
+						doodle.addAll(newDoodle);
+						
+					}
+					
+					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+					for(int i = 0; i<currentDoodle.size() -1; i++) {
+						
+						Vector2 v = currentDoodle.get(i);
+						
+						v.add(new Vector2(edgeScrollingSpeed,0));
+						
+						newCurrentDoodle.add(v);
+						
+					}
+					
+					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+					currentDoodle.clear();
+					currentDoodle.addAll(newCurrentDoodle);
+					
+				}
+				
+				if(v0.y > Gdx.graphics.getHeight() - 50) {
+					
+					Vector3 temp = new Vector3(Vector3.X);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp);
+					drawController.camera.update();
+					
+					if(edgeScrollingSpeed < 25)
+						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
+					
+					for(ArrayList<Vector2> doodle : doodles.values()) {
+						
+						
+						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+						for(Vector2 v : doodle) {
+							
+							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+									
+							newDoodle.add(v);
+							
+						}
+						
+						doodle.clear();
+						doodle.addAll(newDoodle);
+						
+					}
+					
+					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+					for(int i = 0; i<currentDoodle.size() -1; i++) {
+						
+						Vector2 v = currentDoodle.get(i);
+						
+						v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+						
+						newCurrentDoodle.add(v);
+						
+					}
+					
+					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+					currentDoodle.clear();
+					currentDoodle.addAll(newCurrentDoodle);
+					
+				}
+				
+				if(v0.y < 50) {
+					
+					Vector3 temp = new Vector3(Vector3.X);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.update();
+					
+					if(edgeScrollingSpeed < 25)
+						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
+					
+					for(ArrayList<Vector2> doodle : doodles.values()) {
+						
+						
+						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+						for(Vector2 v : doodle) {
+							
+							v.add(new Vector2(0,edgeScrollingSpeed));
+									
+							newDoodle.add(v);
+							
+						}
+						
+						doodle.clear();
+						doodle.addAll(newDoodle);
+						
+					}
+					
+					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+					for(int i = 0; i<currentDoodle.size() -1; i++) {
+						
+						Vector2 v = currentDoodle.get(i);
+						
+						v.add(new Vector2(0,edgeScrollingSpeed));
+						
+						newCurrentDoodle.add(v);
+						
+					}
+					
+					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+					currentDoodle.clear();
+					currentDoodle.addAll(newCurrentDoodle);
+					
+				}
+				
+				if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
+					edgeScrollingSpeed = 1.0f;
+				
 			}			
 
-//			if(circleRay != null) {	
-//				
-//				//TODO fix me for Vector2 usage instead of Vector3
-////				for(Soldier s : GameSession.getInstance().soldiers) {
-////					if(s instanceof PlayerSoldier) {
-////						for(Polygon pathPolygon : circles) {
-////							if(pathPolygon.contains(s.position.x, s.position.y))
-////								Gdx.app.log("", s.id + "");
-////						}
-////					}
-////					if(s.position.dst(localIntersection) < circleRadius) {
-////						Gdx.app.log("", "" + s.id);
-////					}
-////				}
-//			}
 		}
 	}
 	
@@ -357,15 +546,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
 			
-//			for(PlayerSoldier playerSoldier : soldiers) {
-//				
-//				ArrayList<Vector3> wayPoints = paths.get(pol);
-//				
-//				if(wayPoints != null) {
-//					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
-//				}
-//				
-//			}
+			for(PlayerSoldier playerSoldier : soldiers) {
+				
+				ArrayList<Vector3> wayPoints = paths.get(pol);
+				
+				if(wayPoints != null) {
+					Gdx.app.log("", wayPoints.get(wayPoints.size() -1).toString());
+					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
+				}
+				
+			}
 			
 		}
 	

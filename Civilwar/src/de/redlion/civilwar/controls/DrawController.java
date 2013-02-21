@@ -22,10 +22,10 @@ import de.redlion.civilwar.units.Soldier;
 
 public class DrawController extends InputAdapter{
 	
-	final OrthographicCamera camera;
+	public final OrthographicCamera camera;
 	final Vector3 curr = new Vector3();
-	final Vector2 last = new Vector2(0, 0);
-	final Vector2 delta = new Vector2();
+	public final Vector2 last = new Vector2(0, 0);
+	public final Vector2 delta = new Vector2();
 	
 	final Vector2 lastPoint = new Vector2();
 	
@@ -63,12 +63,31 @@ public class DrawController extends InputAdapter{
 		}
 		else if(!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)){
 			Vector2 temp = new Vector2(x, y);
+			
+//			while(x > Gdx.graphics.getWidth() - 50 || x < 50 || y > Gdx.graphics.getHeight() - 50 || y < 50) {
+//						
+//				delta.set(x, y).sub(last);
+//				delta.mul(0.0001f * Constants.MOVESPEED);
+//				Vector3 temp2 = new Vector3(-delta.y, 0, delta.x);
+//				Quaternion rotation = new Quaternion();
+//				camera.combined.getRotation(rotation);
+//				rotation.transform(temp2);
+//				camera.translate(temp2);
+//				camera.update();
+//				
+//				if(x < Gdx.graphics.getWidth() - 50 && x > 50 && y < Gdx.graphics.getHeight() - 50 && y > 50)
+//					break;
+//				
+//				
+//				updateDoodles(x,y);
+//				
+//			}
 
 			
 			// convert to screen space
 			y = -y + Gdx.graphics.getHeight();			
-			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
-			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
+//			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
+//			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
 			
 			temp = new Vector2(x, y);
 			
@@ -82,6 +101,7 @@ public class DrawController extends InputAdapter{
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 			}
+			
 		}
 		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
 //			y = -y + Gdx.graphics.getHeight();
@@ -442,7 +462,7 @@ public class DrawController extends InputAdapter{
 		return true;
 	}
 	
-	void updateDoodles(int x, int y) {
+	public void updateDoodles(int x, int y) {
 		
 		Vector2 trans = new Vector2();
 		
@@ -465,6 +485,19 @@ public class DrawController extends InputAdapter{
 			doodle.addAll(newDoodle);
 			
 		}
+		
+//		ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+//		
+//		for(Vector2 v : SinglePlayerGameScreen.currentDoodle) {
+//			
+//			v.add(trans);
+//			
+//			newCurrentDoodle.add(v);
+//			
+//		}
+//		
+//		SinglePlayerGameScreen.currentDoodle.clear();
+//		SinglePlayerGameScreen.currentDoodle.addAll(newCurrentDoodle);
 		
 	}
 	

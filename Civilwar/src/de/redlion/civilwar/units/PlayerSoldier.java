@@ -55,8 +55,10 @@ public class PlayerSoldier extends Soldier {
 					return;
 				
 				for(int i=0;i<=index;i++) {
-					if(i >= wayPoints.size() -1)
+					if(i >= wayPoints.size() -1) {
 						wayPoints.clear();
+						return;
+					}
 					else
 						wayPoints.remove(i);
 				}
