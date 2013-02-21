@@ -1,18 +1,14 @@
 package de.redlion.civilwar.units;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Soldier {
 
 	public int id;
-	public Vector3 direction;
 	public float angle = MathUtils.random(-90, 90);
 	public int angleSpin = 1;
 

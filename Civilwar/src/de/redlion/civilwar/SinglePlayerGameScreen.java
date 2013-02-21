@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -191,7 +192,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderMap.render();
 
 		if (Configuration.getInstance().debug) {
-
 			renderDebug.render(renderMap.cam);
 		}
 
@@ -566,6 +566,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 	private void collisionTest() {
 		
+		for(int soldier1ID = 0; soldier1ID < GameSession.getInstance().soldiers.size; soldier1ID++) {
+			Soldier soldier1 = GameSession.getInstance().soldiers.get(soldier1ID);
+			for(int soldier2ID = 0; soldier2ID < GameSession.getInstance().soldiers.size; soldier2ID++) {
+				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);	
+				if(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
+					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(0.1f));
+					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(0.1f));
+				}
+			}			
+		}
 		
 	}
 
