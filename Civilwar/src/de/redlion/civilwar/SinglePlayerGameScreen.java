@@ -550,9 +550,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				ArrayList<Vector3> wayPoints = paths.get(pol);
 				
-				if(wayPoints != null) {
+				if(wayPoints != null && wayPoints.size() > 0) {
 					Gdx.app.log("", wayPoints.get(wayPoints.size() -1).toString());
-					playerSoldier.goTowards(new Vector2(wayPoints.get(wayPoints.size() -1).x, wayPoints.get(wayPoints.size() -1).z), false);
+					playerSoldier.goTowards(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z), false);
+					if(playerSoldier.position.dst(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z))<0.5f) {
+						wayPoints.remove(0);
+					}
 				}
 				
 			}
