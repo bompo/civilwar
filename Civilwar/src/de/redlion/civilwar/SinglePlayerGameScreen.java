@@ -8,7 +8,11 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,6 +21,7 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
@@ -30,6 +35,7 @@ import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.OrthoCamController;
 import de.redlion.civilwar.render.RenderDebug;
 import de.redlion.civilwar.render.RenderMap;
+import de.redlion.civilwar.shader.DiffuseShader;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -45,6 +51,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static RenderMap renderMap;
 	RenderDebug renderDebug;
+	ShaderProgram diff;
 
 	float fade = 1.0f;
 	boolean finished = false;
@@ -86,6 +93,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		//TODO Observer Pattern for newGame
 		renderMap = new RenderMap();
 		renderDebug = new RenderDebug();
+		diff = new ShaderProgram(DiffuseShader.mVertexShader, DiffuseShader.mFragmentShader);
 		
 		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
 		
@@ -236,22 +244,53 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		//draw polygons for debugging
 		for(Polygon pol : circles.keySet()) {
-			
+			diff.begin();
 			float[] vertices = pol.getTransformedVertices();
 			
 			if(vertices.length > 0) {
 				
+				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
+				
+				Mesh polygonalMesh = new Mesh(true, vertices3D.length, vertices3D.length / 3, VertexAttribute.Position());
+				
+				int l = 0;
+				for(int k=0;k<vertices3D.length;k++) {
+					
+					if(k%3 == 1)
+						vertices3D[k] = 0;
+					else {
+						vertices3D[k] = vertices[l];
+						l++;
+					}
+					
+				}
+				
+				polygonalMesh.setVertices(vertices3D);
+				short[] indices =  new short[vertices3D.length/3];
+				
+				for(short j=0;j<indices.length;j++) {
+					indices[j] = j;
+				}
+				
+				polygonalMesh.setIndices(indices);
+				
 				for(int i=0; i<vertices.length;i+=2) {
 
-					StillModelNode node = new StillModelNode();
-					node.matrix.translate(vertices[i],0,vertices[i+1]);
-					node.matrix.scl(0.1f);
-					RenderMap.protoRenderer.draw(sphere, node);
+//					StillModelNode node = new StillModelNode();
+//					node.matrix.translate(vertices[i],0,vertices[i+1]);
+//					node.matrix.scl(0.1f);
+//					RenderMap.protoRenderer.draw(sphere, node);
+					
+					diff.setUniformMatrix("VPMatrix", renderMap.cam.combined);
+					diff.setUniformMatrix("MMatrix", model);
+					diff.setUniformi("uSampler", 0);
+					polygonalMesh.render(diff, GL20.GL_LINE_LOOP);
+					
 					
 				}
 				
 			}
-			
+			diff.end();
 		}
 		
 		
