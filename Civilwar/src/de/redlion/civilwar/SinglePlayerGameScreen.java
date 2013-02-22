@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import javax.swing.text.Position;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -276,10 +278,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				for(int i=0; i<vertices.length;i+=2) {
 
-//					StillModelNode node = new StillModelNode();
-//					node.matrix.translate(vertices[i],0,vertices[i+1]);
-//					node.matrix.scl(0.1f);
-//					RenderMap.protoRenderer.draw(sphere, node);
+					StillModelNode node = new StillModelNode();
+					node.matrix.translate(vertices[i],0,vertices[i+1]);
+					node.matrix.scl(0.02f);
+					RenderMap.protoRenderer.draw(sphere, node);
 					
 					diff.setUniformMatrix("VPMatrix", renderMap.cam.combined);
 					diff.setUniformMatrix("MMatrix", model);
@@ -588,7 +590,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
 					edgeScrollingSpeed = 1.0f;
-				
 			}			
 
 		}
@@ -608,20 +609,96 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				positions.add(soldier.position);
 			}
 			
-			Array<Vector2> bound = BoundingPolygon.createGiftWrapConvexHull(positions);
+			float[] newVertices = null;
 			
-			float[] newVertices = new float[bound.size * 2];
-			
-			int j=0;
-			for(int i=0;i<newVertices.length;i+=2) {
+			if(positions.size == 1) {
+				Vector2 tempPos = positions.get(0).cpy();
+				Vector2 tempPos2 = positions.get(0).cpy();
+				Vector2 tempPos3 = positions.get(0).cpy();
 				
-				newVertices[i] = bound.get(j).x;
-				newVertices[i+1] = bound.get(j).y;
+				tempPos.x += 0.2f;
+				tempPos2.y -= 0.2f;
+				tempPos3.x += 0.2f;
+				tempPos3.y -= 0.2f;
 				
-				j++;
+				positions.clear();
+				positions.add(tempPos);
+				positions.add(tempPos2);
+				positions.add(tempPos3);
+				
+				newVertices = new float[positions.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = positions.get(j).x;
+					newVertices[i+1] = positions.get(j).y;
+					
+					j++;
+				}
+				
+			}
+			else if(positions.size == 2) {
+				Vector2 tempPos = positions.get(0).cpy();
+				Vector2 tempPos2 = positions.get(1).cpy();
+				
+				Vector2 mid = tempPos.cpy().add(tempPos2.cpy());
+				mid.mul(0.5f);
+				
+				//not perfect but it's a triangle...
+				mid.add(Math.signum(mid.x) / 5, Math.signum(mid.y) / 5);
+				
+				positions.clear();
+				positions.add(tempPos);
+				positions.add(tempPos2);
+				positions.add(mid);
+				
+				newVertices = new float[positions.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = positions.get(j).x;
+					newVertices[i+1] = positions.get(j).y;
+					
+					j++;
+				}
+				
+			}
+			else if(positions.size >= 3) {
+				Array<Vector2> bound = BoundingPolygon.createGiftWrapConvexHull(positions);
+				
+				newVertices = new float[bound.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = bound.get(j).x;
+					newVertices[i+1] = bound.get(j).y;
+					
+					j++;
+				}
 			}
 			
+			
 			Polygon newPoly = new Polygon(newVertices);
+
+			//calculate Origin
+			float originX = 0;
+			float originY = 0;
+			for(int k=0;k<newVertices.length;k++) {
+				if(k%2==0)
+					originX += newVertices[k];
+				else
+					originY += newVertices[k];
+			}
+			
+			originX /= newVertices.length / 2;
+			originY /= newVertices.length / 2;
+			
+			newPoly.setOrigin(originX, originY);
+			newPoly.scale(1.5f);
+			
 			updatedList.put(newPoly, circles.get(pol));
 			
 			if(paths.containsKey(pol)) {
