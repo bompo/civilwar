@@ -12,22 +12,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.StillModelInstance;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
-import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.OrthoCamController;
@@ -72,7 +69,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
-	public static HashMap<Polygon,ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
+	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
@@ -92,7 +89,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
 		
-		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/white.png"), true), 0, TextureAttribute.diffuseTexture));
+		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/black.png"), true), 0, TextureAttribute.diffuseTexture));
 		sphere.setMaterial(mat);
 		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
@@ -183,8 +180,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 		startTime += delta;
 
-		if(!paused)
+		if(!paused) {
 			updateUnits();
+			updatePolygons();
+		}
 
 		collisionTest();
 		updateAI();
@@ -218,15 +217,35 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		
 		//draw waypoints for debugging
-		for(ArrayList<Vector3> pathPoints : paths.values()) {
+//		for(ArrayList<Vector3> pathPoints : paths.values()) {
+//			
+//			if(!pathPoints.isEmpty()) {
+//				
+//				for(Vector3 pPoint : pathPoints) {
+//
+//					StillModelNode node = new StillModelNode();
+//					node.matrix.translate(pPoint);
+//					node.matrix.scl(0.05f);
+//					RenderMap.protoRenderer.draw(sphere, node);
+//					
+//				}
+//				
+//			}
+//			
+//		}
+		
+		//draw polygons for debugging
+		for(Polygon pol : circles.keySet()) {
 			
-			if(!pathPoints.isEmpty()) {
+			float[] vertices = pol.getTransformedVertices();
+			
+			if(vertices.length > 0) {
 				
-				for(Vector3 pPoint : pathPoints) {
+				for(int i=0; i<vertices.length;i+=2) {
 
 					StillModelNode node = new StillModelNode();
-					node.matrix.translate(pPoint);
-					node.matrix.scl(0.05f);
+					node.matrix.translate(vertices[i],0,vertices[i+1]);
+					node.matrix.scl(0.1f);
 					RenderMap.protoRenderer.draw(sphere, node);
 					
 				}
@@ -536,6 +555,54 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 	}
 	
+	private void updatePolygons() {
+		
+		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
+		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
+		HashMap<Polygon, ArrayList<Vector3>> updatedPaths = new HashMap<Polygon, ArrayList<Vector3>>();
+
+		for(Polygon pol : circles.keySet()) {
+			
+			Array<Vector2> positions = new Array<Vector2>();
+			
+			for(PlayerSoldier soldier : circles.get(pol)) {
+				positions.add(soldier.position);
+			}
+			
+			Array<Vector2> bound = BoundingPolygon.createGiftWrapConvexHull(positions);
+			
+			float[] newVertices = new float[bound.size * 2];
+			
+			int j=0;
+			for(int i=0;i<newVertices.length;i+=2) {
+				
+				newVertices[i] = bound.get(j).x;
+				newVertices[i+1] = bound.get(j).y;
+				
+				j++;
+			}
+			
+			Polygon newPoly = new Polygon(newVertices);
+			updatedList.put(newPoly, circles.get(pol));
+			
+			if(paths.containsKey(pol)) {
+				updatedPaths.put(newPoly, paths.get(pol));
+				updatedCircleHasPath.add(newPoly);
+				paths.remove(pol);
+			}
+			
+		}
+		
+		circleHasPath.clear();
+		circleHasPath.addAll(updatedCircleHasPath);
+		
+		paths.putAll(updatedPaths);
+		
+		circles.clear();
+		circles.putAll(updatedList);
+		
+	}
+
 	private void updateUnits() {
 		
 		for(Soldier soldier:GameSession.getInstance().soldiers) {
@@ -549,7 +616,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			for(PlayerSoldier playerSoldier : soldiers) {
 				
 				if(playerSoldier.wayPoints != null && playerSoldier.wayPoints.size() > 0) {
-					Gdx.app.log("", playerSoldier.wayPoints.get(playerSoldier.wayPoints.size() -1).toString());
+//					Gdx.app.log("", playerSoldier.wayPoints.get(playerSoldier.wayPoints.size() -1).toString());
 					playerSoldier.goTowards(new Vector2(playerSoldier.wayPoints.get(0).x, playerSoldier.wayPoints.get(0).z), false);
 					if(playerSoldier.position.dst(new Vector2(playerSoldier.wayPoints.get(0).x, playerSoldier.wayPoints.get(0).z))<0.5f) {
 						playerSoldier.wayPoints.remove(0);

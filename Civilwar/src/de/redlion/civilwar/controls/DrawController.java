@@ -114,7 +114,7 @@ public class DrawController extends InputAdapter{
 			Vector3 projected = new Vector3();
 			
 			picker = camera.getPickRay(temp.x, temp.y);
-			
+
 			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
 			
 			deletePath.add(projected);
