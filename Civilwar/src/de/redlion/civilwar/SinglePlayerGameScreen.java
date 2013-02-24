@@ -244,6 +244,19 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //			
 //		}
 		
+//		for (ArrayList<Vector3> pathPoints : paths.values()) {
+//
+//			if (!pathPoints.isEmpty()) {
+//
+//				StillModelNode node = new StillModelNode();
+//				node.matrix.translate(pathPoints.get(pathPoints.size() -1));
+//				node.matrix.scl(0.05f);
+//				RenderMap.protoRenderer.draw(sphere, node);
+//
+//			}
+//
+//		}
+		
 		//draw polygons for debugging
 		for(Polygon pol : circles.keySet()) {
 			diff.begin();
@@ -322,53 +335,39 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					
 					if(paths.containsKey(pol)) {
 						Sprite arrowhead = Resources.getInstance().arrowhead;
-						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
+//						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
 
 						Vector2 a = doodle.get(doodle.size()-1).cpy();
 						Vector2 b = doodle.get(doodle.size()-3).cpy();
-						Vector2 c = a.cpy().sub(b);
-						c = a.cpy().add(c);
 						
-						float dot = Math.abs(a.cpy().dot(c));
-						float angle = dot / (a.len() * c.len());
+						Vector2 c = a.cpy().sub(b);
+						
+						Vector2 d = new Vector2(0, 1);
+						
+//						r.setColor(1, 1, 1, 1);
+//						r.begin(ShapeType.Line);
+//						r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+//						r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+//						r.end();
+						
+						float dot = c.cpy().dot(d);
+						float angle = dot / (d.len() * c.len());
 						
 						angle = (float) Math.acos(angle);
 						angle = (float) Math.toDegrees(angle);
 						
-//						if(Float.isNaN(angle))
-//							angle = 0;
-						
-//						r.end();
-//						r.begin(ShapeType.Circle);
-//						r.circle(a.x, a.y, 7);
-//						r.circle(b.x, b.y, 7);
+						if(a.x < b.x)
+							angle *= -1;
 						
 						
-						if(a.x < b.x) {
-							if(a.y < b.y)
-								angle+=90;
-							if(a.y == b.y)
-								angle+=45;
-						}
-						else if(a.x > b.x){
-							if(a.y < b.y)
-								angle+=180;
-							else if(a.y > b.y)
-								angle+=270;
-							
-							if(a.y == b.y)
-								angle+=225;
-						}
-						else {
-							if(a.y > b.y)
-								angle+=315;
-							else
-								angle+=135;
-						}
+//						Gdx.app.log("angle", angle + "");
 						
+						//correction due to sprite?
+						angle += 30;
 						
-//						Gdx.app.log("", angle + "");
-						arrowhead.setRotation(angle);
+						arrowhead.setPosition(a.x, a.y);
+						arrowhead.setRotation(-angle);
+						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
 						batch.begin();
 						arrowhead.draw(batch);
 						batch.end();

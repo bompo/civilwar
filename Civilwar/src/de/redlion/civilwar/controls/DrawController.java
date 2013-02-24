@@ -336,8 +336,10 @@ public class DrawController extends InputAdapter{
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 					
-					for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(pop)) {
-						pS.wayPoints.clear();
+					if(!SinglePlayerGameScreen.circles.isEmpty()) {
+						for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(pop)) {
+							pS.wayPoints.clear();
+						}
 					}
 					
 				}
