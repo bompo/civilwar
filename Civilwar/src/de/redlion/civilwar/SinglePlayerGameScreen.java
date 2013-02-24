@@ -338,7 +338,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
 
 						Vector2 a = doodle.get(doodle.size()-1).cpy();
-						Vector2 b = doodle.get(doodle.size()-3).cpy();
+						Vector2 b = doodle.get(doodle.size()-2).cpy();
 						
 						Vector2 c = a.cpy().sub(b);
 						
