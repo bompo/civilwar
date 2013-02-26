@@ -180,26 +180,27 @@ public class RenderMap {
 		Soldier tempSoldier = GameSession.getInstance().soldiers.get(soldierSelector);
 		Ray ray = new Ray(new Vector3(tempSoldier.position.x + (tempSoldier.velocity.x * Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size), -100, tempSoldier.position.y + (tempSoldier.velocity.y* Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size)), Vector3.Y);
 		Vector3 localIntersection = new Vector3();
-		if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
-			tempSoldier.height = tempSoldier.targetHeight; 
-			tempSoldier.targetHeight = localIntersection.y;
-			tempSoldier.heightIterator = soldierSelector;
-			soldierSelector = (soldierSelector + 1) % GameSession.getInstance().soldiers.size;
-		}
+		Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection);
+		tempSoldier.height = tempSoldier.targetHeight; 
+		tempSoldier.targetHeight = localIntersection.y;
+		tempSoldier.heightIterator = soldierSelector;
+		soldierSelector = (soldierSelector + 1) % GameSession.getInstance().soldiers.size;
 		
 		//render soldier
 		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
 			Soldier soldier = GameSession.getInstance().soldiers.get(i);
 			
-//			if(i==39) {
-//				System.out.println((GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size) );
-//				System.out.println(soldier.height);
-//				System.out.println(soldier.targetHeight);
-//				System.out.println(Interpolation.linear.apply(soldier.height, soldier.targetHeight, (GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size)));
-//			}
-			
 			soldier.instance.matrix.idt();
-			soldier.instance.matrix.trn(soldier.position.x, Interpolation.linear.apply(soldier.height, soldier.targetHeight, (1.0f +  GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size)), soldier.position.y);
+			
+			float height = Interpolation.linear.apply(soldier.height, soldier.targetHeight, (GameSession.getInstance().soldiers.size) * ((soldier.heightIterator + soldierSelector - soldier.heightIterator) / (float) (GameSession.getInstance().soldiers.size))/ (float) (GameSession.getInstance().soldiers.size));
+			
+//			System.out.println("frame:" + soldierSelector);
+//			System.out.println("soldier:" + soldier.heightIterator);
+//			System.out.println("soldier.height:" + soldier.height);
+//			System.out.println("soldier.targetHeight:" + soldier.targetHeight);
+//			System.out.println("height:" + height);
+			
+			soldier.instance.matrix.trn(soldier.position.x, height, soldier.position.y);
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.Z, soldier.angle);
