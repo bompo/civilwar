@@ -183,17 +183,20 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 		startTime += delta;
 
-		if(!paused)
+		if(!paused) {
 			updateUnits();
-
-		collisionTest();
-		updateAI();
-		
+			collisionTest();
+			updateAI();
+		}
+					
 		renderMap.render();
 
+		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+		
 		if (Configuration.getInstance().debug) {
 			renderDebug.render(renderMap.cam);
-		}
+		}		
 
 		// FadeInOut
 		if (!finished && fade > 0) {
@@ -551,7 +554,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				ArrayList<Vector3> wayPoints = paths.get(pol);
 				
 				if(wayPoints != null && wayPoints.size() > 0) {
-					Gdx.app.log("", wayPoints.get(wayPoints.size() -1).toString());
 					playerSoldier.goTowards(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z), false);
 					if(playerSoldier.position.dst(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z))<0.5f) {
 						wayPoints.remove(0);
@@ -573,9 +575,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Soldier soldier1 = GameSession.getInstance().soldiers.get(soldier1ID);
 			for(int soldier2ID = 0; soldier2ID < GameSession.getInstance().soldiers.size; soldier2ID++) {
 				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);	
-				if(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
-					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(0.1f));
-					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(0.1f));
+				while(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
+					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(Gdx.graphics.getDeltaTime()));
+					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(Gdx.graphics.getDeltaTime()));
 				}
 			}			
 		}

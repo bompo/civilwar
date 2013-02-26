@@ -96,6 +96,7 @@ public class PrototypeRendererGL20 implements ModelRenderer {
 		// transparent is sorted back to front
 		drawableManager.drawables.sort(opaqueSorter);
 		for (int i = drawableManager.drawables.size; --i >= 0;) {
+			
 
 			final Drawable drawable = drawableManager.drawables.get(i);
 
@@ -111,11 +112,12 @@ public class PrototypeRendererGL20 implements ModelRenderer {
 			final SubMesh subMeshes[] = drawable.model.getSubMeshes();
 
 			boolean matrixChanged = true;
+			
 			for (int j = 0; j < subMeshes.length; j++) {
 
 				final SubMesh subMesh = subMeshes[j];
 				final Material material = drawable.materials.get(j);
-
+				
 				// bind new shader if material can't use old one
 				final boolean shaderChanged = bindShader(material);
 
@@ -177,7 +179,7 @@ public class PrototypeRendererGL20 implements ModelRenderer {
 		currentShader.begin();
 
 		lightManager.applyGlobalLights(currentShader);
-		lightManager.applyLights(currentShader);
+//		lightManager.applyLights(currentShader);
 		currentShader.setUniformMatrix("u_projectionViewMatrix", cam.combined);
 		currentShader.setUniformf("camPos", cam.position.x, cam.position.y, cam.position.z, 1.2f / cam.far);
 		currentShader.setUniformf("camDir", cam.direction.x, cam.direction.y, cam.direction.z);

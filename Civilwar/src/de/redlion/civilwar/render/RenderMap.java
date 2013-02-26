@@ -1,8 +1,5 @@
 package de.redlion.civilwar.render;
 
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
@@ -11,26 +8,20 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.badlogic.gdx.graphics.g3d.AnimatedModelNode;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.keyframe.KeyframedAnimation;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.sun.xml.internal.ws.resources.ModelerMessages;
 
 import de.redlion.civilwar.Configuration;
 import de.redlion.civilwar.GameSession;
-import de.redlion.civilwar.SinglePlayerGameScreen;
 import de.redlion.civilwar.collision.HeightMap;
 import de.redlion.civilwar.render.LightManager.LightQuality;
 import de.redlion.civilwar.units.EnemySoldier;
@@ -51,6 +42,7 @@ public class RenderMap {
 	
 	StillModel modelSoldierObj;
 	StillModel modelEnemySoldierObj;
+	StillModel modelSelectedSoldierObj;
 	Texture texSoldierDiff;
 	Texture texEnemySoldierDiff;	
 	
@@ -110,6 +102,7 @@ public class RenderMap {
 		
 		modelSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
 		modelEnemySoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
+		modelSelectedSoldierObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/soldier.g3dt"));
 		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);		
 		texEnemySoldierDiff = new Texture(Gdx.files.internal("data/enemy_soldier_diff.png"), true);
 		
@@ -147,6 +140,7 @@ public class RenderMap {
 		modelWeaponObj.setMaterial(materialWeapon);
 		modelSoldierObj.setMaterial(materialSoldier);
 		modelEnemySoldierObj.setMaterial(materialEnemySoldier);
+		modelSelectedSoldierObj.setMaterial(circledSoldier);
 		modelLandscapeObj.setMaterial(materialLandscape);
 		
 		
@@ -169,70 +163,45 @@ public class RenderMap {
 		
 		time += Gdx.graphics.getDeltaTime();		
 		
-		
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		
 		protoRenderer.cam = cam;
-		
 		
 		protoRenderer.begin();
 		protoRenderer.draw(modelLandscapeObj, instanceLand);
 		
 		//render soldier
-		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			
-			//search in all circles if current soldier is selected... TODO cache this...
-			int selected = 0;
-			for (Entry<Polygon, ArrayList<PlayerSoldier>> entry : SinglePlayerGameScreen.circles.entrySet()) {
-			    for(Soldier soldierToSelect: entry.getValue()) {
-			    	if(soldier.equals(soldierToSelect)) {
-			    		selected = 1;
-			    		break;
-			    	}
-			    	
-			    }
-			}
+		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
+			Soldier soldier = GameSession.getInstance().soldiers.get(i);
 			
 			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
 			Vector3 localIntersection = new Vector3();
 			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
 			}
 			
-
-			
-			modelSoldierObj.getBoundingBox(soldier.instanceBB);
-			soldier.instanceBB.mul(soldier.instance.matrix);
-			soldier.instance.radius = (soldier.instanceBB.getDimensions().len() / 2);
-
 			soldier.instance.matrix.idt();
 			soldier.instance.matrix.trn(localIntersection.x, localIntersection.y, localIntersection.z);
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.Z, soldier.angle);
 			
-			
 			if((soldier instanceof PlayerSoldier)) {
 				if(!((PlayerSoldier) soldier).circled) {
-					modelSoldierObj.setMaterial(materialSoldier);
 					protoRenderer.draw(modelSoldierObj, soldier.instance);
 				}
 				else {
-					modelSoldierObj.setMaterial(circledSoldier);
-					protoRenderer.draw(modelSoldierObj, soldier.instance);
+					protoRenderer.draw(modelSelectedSoldierObj, soldier.instance);
 				}
 			}
 			
 			if((soldier instanceof EnemySoldier)) {
 				protoRenderer.draw(modelEnemySoldierObj, soldier.instance);
 			}
-			
-			
 		}
-		
 
 		protoRenderer.end();	
-		
 
 	}
 
