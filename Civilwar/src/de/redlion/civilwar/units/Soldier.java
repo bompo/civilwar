@@ -33,6 +33,8 @@ public class Soldier {
 	public Vector2 velocity = new Vector2();
 	public Vector2 facing = new Vector2();
 	public float height = 0;
+	public float targetHeight = 0;
+	public int heightIterator = 0;
 	
 	public DefaultAI ai = new DefaultAI(this);
 	

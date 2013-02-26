@@ -127,8 +127,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 	public void initRender() {
 		Gdx.graphics.getGL20().glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		
+		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);		
 	}
 
 	@Override
@@ -301,7 +300,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					diff.setUniformMatrix("MMatrix", model);
 					diff.setUniformi("uSampler", 0);
 					polygonalMesh.render(diff, GL20.GL_LINE_LOOP);
-					
 					
 				}
 				

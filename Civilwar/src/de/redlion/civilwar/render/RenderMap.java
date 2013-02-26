@@ -14,7 +14,9 @@ import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -54,6 +56,8 @@ public class RenderMap {
 	
 	Material circledSoldier; /* debug */
 	Material materialSoldier;
+	
+	int soldierSelector = 0;
 	
 	float time;
 
@@ -172,17 +176,30 @@ public class RenderMap {
 		protoRenderer.begin();
 		protoRenderer.draw(modelLandscapeObj, instanceLand);
 		
+		//update height per frame		
+		Soldier tempSoldier = GameSession.getInstance().soldiers.get(soldierSelector);
+		Ray ray = new Ray(new Vector3(tempSoldier.position.x + (tempSoldier.velocity.x * Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size), -100, tempSoldier.position.y + (tempSoldier.velocity.y* Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size)), Vector3.Y);
+		Vector3 localIntersection = new Vector3();
+		if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
+			tempSoldier.height = tempSoldier.targetHeight; 
+			tempSoldier.targetHeight = localIntersection.y;
+			tempSoldier.heightIterator = soldierSelector;
+			soldierSelector = (soldierSelector + 1) % GameSession.getInstance().soldiers.size;
+		}
+		
 		//render soldier
 		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
 			Soldier soldier = GameSession.getInstance().soldiers.get(i);
 			
-			Ray ray = new Ray(new Vector3(soldier.position.x, -100, soldier.position.y), Vector3.Y);
-			Vector3 localIntersection = new Vector3();
-			if (Intersector.intersectRayTriangles(ray, heightMap.map, localIntersection)) {
-			}
+//			if(i==39) {
+//				System.out.println((GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size) );
+//				System.out.println(soldier.height);
+//				System.out.println(soldier.targetHeight);
+//				System.out.println(Interpolation.linear.apply(soldier.height, soldier.targetHeight, (GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size)));
+//			}
 			
 			soldier.instance.matrix.idt();
-			soldier.instance.matrix.trn(localIntersection.x, localIntersection.y, localIntersection.z);
+			soldier.instance.matrix.trn(soldier.position.x, Interpolation.linear.apply(soldier.height, soldier.targetHeight, (1.0f +  GameSession.getInstance().soldiers.size * (float) (soldierSelector / (float) (GameSession.getInstance().soldiers.size))/ (float) GameSession.getInstance().soldiers.size)), soldier.position.y);
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.Z, soldier.angle);
