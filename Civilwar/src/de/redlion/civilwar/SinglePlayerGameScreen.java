@@ -8,31 +8,32 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.StillModelInstance;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
-import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.OrthoCamController;
 import de.redlion.civilwar.render.RenderDebug;
 import de.redlion.civilwar.render.RenderMap;
+import de.redlion.civilwar.shader.DiffuseShader;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -48,6 +49,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static RenderMap renderMap;
 	RenderDebug renderDebug;
+	ShaderProgram diff;
 
 	float fade = 1.0f;
 	boolean finished = false;
@@ -72,7 +74,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static boolean paused = false;
 
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
-	public static HashMap<Polygon,ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
+	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
@@ -89,10 +91,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		//TODO Observer Pattern for newGame
 		renderMap = new RenderMap();
 		renderDebug = new RenderDebug();
+		diff = new ShaderProgram(DiffuseShader.mVertexShader, DiffuseShader.mFragmentShader);
 		
 		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
 		
-		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/white.png"), true), 0, TextureAttribute.diffuseTexture));
+		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/black.png"), true), 0, TextureAttribute.diffuseTexture));
 		sphere.setMaterial(mat);
 		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
@@ -187,8 +190,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			updateUnits();
 			collisionTest();
 			updateAI();
+			updatePolygons();
 		}
-					
+
+		collisionTest();
+		updateAI();
+		
 		renderMap.render();
 
 		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
@@ -221,21 +228,85 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 		
 		//draw waypoints for debugging
-		for(ArrayList<Vector3> pathPoints : paths.values()) {
+//		for(ArrayList<Vector3> pathPoints : paths.values()) {
+//			
+//			if(!pathPoints.isEmpty()) {
+//				
+//				for(Vector3 pPoint : pathPoints) {
+//
+//					StillModelNode node = new StillModelNode();
+//					node.matrix.translate(pPoint);
+//					node.matrix.scl(0.05f);
+//					RenderMap.protoRenderer.draw(sphere, node);
+//					
+//				}
+//				
+//			}
+//			
+//		}
+		
+//		for (ArrayList<Vector3> pathPoints : paths.values()) {
+//
+//			if (!pathPoints.isEmpty()) {
+//
+//				StillModelNode node = new StillModelNode();
+//				node.matrix.translate(pathPoints.get(pathPoints.size() -1));
+//				node.matrix.scl(0.05f);
+//				RenderMap.protoRenderer.draw(sphere, node);
+//
+//			}
+//
+//		}
+		
+		//draw polygons for debugging
+		for(Polygon pol : circles.keySet()) {
+			diff.begin();
+			float[] vertices = pol.getTransformedVertices();
 			
-			if(!pathPoints.isEmpty()) {
+			if(vertices.length > 0) {
 				
-				for(Vector3 pPoint : pathPoints) {
+				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
+				
+				Mesh polygonalMesh = new Mesh(true, vertices3D.length, vertices3D.length / 3, VertexAttribute.Position());
+				
+				int l = 0;
+				for(int k=0;k<vertices3D.length;k++) {
+					
+					if(k%3 == 1)
+						vertices3D[k] = 0;
+					else {
+						vertices3D[k] = vertices[l];
+						l++;
+					}
+					
+				}
+				
+				polygonalMesh.setVertices(vertices3D);
+				short[] indices =  new short[vertices3D.length/3];
+				
+				for(short j=0;j<indices.length;j++) {
+					indices[j] = j;
+				}
+				
+				polygonalMesh.setIndices(indices);
+				
+				for(int i=0; i<vertices.length;i+=2) {
 
 					StillModelNode node = new StillModelNode();
-					node.matrix.translate(pPoint);
-					node.matrix.scl(0.05f);
+					node.matrix.translate(vertices[i],0,vertices[i+1]);
+					node.matrix.scl(0.02f);
 					RenderMap.protoRenderer.draw(sphere, node);
+					
+					diff.setUniformMatrix("VPMatrix", renderMap.cam.combined);
+					diff.setUniformMatrix("MMatrix", model);
+					diff.setUniformi("uSampler", 0);
+					polygonalMesh.render(diff, GL20.GL_LINE_LOOP);
+					
 					
 				}
 				
 			}
-			
+			diff.end();
 		}
 		
 		
@@ -265,53 +336,39 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					
 					if(paths.containsKey(pol)) {
 						Sprite arrowhead = Resources.getInstance().arrowhead;
-						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
+//						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
 
 						Vector2 a = doodle.get(doodle.size()-1).cpy();
-						Vector2 b = doodle.get(doodle.size()-3).cpy();
-						Vector2 c = a.cpy().sub(b);
-						c = a.cpy().add(c);
+						Vector2 b = doodle.get(doodle.size()-2).cpy();
 						
-						float dot = Math.abs(a.cpy().dot(c));
-						float angle = dot / (a.len() * c.len());
+						Vector2 c = a.cpy().sub(b);
+						
+						Vector2 d = new Vector2(0, 1);
+						
+//						r.setColor(1, 1, 1, 1);
+//						r.begin(ShapeType.Line);
+//						r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+//						r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+//						r.end();
+						
+						float dot = c.cpy().dot(d);
+						float angle = dot / (d.len() * c.len());
 						
 						angle = (float) Math.acos(angle);
 						angle = (float) Math.toDegrees(angle);
 						
-//						if(Float.isNaN(angle))
-//							angle = 0;
-						
-//						r.end();
-//						r.begin(ShapeType.Circle);
-//						r.circle(a.x, a.y, 7);
-//						r.circle(b.x, b.y, 7);
+						if(a.x < b.x)
+							angle *= -1;
 						
 						
-						if(a.x < b.x) {
-							if(a.y < b.y)
-								angle+=90;
-							if(a.y == b.y)
-								angle+=45;
-						}
-						else if(a.x > b.x){
-							if(a.y < b.y)
-								angle+=180;
-							else if(a.y > b.y)
-								angle+=270;
-							
-							if(a.y == b.y)
-								angle+=225;
-						}
-						else {
-							if(a.y > b.y)
-								angle+=315;
-							else
-								angle+=135;
-						}
+//						Gdx.app.log("angle", angle + "");
 						
+						//correction due to sprite?
+						angle += 30;
 						
-//						Gdx.app.log("", angle + "");
-						arrowhead.setRotation(angle);
+						arrowhead.setPosition(a.x, a.y);
+						arrowhead.setRotation(-angle);
+						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
 						batch.begin();
 						arrowhead.draw(batch);
 						batch.end();
@@ -533,12 +590,135 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
 					edgeScrollingSpeed = 1.0f;
-				
 			}			
 
 		}
 	}
 	
+	private void updatePolygons() {
+		
+		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
+		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
+		HashMap<Polygon, ArrayList<Vector3>> updatedPaths = new HashMap<Polygon, ArrayList<Vector3>>();
+
+		for(Polygon pol : circles.keySet()) {
+			
+			Array<Vector2> positions = new Array<Vector2>();
+			
+			for(PlayerSoldier soldier : circles.get(pol)) {
+				positions.add(soldier.position);
+			}
+			
+			float[] newVertices = null;
+			
+			if(positions.size == 1) {
+				Vector2 tempPos = positions.get(0).cpy();
+				Vector2 tempPos2 = positions.get(0).cpy();
+				Vector2 tempPos3 = positions.get(0).cpy();
+				
+				tempPos.x += 0.2f;
+				tempPos2.y -= 0.2f;
+				tempPos3.x += 0.2f;
+				tempPos3.y -= 0.2f;
+				
+				positions.clear();
+				positions.add(tempPos);
+				positions.add(tempPos2);
+				positions.add(tempPos3);
+				
+				newVertices = new float[positions.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = positions.get(j).x;
+					newVertices[i+1] = positions.get(j).y;
+					
+					j++;
+				}
+				
+			}
+			else if(positions.size == 2) {
+				Vector2 tempPos = positions.get(0).cpy();
+				Vector2 tempPos2 = positions.get(1).cpy();
+				
+				Vector2 mid = tempPos.cpy().add(tempPos2.cpy());
+				mid.mul(0.5f);
+				
+				//not perfect but it's a triangle...
+				mid.add(Math.signum(mid.x) / 5, Math.signum(mid.y) / 5);
+				
+				positions.clear();
+				positions.add(tempPos);
+				positions.add(tempPos2);
+				positions.add(mid);
+				
+				newVertices = new float[positions.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = positions.get(j).x;
+					newVertices[i+1] = positions.get(j).y;
+					
+					j++;
+				}
+				
+			}
+			else if(positions.size >= 3) {
+				Array<Vector2> bound = BoundingPolygon.createGiftWrapConvexHull(positions);
+				
+				newVertices = new float[bound.size * 2];
+				
+				int j=0;
+				for(int i=0;i<newVertices.length;i+=2) {
+					
+					newVertices[i] = bound.get(j).x;
+					newVertices[i+1] = bound.get(j).y;
+					
+					j++;
+				}
+			}
+			
+			
+			Polygon newPoly = new Polygon(newVertices);
+
+			//calculate Origin
+			float originX = 0;
+			float originY = 0;
+			for(int k=0;k<newVertices.length;k++) {
+				if(k%2==0)
+					originX += newVertices[k];
+				else
+					originY += newVertices[k];
+			}
+			
+			originX /= newVertices.length / 2;
+			originY /= newVertices.length / 2;
+			
+			newPoly.setOrigin(originX, originY);
+			newPoly.scale(1.5f);
+			
+			updatedList.put(newPoly, circles.get(pol));
+			
+			if(paths.containsKey(pol)) {
+				updatedPaths.put(newPoly, paths.get(pol));
+				updatedCircleHasPath.add(newPoly);
+				paths.remove(pol);
+			}
+			
+		}
+		
+		circleHasPath.clear();
+		circleHasPath.addAll(updatedCircleHasPath);
+		
+		paths.putAll(updatedPaths);
+		
+		circles.clear();
+		circles.putAll(updatedList);
+		
+	}
+
 	private void updateUnits() {
 		
 		for(Soldier soldier:GameSession.getInstance().soldiers) {
@@ -550,7 +730,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
 			
 			for(PlayerSoldier playerSoldier : soldiers) {
-				
+			
 				ArrayList<Vector3> wayPoints = paths.get(pol);
 				
 				if(wayPoints != null && wayPoints.size() > 0) {
