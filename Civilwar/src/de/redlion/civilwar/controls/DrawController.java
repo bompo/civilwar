@@ -16,7 +16,6 @@ import com.badlogic.gdx.math.collision.Ray;
 import de.redlion.civilwar.Constants;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
-import de.redlion.civilwar.units.EnemySoldier;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -33,6 +32,7 @@ public class DrawController extends InputAdapter{
 //	final DollarListener listener;
 //	final double MINSCORE = 0.82;
 	final float MAX_DISTANCE = 45.0f;
+	final int SMOOTHING_ITERATIONS = 2;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
 	
@@ -64,38 +64,10 @@ public class DrawController extends InputAdapter{
 		else if(!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)){
 			Vector2 temp = new Vector2(x, y);
 			
-//			while(x > Gdx.graphics.getWidth() - 50 || x < 50 || y > Gdx.graphics.getHeight() - 50 || y < 50) {
-//						
-//				delta.set(x, y).sub(last);
-//				delta.mul(0.0001f * Constants.MOVESPEED);
-//				Vector3 temp2 = new Vector3(-delta.y, 0, delta.x);
-//				Quaternion rotation = new Quaternion();
-//				camera.combined.getRotation(rotation);
-//				rotation.transform(temp2);
-//				camera.translate(temp2);
-//				camera.update();
-//				
-//				if(x < Gdx.graphics.getWidth() - 50 && x > 50 && y < Gdx.graphics.getHeight() - 50 && y > 50)
-//					break;
-//				
-//				
-//				updateDoodles(x,y);
-//				
-//			}
-
-			
 			// convert to screen space
 			y = -y + Gdx.graphics.getHeight();			
-//			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
-//			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
 			
 			temp = new Vector2(x, y);
-			
-			
-//			if(temp.dst(lastPoint) > 10 || SinglePlayerGameScreen.currentDoodleCollisionPoints.isEmpty()) {
-//				SinglePlayerGameScreen.currentDoodleCollisionPoints.add(temp);
-//				lastPoint.set(temp);
-//			}
 			
 			if(temp.dst(lastPoint) > 10 || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
@@ -104,7 +76,6 @@ public class DrawController extends InputAdapter{
 			
 		}
 		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
-//			y = -y + Gdx.graphics.getHeight();
 			
 			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
 			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
@@ -137,6 +108,12 @@ public class DrawController extends InputAdapter{
 			
 			ArrayList<Vector3> tempList = new ArrayList<Vector3>();
 			
+			for(int h=0;h<SMOOTHING_ITERATIONS;h++) {
+				ArrayList<Vector2> smoothedDoodle = smooth(SinglePlayerGameScreen.currentDoodle);
+				SinglePlayerGameScreen.currentDoodle.clear();
+				SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
+			}
+			
 			for(Vector2 temp : SinglePlayerGameScreen.currentDoodle) {
 			
 				Vector3 projected = new Vector3();
@@ -166,7 +143,7 @@ public class DrawController extends InputAdapter{
 					}
 					
 					points[i] = tempList.get(0).x;
-					points[i+1] = tempList.get(0).z;				
+					points[i+1] = tempList.get(0).z;		
 					
 					Polygon poly = new Polygon(points);
 					
@@ -246,19 +223,16 @@ public class DrawController extends InputAdapter{
 							}
 						}
 						if(deletedoodle) {
-//							SinglePlayerGameScreen.currentDoodleCollisionPoints.clear();
 							SinglePlayerGameScreen.currentDoodle.clear();
 						}
 					}
 					
 				}
 				else {
-//					SinglePlayerGameScreen.currentDoodleCollisionPoints.clear();
 					SinglePlayerGameScreen.currentDoodle.clear();
 				}
 			}
 			else {
-//				SinglePlayerGameScreen.currentDoodleCollisionPoints.clear();
 				SinglePlayerGameScreen.currentDoodle.clear();
 			}
 			
@@ -356,19 +330,7 @@ public class DrawController extends InputAdapter{
 		last.set(x, y);
 	
 		SinglePlayerGameScreen.currentDoodle.clear();
-//		SinglePlayerGameScreen.currentDoodleCollisionPoints.clear();
 		deletePath.clear();
-		
-//		y = -y + Gdx.graphics.getHeight();
-//		
-//		x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
-//		y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
-		
-//		Vector2 temp = new Vector2(x, y);
-//		Vector3 projected = new Vector3();
-//		picker = camera.getPickRay(temp.x, temp.y);
-//		Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
-//		GameSession.getInstance().soldiers.add(new EnemySoldier(2, new Vector2(projected.x, projected.z), new Vector2(1,0)));
 
 		return true;
 	}
@@ -488,18 +450,28 @@ public class DrawController extends InputAdapter{
 			
 		}
 		
-//		ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-//		
-//		for(Vector2 v : SinglePlayerGameScreen.currentDoodle) {
-//			
-//			v.add(trans);
-//			
-//			newCurrentDoodle.add(v);
-//			
-//		}
-//		
-//		SinglePlayerGameScreen.currentDoodle.clear();
-//		SinglePlayerGameScreen.currentDoodle.addAll(newCurrentDoodle);
+	}
+	
+	public ArrayList<Vector2> smooth(ArrayList<Vector2> input) {
+		
+		ArrayList<Vector2> output = new ArrayList<Vector2>();
+		output.ensureCapacity(input.size() * 2);
+		
+		output.add(input.get(0));
+		
+		for (int i=0; i<input.size()-1; i++) {
+			Vector2 p0 = input.get(i);
+			Vector2 p1 = input.get(i+1);
+
+			Vector2 Q = new Vector2(0.75f * p0.x + 0.25f * p1.x, 0.75f * p0.y + 0.25f * p1.y);
+			Vector2 R = new Vector2(0.25f * p0.x + 0.75f * p1.x, 0.25f * p0.y + 0.75f * p1.y);
+	        	output.add(Q);
+		        output.add(R);
+		}
+		
+		output.add(input.get(input.size()-1));
+		
+		return output;
 		
 	}
 	
