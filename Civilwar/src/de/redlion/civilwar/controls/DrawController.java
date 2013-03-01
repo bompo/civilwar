@@ -31,10 +31,14 @@ public class DrawController extends InputAdapter{
 //	final Dollar dollar = new Dollar(4);
 //	final DollarListener listener;
 //	final double MINSCORE = 0.82;
-	final float MAX_DISTANCE = 45.0f;
+	final float MAX_DISTANCE = 45.0f; //used for circleTesting
 	final int SMOOTHING_ITERATIONS = 2;
+	final float MIN_DISTANCE = 10.0f; //used for doodling
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
+	
+	Vector2 tmp = new Vector2();
+	ArrayList<Vector2> currentTriangleStrip = new ArrayList<Vector2>();
 	
 	Ray picker;
 
@@ -69,7 +73,7 @@ public class DrawController extends InputAdapter{
 			
 			temp = new Vector2(x, y);
 			
-			if(temp.dst(lastPoint) > 10 || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
+			if(temp.dst(lastPoint) > MIN_DISTANCE || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 			}
@@ -77,8 +81,8 @@ public class DrawController extends InputAdapter{
 		}
 		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
 			
-			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
-			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
+//			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
+//			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
 			
 			Vector2 temp = new Vector2(x, y);
 			
@@ -108,11 +112,15 @@ public class DrawController extends InputAdapter{
 			
 			ArrayList<Vector3> tempList = new ArrayList<Vector3>();
 			
-			for(int h=0;h<SMOOTHING_ITERATIONS;h++) {
-				ArrayList<Vector2> smoothedDoodle = smooth(SinglePlayerGameScreen.currentDoodle);
-				SinglePlayerGameScreen.currentDoodle.clear();
-				SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
+			if(!SinglePlayerGameScreen.currentDoodle.isEmpty()) {
+				for(int h=0;h<SMOOTHING_ITERATIONS;h++) {
+					ArrayList<Vector2> smoothedDoodle = smooth(SinglePlayerGameScreen.currentDoodle);
+					SinglePlayerGameScreen.currentDoodle.clear();
+					SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
+				}
 			}
+			
+			
 			
 			for(Vector2 temp : SinglePlayerGameScreen.currentDoodle) {
 			
@@ -472,6 +480,12 @@ public class DrawController extends InputAdapter{
 		output.add(input.get(input.size()-1));
 		
 		return output;
+		
+	}
+	
+	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input) {
+		
+		return null;
 		
 	}
 	

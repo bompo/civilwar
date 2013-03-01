@@ -101,7 +101,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
 		batch = new SpriteBatch();
-		batch.getProjectionMatrix().setToOrtho2D(0, 0, 800, 480);
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		blackFade = new Sprite(	new Texture(Gdx.files.internal("data/black.png")));
 		fadeBatch = new SpriteBatch();
@@ -134,17 +134,36 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public void resize(int width, int height) {
 		super.resize(width, height);
 	
+		Vector3 camPos = renderMap.cam.position;
+		Vector3 camUp = renderMap.cam.up;
+		Vector3 camDir = renderMap.cam.direction;
+		
 		initRender();
-		renderMap = new RenderMap();
+		renderMap = new RenderMap(camPos,camDir,camUp);
+
+		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		camController = new OrthoCamController(renderMap.cam);
 		keyController = new KeyController();
 		drawController = new DrawController(renderMap.cam);
 		multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(camController);
-		multiplexer.addProcessor(keyController);
-
-		Gdx.input.setInputProcessor(multiplexer);
+		
+		if(paused) {
+			multiplexer = new InputMultiplexer();
+			multiplexer.removeProcessor(camController);
+			multiplexer.addProcessor(drawController);
+			multiplexer.addProcessor(keyController);
+			Gdx.input.setInputProcessor(multiplexer);
+		} else {
+			doodles.clear();
+			currentDoodle.clear();
+			multiplexer = new InputMultiplexer();
+			multiplexer.removeProcessor(drawController);
+			multiplexer.addProcessor(camController);
+			multiplexer.addProcessor(keyController);
+			Gdx.input.setInputProcessor(multiplexer);
+		}
 	}
 
 	@Override
