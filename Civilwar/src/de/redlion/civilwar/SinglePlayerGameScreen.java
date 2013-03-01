@@ -19,6 +19,8 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer10;
+import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -76,9 +78,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
 	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
+	public static HashMap<Polygon, ArrayList<Vector2>> triangleStrips; //maps polygons to triangle strips
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
-//	public static ArrayList<Vector2> currentDoodleCollisionPoints; //doodle coordinates in real screen values
 	
 //	public static Ray circleRay;
 
@@ -118,9 +120,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
 		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
+		triangleStrips = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
-//		currentDoodleCollisionPoints = new ArrayList<Vector2>();
+
 		
 		initRender();
 	}
@@ -157,6 +160,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
+			triangleStrips.clear();
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
@@ -187,6 +191,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
+			triangleStrips.clear();
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
@@ -336,20 +341,25 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				ArrayList<Vector2> doodle = doodles.get(pol);
 				
-				if(!doodle.isEmpty()) {
+				ArrayList<Vector2> triangleStrip = triangleStrips.get(pol);
+				
+				if(!triangleStrip.isEmpty()) {
+					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.Line);
+					r.begin(ShapeType.FilledTriangle);
 					
-					Vector2 v0 = doodle.get(0);
+					Vector2 p0 = triangleStrip.get(0);
+					Vector2 p1 = triangleStrip.get(1);
 					
-					for(Vector2 v1 : doodle) {
+					for(Vector2 p2 : triangleStrip) {
 						
-						r.line(v0.x, v0.y, v1.x, v1.y);
-						v0 = v1;
+						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
 						
 					}
-					r.end();
 					
+					r.end();
 					
 					if(paths.containsKey(pol)) {
 						Sprite arrowhead = Resources.getInstance().arrowhead;
@@ -441,6 +451,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 						doodle.clear();
 						doodle.addAll(newDoodle);
+						
+					}
+					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
 						
 					}
 					

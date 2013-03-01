@@ -34,6 +34,7 @@ public class DrawController extends InputAdapter{
 	final float MAX_DISTANCE = 45.0f; //used for circleTesting
 	final int SMOOTHING_ITERATIONS = 2;
 	final float MIN_DISTANCE = 10.0f; //used for doodling
+	final int MAX_THICKNESS = 30;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
 	
@@ -118,8 +119,8 @@ public class DrawController extends InputAdapter{
 					SinglePlayerGameScreen.currentDoodle.clear();
 					SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
 				}
-			}
-			
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());	
+			}	
 			
 			
 			for(Vector2 temp : SinglePlayerGameScreen.currentDoodle) {
@@ -159,9 +160,10 @@ public class DrawController extends InputAdapter{
 					
 					if(!so.isEmpty()) {
 						SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+						SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 						SinglePlayerGameScreen.circles.put(poly, so);
 						
-						Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
+//						Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 					}
 					else
 						SinglePlayerGameScreen.currentDoodle.clear();
@@ -193,15 +195,20 @@ public class DrawController extends InputAdapter{
 							ArrayList<PlayerSoldier> so = soldierTest(poly);
 							if(!so.isEmpty()) {
 								SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+								SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 								SinglePlayerGameScreen.circles.put(poly, so);
 								
-								Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
+//								Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 							}
-							else
+							else {
 								SinglePlayerGameScreen.currentDoodle.clear();
+								currentTriangleStrip.clear();
+							}
 						}
-						else
+						else {
 							SinglePlayerGameScreen.currentDoodle.clear();
+							currentTriangleStrip.clear();
+						}
 					}
 					else {
 						boolean deletedoodle = true;
@@ -214,6 +221,7 @@ public class DrawController extends InputAdapter{
 									Polygon pCopy = new Polygon(p.getTransformedVertices());
 									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
 									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+									SinglePlayerGameScreen.triangleStrips.put(pCopy, (ArrayList<Vector2>) currentTriangleStrip.clone());
 									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
 									
 									for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
@@ -223,8 +231,8 @@ public class DrawController extends InputAdapter{
 									
 									SinglePlayerGameScreen.circleHasPath.add(p);
 									
-									Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
-									Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
+//									Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
+//									Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
 									deletedoodle = false;
 									break;
 								}
@@ -232,16 +240,19 @@ public class DrawController extends InputAdapter{
 						}
 						if(deletedoodle) {
 							SinglePlayerGameScreen.currentDoodle.clear();
+							currentTriangleStrip.clear();
 						}
 					}
 					
 				}
 				else {
 					SinglePlayerGameScreen.currentDoodle.clear();
+					currentTriangleStrip.clear();
 				}
 			}
 			else {
 				SinglePlayerGameScreen.currentDoodle.clear();
+				currentTriangleStrip.clear();
 			}
 			
 			tempList.clear();
@@ -267,7 +278,7 @@ public class DrawController extends InputAdapter{
 							
 							if(pol.contains(vec.x, vec.z) && deletePath.indexOf(vec) != 0 && deletePath.indexOf(vec) != deletePath.size() -1) {
 								toDelete.add(pol);
-								Gdx.app.log("", "Circle deleted :(");
+//								Gdx.app.log("", "Circle deleted :(");
 								break;
 							}
 							
@@ -337,6 +348,7 @@ public class DrawController extends InputAdapter{
 	public boolean touchDown (int x, int y, int pointer, int button) {
 		last.set(x, y);
 	
+		currentTriangleStrip.clear();
 		SinglePlayerGameScreen.currentDoodle.clear();
 		deletePath.clear();
 
@@ -348,7 +360,7 @@ public class DrawController extends InputAdapter{
 		camera.zoom -= -amount * Gdx.graphics.getDeltaTime() / 50;
 		camera.update();
 		
-		Gdx.app.log("", amount + "");
+//		Gdx.app.log("", amount + "");
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
 			
@@ -387,7 +399,7 @@ public class DrawController extends InputAdapter{
 			if(s instanceof PlayerSoldier) {
 				PlayerSoldier p = (PlayerSoldier) s;
 				if(polygon.contains(p.position.x, p.position.y)) {
-					Gdx.app.log("", p.dogTag + "");
+//					Gdx.app.log("", p.dogTag + "");
 					p.circled = true;
 					soldiers.add(p);
 				}
@@ -434,7 +446,7 @@ public class DrawController extends InputAdapter{
 		return true;
 	}
 	
-	public void updateDoodles(int x, int y) {
+	private void updateDoodles(int x, int y) {
 		
 		Vector2 trans = new Vector2();
 		
@@ -458,9 +470,26 @@ public class DrawController extends InputAdapter{
 			
 		}
 		
+		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.triangleStrips.values()) {
+			
+			
+			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+			for(Vector2 v : triStrip) {
+				
+				v.add(trans);
+				
+				newStrip.add(v);
+				
+			}
+			
+			triStrip.clear();
+			triStrip.addAll(newStrip);
+			
+		}
+		
 	}
 	
-	public ArrayList<Vector2> smooth(ArrayList<Vector2> input) {
+	private ArrayList<Vector2> smooth(ArrayList<Vector2> input) {
 		
 		ArrayList<Vector2> output = new ArrayList<Vector2>();
 		output.ensureCapacity(input.size() * 2);
@@ -483,9 +512,35 @@ public class DrawController extends InputAdapter{
 		
 	}
 	
-	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input) {
+	private void makeTriangleStrip(ArrayList<Vector2> input) {
 		
-		return null;
+		Vector2 p1 = new Vector2();
+		Vector2 p2 = new Vector2();
+		tmp = new Vector2();
+		
+		if(input.size() % 2 != 0)
+			input.add(input.get(input.size()-1));
+		
+		float thickness = 5;
+		
+		for(int j=0;j<input.size();j+=2) {
+			
+			p1 = input.get(j);
+			p2 = input.get(j+1);
+			
+			if(thickness < MAX_THICKNESS)
+				thickness += (input.size() -j) / 100;
+			
+			tmp.set(p2).sub(p1).nor();
+			tmp.set(-tmp.y, tmp.x);
+			tmp.mul(thickness / 2);
+			
+			Vector2 a = p1.cpy().add(tmp);
+			Vector2 b = p1.cpy().sub(tmp);
+			
+			currentTriangleStrip.add(a);
+			currentTriangleStrip.add(b);
+		}
 		
 	}
 	
