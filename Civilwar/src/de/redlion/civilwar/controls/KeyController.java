@@ -1,7 +1,9 @@
-package de.redlion.civilwar;
+package de.redlion.civilwar.controls;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+
+import de.redlion.civilwar.SinglePlayerGameScreen;
 
 
 public class KeyController extends InputAdapter{
@@ -9,7 +11,7 @@ public class KeyController extends InputAdapter{
 	public boolean keyDown(int keycode) {
 	
 		
-		if(keycode == Input.Keys.SPACE || keycode == Input.Keys.VOLUME_UP) {
+		if(keycode == Input.Keys.SPACE) {
 			
 			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
 			
