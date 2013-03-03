@@ -24,12 +24,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.redlion.civilwar.Constants;
+import de.redlion.civilwar.SinglePlayerGameScreen;
 
 public class OrthoCamController extends InputAdapter {
 	final OrthographicCamera camera;
 	final Vector3 curr = new Vector3();
 	final Vector2 last = new Vector2(0, 0);
 	final Vector2 delta = new Vector2();
+	
+	private boolean oneFingerDown = false;
+	private boolean twoFingerDown = false;
+	private boolean threeFingerDown = false;
+	private boolean fourFingerDown = false;
+	private boolean fiveFingerDown = false;
+	private int howmanyfingers = 0;
 
 	public OrthoCamController (OrthographicCamera camera) {
 		this.camera = camera;
@@ -38,27 +46,80 @@ public class OrthoCamController extends InputAdapter {
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {
 		
-		delta.set(x, y).sub(last);
-		delta.mul(0.01f * Constants.MOVESPEED);
-		Vector3 temp = new Vector3(delta.y, 0, -delta.x);
-		Quaternion rotation = new Quaternion();
-		camera.combined.getRotation(rotation);
-		rotation.transform(temp);
-		camera.translate(temp);
-		camera.update();
-		last.set(x, y);
+		if(howmanyfingers == 1 && pointer == 0) {
+			delta.set(x, y).sub(last);
+			delta.mul(0.01f * Constants.MOVESPEED);
+			Vector3 temp = new Vector3(delta.y, 0, -delta.x);
+			Quaternion rotation = new Quaternion();
+			camera.combined.getRotation(rotation);
+			rotation.transform(temp);
+			camera.translate(temp);
+			camera.update();
+			last.set(x, y);
+		}
+		
+		if(pointer == 0)
+			last.set(x,y);
+		
 		return true;
 	}
 
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
-		last.set(0, 0);
+		
+		switch(pointer) {
+		case 0: oneFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 1: twoFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 2: threeFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 3: fourFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 4: fiveFingerDown = false;
+				howmanyfingers--;
+				break;
+		default: break;
+		}
+		
+		if(howmanyfingers == 0)
+			last.set(0, 0);
+		
 		return true;
 	}
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
-		last.set(x, y);
+		
+		switch(pointer) {
+		case 0: oneFingerDown = true;
+				howmanyfingers = 1;
+				break;
+		case 1: twoFingerDown = true;
+				howmanyfingers = 2;
+				break;
+		case 2: threeFingerDown = true;
+				howmanyfingers = 3;
+				break;
+		case 3: fourFingerDown = true;
+				howmanyfingers = 4;
+				break;
+		case 4: fiveFingerDown = true;
+				howmanyfingers = 5;
+				break;
+		default: break;
+		}
+		
+		if(howmanyfingers == 1)
+			last.set(x, y);
+		
+		if(howmanyfingers == 5)
+			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
+		
 		return true;
 	}
 	

@@ -24,6 +24,7 @@ import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -32,6 +33,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.redlion.civilwar.controls.DrawController;
+import de.redlion.civilwar.controls.GestureController;
+import de.redlion.civilwar.controls.KeyController;
 import de.redlion.civilwar.controls.OrthoCamController;
 import de.redlion.civilwar.render.RenderDebug;
 import de.redlion.civilwar.render.RenderMap;
@@ -61,6 +64,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	OrthoCamController camController;
 	DrawController  drawController;
 	KeyController keyController;
+	GestureController gestureController;
+	GestureDetector gestureDetector;
 	InputMultiplexer multiplexer;
 	
 	// GLES20
@@ -150,6 +155,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		camController = new OrthoCamController(renderMap.cam);
 		keyController = new KeyController();
 		drawController = new DrawController(renderMap.cam);
+		gestureController = new GestureController();
+		gestureDetector = new GestureDetector(gestureController);
 		multiplexer = new InputMultiplexer();
 		
 		if(paused) {
@@ -157,6 +164,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.removeProcessor(camController);
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(keyController);
+			multiplexer.addProcessor(gestureDetector);
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -164,6 +172,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
+			multiplexer.removeProcessor(gestureDetector);
 			multiplexer.addProcessor(camController);
 			multiplexer.addProcessor(keyController);
 			Gdx.input.setInputProcessor(multiplexer);
@@ -188,6 +197,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.removeProcessor(camController);
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(keyController);
+			multiplexer.addProcessor(gestureDetector);
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -195,6 +205,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
+			multiplexer.removeProcessor(gestureDetector);
 			multiplexer.addProcessor(camController);
 			multiplexer.addProcessor(keyController);
 			Gdx.input.setInputProcessor(multiplexer);

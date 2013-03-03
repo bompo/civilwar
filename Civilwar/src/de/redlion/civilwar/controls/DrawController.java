@@ -2,6 +2,7 @@ package de.redlion.civilwar.controls;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -26,6 +27,14 @@ public class DrawController extends InputAdapter{
 	public final Vector2 last = new Vector2(0, 0);
 	public final Vector2 delta = new Vector2();
 	
+	public static boolean fling = false;
+	private boolean oneFingerDown = false;
+	private boolean twoFingerDown = false;
+	private boolean threeFingerDown = false;
+	private boolean fourFingerDown = false;
+	private boolean fiveFingerDown = false;
+	private int howmanyfingers = 0;
+	
 	final Vector2 lastPoint = new Vector2();
 	
 //	final Dollar dollar = new Dollar(4);
@@ -48,9 +57,30 @@ public class DrawController extends InputAdapter{
 	}
 
 	@Override
-	public boolean touchDragged (int x, int y, int pointer) {
+	public boolean touchDragged (int x, int y, int pointer) {		
 		
-		if(SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ) {
+		boolean move = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 2 && pointer == 0)
+			move = true;
+		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+			move = true;
+		
+		boolean draw = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 1 && !fling && pointer == 0)
+			draw = true;
+		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+				draw = true;
+		
+		boolean del = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 1 && fling)
+			del = true;
+		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+			del = true;
+		
+		if(move) {
 			delta.set(x, y).sub(last);
 			delta.mul(0.01f * Constants.MOVESPEED);
 			Vector3 temp = new Vector3(delta.y, 0, -delta.x);
@@ -66,7 +96,7 @@ public class DrawController extends InputAdapter{
 			
 			
 		}
-		else if(!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)){
+		else if(draw){
 			Vector2 temp = new Vector2(x, y);
 			
 			// convert to screen space
@@ -78,9 +108,10 @@ public class DrawController extends InputAdapter{
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 			}
+			last.set(x,y);
 			
 		}
-		else if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+		else if(del) {
 			
 //			x = Math.max(Math.min(x, Gdx.graphics.getWidth()), 0);
 //			y = Math.max(Math.min(y, Gdx.graphics.getHeight()), 0);
@@ -95,7 +126,11 @@ public class DrawController extends InputAdapter{
 			
 			deletePath.add(projected);
 			lastPoint.set(temp);
+			last.set(x,y);
 		}
+		
+		if(howmanyfingers == 1 || (howmanyfingers >= 2 && pointer == 0))
+			last.set(x,y);
 		
 		return true;
 	}
@@ -103,10 +138,44 @@ public class DrawController extends InputAdapter{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
-		last.set(0, 0);
 		
-		if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
-
+		switch(pointer) {
+		case 0: oneFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 1: twoFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 2: threeFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 3: fourFingerDown = false;
+				howmanyfingers--;
+				break;
+		case 4: fiveFingerDown = false;
+				howmanyfingers--;
+				break;
+		default: break;
+		}
+		
+		if(howmanyfingers == 0)
+			last.set(0, 0);
+		
+		boolean draw = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 0 && !fling && pointer == 0)
+			draw = true;
+		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+				draw = true;
+		
+		boolean del = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 0 && fling)
+			del = true;
+		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+			del = true;
+		
+		if(draw) {
 //			!! commenting this might crash the game !!
 //			if(SinglePlayerGameScreen.currentDoodle.size()%2 != 0)
 //				SinglePlayerGameScreen.currentDoodle.add(SinglePlayerGameScreen.currentDoodle.get(SinglePlayerGameScreen.currentDoodle.size() - 1));
@@ -163,7 +232,7 @@ public class DrawController extends InputAdapter{
 						SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 						SinglePlayerGameScreen.circles.put(poly, so);
 						
-//						Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
+//						("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 					}
 					else
 						SinglePlayerGameScreen.currentDoodle.clear();
@@ -198,7 +267,7 @@ public class DrawController extends InputAdapter{
 								SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 								SinglePlayerGameScreen.circles.put(poly, so);
 								
-//								Gdx.app.log("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
+//								("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 							}
 							else {
 								SinglePlayerGameScreen.currentDoodle.clear();
@@ -231,8 +300,8 @@ public class DrawController extends InputAdapter{
 									
 									SinglePlayerGameScreen.circleHasPath.add(p);
 									
-//									Gdx.app.log("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
-//									Gdx.app.log("","" + SinglePlayerGameScreen.currentDoodle.get(0));
+//									("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
+//									("","" + SinglePlayerGameScreen.currentDoodle.get(0));
 									deletedoodle = false;
 									break;
 								}
@@ -257,7 +326,7 @@ public class DrawController extends InputAdapter{
 			
 			tempList.clear();
 		}
-		else if(SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {			
+		else if(del) {			
 				
 			
 			ArrayList<Polygon> toDelete = new ArrayList<Polygon>();
@@ -278,7 +347,7 @@ public class DrawController extends InputAdapter{
 							
 							if(pol.contains(vec.x, vec.z) && deletePath.indexOf(vec) != 0 && deletePath.indexOf(vec) != deletePath.size() -1) {
 								toDelete.add(pol);
-//								Gdx.app.log("", "Circle deleted :(");
+//								("", "Circle deleted :(");
 								break;
 							}
 							
@@ -338,19 +407,46 @@ public class DrawController extends InputAdapter{
 				}
 			}
 			
-				
+			fling = false;
 		}
-		
+			
 		return true;
 	}
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
-		last.set(x, y);
+		
+		switch(pointer) {
+		case 0: oneFingerDown = true;
+				howmanyfingers = 1;
+				break;
+		case 1: twoFingerDown = true;
+				howmanyfingers = 2;
+				break;
+		case 2: threeFingerDown = true;
+				howmanyfingers = 3;
+				break;
+		case 3: fourFingerDown = true;
+				howmanyfingers = 4;
+				break;
+		case 4: fiveFingerDown = true;
+				howmanyfingers = 5;
+				break;
+		default: break;
+		}
+		
+		if(howmanyfingers == 1  && pointer == 0) {
+			last.set(x, y);
+		}
+		
+		if(howmanyfingers == 5)
+			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
 	
-		currentTriangleStrip.clear();
-		SinglePlayerGameScreen.currentDoodle.clear();
-		deletePath.clear();
+		if(howmanyfingers != 1) {
+			currentTriangleStrip.clear();
+			SinglePlayerGameScreen.currentDoodle.clear();
+			deletePath.clear();
+		}
 
 		return true;
 	}
@@ -360,7 +456,7 @@ public class DrawController extends InputAdapter{
 		camera.zoom -= -amount * Gdx.graphics.getDeltaTime() / 50;
 		camera.update();
 		
-//		Gdx.app.log("", amount + "");
+//		("", amount + "");
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
 			
@@ -399,7 +495,7 @@ public class DrawController extends InputAdapter{
 			if(s instanceof PlayerSoldier) {
 				PlayerSoldier p = (PlayerSoldier) s;
 				if(polygon.contains(p.position.x, p.position.y)) {
-//					Gdx.app.log("", p.dogTag + "");
+//					("", p.dogTag + "");
 					p.circled = true;
 					soldiers.add(p);
 				}
