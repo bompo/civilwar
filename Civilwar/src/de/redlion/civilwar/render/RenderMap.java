@@ -176,7 +176,7 @@ public class RenderMap {
 		protoRenderer.begin();
 		protoRenderer.draw(modelLandscapeObj, instanceLand);
 		
-		//update height per frame		
+		//update height per frame
 		Soldier tempSoldier = GameSession.getInstance().soldiers.get(soldierSelector);
 		Ray ray = new Ray(new Vector3(tempSoldier.position.x + (tempSoldier.velocity.x * Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size), -100, tempSoldier.position.y + (tempSoldier.velocity.y* Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size)), Vector3.Y);
 		Vector3 localIntersection = new Vector3();
