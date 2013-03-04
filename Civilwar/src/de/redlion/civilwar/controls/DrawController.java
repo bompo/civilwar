@@ -6,7 +6,9 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.input.GestureDetector.GestureAdapter;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -20,7 +22,7 @@ import de.redlion.civilwar.SinglePlayerGameScreen;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
-public class DrawController extends InputAdapter{
+public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	public final OrthographicCamera camera;
 	final Vector3 curr = new Vector3();
@@ -44,6 +46,7 @@ public class DrawController extends InputAdapter{
 	final int SMOOTHING_ITERATIONS = 2;
 	final float MIN_DISTANCE = 10.0f; //used for doodling
 	final int MAX_THICKNESS = 30;
+	final int MIN_FLICK_VELOCITY = 3000;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
 	
@@ -58,7 +61,7 @@ public class DrawController extends InputAdapter{
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {		
-		
+		Gdx.app.log("fling", "" + "drag");
 		boolean move = false;
 		
 		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 2 && pointer == 0)
@@ -132,13 +135,14 @@ public class DrawController extends InputAdapter{
 		if(howmanyfingers == 1 || (howmanyfingers >= 2 && pointer == 0))
 			last.set(x,y);
 		
-		return true;
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		
+		Gdx.app.log("fling", "up");		
 		switch(pointer) {
 		case 0: oneFingerDown = false;
 				howmanyfingers--;
@@ -406,16 +410,14 @@ public class DrawController extends InputAdapter{
 					
 				}
 			}
-			
-			fling = false;
 		}
-			
-		return true;
+		fling = false;
+		return false;
 	}
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
-		
+		Gdx.app.log("fling", "down 1 " + howmanyfingers);
 		switch(pointer) {
 		case 0: oneFingerDown = true;
 				howmanyfingers = 1;
@@ -448,7 +450,7 @@ public class DrawController extends InputAdapter{
 			deletePath.clear();
 		}
 
-		return true;
+		return false;
 	}
 	
 	@Override
@@ -638,6 +640,50 @@ public class DrawController extends InputAdapter{
 			currentTriangleStrip.add(b);
 		}
 		
+	}
+	
+	@Override
+	public boolean touchDown (float x, float y, int pointer, int button) {
+		Gdx.app.log("fling", "down 2 " + howmanyfingers);
+		currentTriangleStrip.clear();
+		SinglePlayerGameScreen.currentDoodle.clear();
+		deletePath.clear();
+		
+		return false;
+	}
+	
+	@Override
+	public boolean fling(float velocityX, float velocityY, int button) {
+		
+		if((Math.abs(velocityY) + Math.abs(velocityX)) > MIN_FLICK_VELOCITY) {
+			fling = true;
+		}
+		Gdx.app.log("fling", "" + fling);
+		return true;
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

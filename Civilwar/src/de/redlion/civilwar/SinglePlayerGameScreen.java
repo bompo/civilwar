@@ -19,8 +19,6 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
-import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer10;
-import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -156,15 +154,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		keyController = new KeyController();
 		drawController = new DrawController(renderMap.cam);
 		gestureController = new GestureController();
-		gestureDetector = new GestureDetector(gestureController);
-		multiplexer = new InputMultiplexer();
+		gestureDetector = new GestureDetector(drawController);
 		
 		if(paused) {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
+			
 			multiplexer.addProcessor(drawController);
-			multiplexer.addProcessor(keyController);
 			multiplexer.addProcessor(gestureDetector);
+			multiplexer.addProcessor(keyController);
+			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -195,9 +194,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		if(paused) {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
+			
 			multiplexer.addProcessor(drawController);
-			multiplexer.addProcessor(keyController);
 			multiplexer.addProcessor(gestureDetector);
+			multiplexer.addProcessor(keyController);
+			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
