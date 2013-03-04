@@ -19,9 +19,12 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer10;
+import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -30,6 +33,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.redlion.civilwar.controls.DrawController;
+import de.redlion.civilwar.controls.GestureController;
+import de.redlion.civilwar.controls.KeyController;
 import de.redlion.civilwar.controls.OrthoCamController;
 import de.redlion.civilwar.render.RenderDebug;
 import de.redlion.civilwar.render.RenderMap;
@@ -59,6 +64,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	OrthoCamController camController;
 	DrawController  drawController;
 	KeyController keyController;
+	GestureController gestureController;
+	GestureDetector gestureDetector;
 	InputMultiplexer multiplexer;
 	
 	// GLES20
@@ -76,9 +83,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
 	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
+	public static HashMap<Polygon, ArrayList<Vector2>> triangleStrips; //maps polygons to triangle strips
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
-//	public static ArrayList<Vector2> currentDoodleCollisionPoints; //doodle coordinates in real screen values
 	
 //	public static Ray circleRay;
 
@@ -101,7 +108,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
 		batch = new SpriteBatch();
-		batch.getProjectionMatrix().setToOrtho2D(0, 0, 800, 480);
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		blackFade = new Sprite(	new Texture(Gdx.files.internal("data/black.png")));
 		fadeBatch = new SpriteBatch();
@@ -118,9 +125,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
 		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
+		triangleStrips = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
-//		currentDoodleCollisionPoints = new ArrayList<Vector2>();
+
 		
 		initRender();
 	}
@@ -134,17 +142,41 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public void resize(int width, int height) {
 		super.resize(width, height);
 	
+		Vector3 camPos = renderMap.cam.position;
+		Vector3 camUp = renderMap.cam.up;
+		Vector3 camDir = renderMap.cam.direction;
+		
 		initRender();
-		renderMap = new RenderMap();
+		renderMap = new RenderMap(camPos,camDir,camUp);
+
+		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		camController = new OrthoCamController(renderMap.cam);
 		keyController = new KeyController();
 		drawController = new DrawController(renderMap.cam);
+		gestureController = new GestureController();
+		gestureDetector = new GestureDetector(gestureController);
 		multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(camController);
-		multiplexer.addProcessor(keyController);
-
-		Gdx.input.setInputProcessor(multiplexer);
+		
+		if(paused) {
+			multiplexer = new InputMultiplexer();
+			multiplexer.removeProcessor(camController);
+			multiplexer.addProcessor(drawController);
+			multiplexer.addProcessor(keyController);
+			multiplexer.addProcessor(gestureDetector);
+			Gdx.input.setInputProcessor(multiplexer);
+		} else {
+			doodles.clear();
+			triangleStrips.clear();
+			currentDoodle.clear();
+			multiplexer = new InputMultiplexer();
+			multiplexer.removeProcessor(drawController);
+			multiplexer.removeProcessor(gestureDetector);
+			multiplexer.addProcessor(camController);
+			multiplexer.addProcessor(keyController);
+			Gdx.input.setInputProcessor(multiplexer);
+		}
 	}
 
 	@Override
@@ -165,12 +197,15 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.removeProcessor(camController);
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(keyController);
+			multiplexer.addProcessor(gestureDetector);
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
+			triangleStrips.clear();
 			currentDoodle.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
+			multiplexer.removeProcessor(gestureDetector);
 			multiplexer.addProcessor(camController);
 			multiplexer.addProcessor(keyController);
 			Gdx.input.setInputProcessor(multiplexer);
@@ -317,20 +352,25 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				ArrayList<Vector2> doodle = doodles.get(pol);
 				
-				if(!doodle.isEmpty()) {
+				ArrayList<Vector2> triangleStrip = triangleStrips.get(pol);
+				
+				if(!triangleStrip.isEmpty()) {
+					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.Line);
+					r.begin(ShapeType.FilledTriangle);
 					
-					Vector2 v0 = doodle.get(0);
+					Vector2 p0 = triangleStrip.get(0);
+					Vector2 p1 = triangleStrip.get(1);
 					
-					for(Vector2 v1 : doodle) {
+					for(Vector2 p2 : triangleStrip) {
 						
-						r.line(v0.x, v0.y, v1.x, v1.y);
-						v0 = v1;
+						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
 						
 					}
-					r.end();
 					
+					r.end();
 					
 					if(paths.containsKey(pol)) {
 						Sprite arrowhead = Resources.getInstance().arrowhead;
@@ -422,6 +462,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 						doodle.clear();
 						doodle.addAll(newDoodle);
+						
+					}
+					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
 						
 					}
 					

@@ -76,10 +76,14 @@ public class RenderMap {
 	Preferences prefs;
 	
 	public RenderMap() {
-		setupScene();
+		setupScene(null,null,null);
+	}
+	
+	public RenderMap(Vector3 camPos,Vector3 camDir, Vector3 camUp) {
+		setupScene(camPos,camDir,camUp);
 	}
 
-	private void setupScene() {
+	private void setupScene(Vector3 camPos,Vector3 camDir, Vector3 camUp) {
 		prefs = Gdx.app.getPreferences(Configuration.getInstance().TAG);
 		
 		highQuality = prefs.getBoolean("highQuality", false);
@@ -119,8 +123,16 @@ public class RenderMap {
 		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.zoom = 0.008f;
-		cam.position.set(-17, 18, 6);
-		cam.lookAt(0, 0, 0);
+		if(camPos == null)
+			cam.position.set(-17, 18, 6);
+		else
+			cam.position.set(camPos);
+		if(camUp == null)
+			cam.lookAt(0, 0, 0);
+		else {
+			cam.direction.set(camDir);
+			cam.up.set(camUp);
+		}
 		cam.update();
 		
 		// set materials
