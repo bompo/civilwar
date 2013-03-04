@@ -73,6 +73,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	float edgeScrollingSpeed;
 	
+	Sprite arrowhead;
+	
 	ShapeRenderer r;
 	StillModel sphere;
 	
@@ -127,6 +129,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
 
+		arrowhead = Resources.getInstance().arrowhead;
 		
 		initRender();
 	}
@@ -374,7 +377,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					r.end();
 					
 					if(paths.containsKey(pol)) {
-						Sprite arrowhead = Resources.getInstance().arrowhead;
+						
 //						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
 
 						Vector2 a = doodle.get(doodle.size()-1).cpy();
@@ -463,7 +466,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 						doodle.clear();
 						doodle.addAll(newDoodle);
-						
+						arrowhead.setPosition(doodle.get(doodle.size()-1).x, doodle.get(doodle.size()-1).y);
 					}
 					
 					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
