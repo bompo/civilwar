@@ -92,8 +92,8 @@ void main()
 	vec3  aggCol = dirLightCol;
 	
 	#ifdef normalsFlag
-	vec3 normal = u_normalMatrix * normalize(a_normal);	
-	aggCol *= wrapLight(normal, -dirLightDir);
+	    vec3 normal = u_normalMatrix * normalize(a_normal);	
+	    aggCol *= wrapLight(normal, -dirLightDir);
 	#endif
 
 #if LIGHTS_NUM > 0		
@@ -104,9 +104,9 @@ void main()
 		float weight = invLen * lightsInt[i];
 				
 		#ifdef normalsFlag
-		vec3 L = invLen * dif;// normalize
-		float lambert = wrapLight(normal, L);
-		weight *= lambert;		
+		    vec3 L = invLen * dif;// normalize
+		    float lambert = wrapLight(normal, L);
+		    weight *= lambert;		
 		#endif
 		aggCol += lightsCol[i] * weight;
 		
@@ -134,11 +134,11 @@ void main()
 
 
 
-	#ifdef fogColorFlag
+#ifdef fogColorFlag
 	float fog  =  (distance(pos, camPos.xyz) * camPos.w);
 	fog *=fog;	
 	v_fog = min(fog, 1.0);	
-	#endif
+#endif
 
 	v_diffuse.rgb = aggCol;
 	

@@ -10,9 +10,9 @@ public class Main {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "Civilwar";
 		cfg.useGL20 = true;
-		cfg.samples = 4;
-		cfg.width = 480;
-		cfg.height = 320;
+		cfg.samples = 8;
+		cfg.width = 1280;
+		cfg.height = 800;
 		
 		new LwjglApplication(new Civilwar(), cfg);
 	}

@@ -29,7 +29,7 @@ public class Configuration {
 			if(fullscreen) {
 				Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 			} else {
-				Gdx.graphics.setDisplayMode(800,480, false);		
+				Gdx.graphics.setDisplayMode(1280,800, false);		
 			}
 		}
 	}

@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -75,6 +74,8 @@ public class RenderMap {
 
 	Preferences prefs;
 	
+	Bloom bloom = new Bloom();
+	
 	public RenderMap() {
 		setupScene(null,null,null);
 	}
@@ -95,9 +96,9 @@ public class RenderMap {
 		
 		lightManager.dirLight = new DirectionalLight();
 		lightManager.dirLight.color.set(1f, 1f, 1f, 1);
-		lightManager.dirLight.direction.set(-0.4f, -1.0f, 0.03f).nor();
+		lightManager.dirLight.direction.set(-0.4f, -1.0f, 0.2f).nor();
 
-		lightManager.ambientLight.set(0.2f, 0.2f, 0.21f, 0.0f);
+		lightManager.ambientLight.set(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		protoRenderer = new PrototypeRendererGL20(lightManager);
 
@@ -122,7 +123,7 @@ public class RenderMap {
 		imageLightning.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.zoom = 0.008f;
+		cam.zoom = 0.015f;
 		if(camPos == null)
 			cam.position.set(-17, 18, 6);
 		else
@@ -168,6 +169,9 @@ public class RenderMap {
 			instanceLandBB.mul(instanceLand.matrix);
 			instanceLand.radius = (instanceLandBB.getDimensions().len() / 2);
 		}
+		
+		bloom.setBloomIntesity(1.0f);		
+		bloom.setClearColor(0.6f, 0.7f, 1, 1);
 	}
 
 	public void updateCamera(PerspectiveCamera cam) {
@@ -184,6 +188,8 @@ public class RenderMap {
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		
 		protoRenderer.cam = cam;
+		
+		bloom.capture();
 		
 		protoRenderer.begin();
 		protoRenderer.draw(modelLandscapeObj, instanceLand);
@@ -207,10 +213,10 @@ public class RenderMap {
 			soldier.heightInterpolator = soldier.heightInterpolator + (1.f/ (float) GameSession.getInstance().soldiers.size);
 			float height = Interpolation.linear.apply(soldier.height, soldier.heightTarget, soldier.heightInterpolator);
 			
-			soldier.instance.matrix.trn(soldier.position.x, height, soldier.position.y);
+			soldier.instance.matrix.trn(soldier.position.x, height + (soldier.bounce / 10.f), soldier.position.y);
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
-			soldier.instance.matrix.rotate(Vector3.Z, soldier.angle);
+			soldier.instance.matrix.rotate(Vector3.X, -soldier.bounce * 10.f);
 			
 			if((soldier instanceof PlayerSoldier)) {
 				if(!((PlayerSoldier) soldier).circled) {
@@ -227,6 +233,8 @@ public class RenderMap {
 		}
 
 		protoRenderer.end();	
+		
+		bloom.render();
 
 	}
 

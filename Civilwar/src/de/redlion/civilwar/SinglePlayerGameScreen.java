@@ -19,8 +19,6 @@ import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
-import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer10;
-import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -74,6 +72,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	Matrix4 tmp = new Matrix4().idt();
 	
 	float edgeScrollingSpeed;
+	
+	Sprite arrowhead;
 	
 	ShapeRenderer r;
 	StillModel sphere;
@@ -129,6 +129,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
 
+		arrowhead = Resources.getInstance().arrowhead;
 		
 		initRender();
 	}
@@ -156,15 +157,16 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		keyController = new KeyController();
 		drawController = new DrawController(renderMap.cam);
 		gestureController = new GestureController();
-		gestureDetector = new GestureDetector(gestureController);
-		multiplexer = new InputMultiplexer();
+		gestureDetector = new GestureDetector(drawController);
 		
 		if(paused) {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
+			
 			multiplexer.addProcessor(drawController);
-			multiplexer.addProcessor(keyController);
 			multiplexer.addProcessor(gestureDetector);
+			multiplexer.addProcessor(keyController);
+			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -195,9 +197,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		if(paused) {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
+			
 			multiplexer.addProcessor(drawController);
-			multiplexer.addProcessor(keyController);
 			multiplexer.addProcessor(gestureDetector);
+			multiplexer.addProcessor(keyController);
+			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -373,7 +377,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					r.end();
 					
 					if(paths.containsKey(pol)) {
-						Sprite arrowhead = Resources.getInstance().arrowhead;
+						
 //						arrowhead.setPosition(doodle.get(doodle.size()-3).x - arrowhead.getOriginX(),doodle.get(doodle.size()-1).y - arrowhead.getOriginY());
 
 						Vector2 a = doodle.get(doodle.size()-1).cpy();
@@ -462,7 +466,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 						doodle.clear();
 						doodle.addAll(newDoodle);
-						
+						arrowhead.setPosition(doodle.get(doodle.size()-1).x, doodle.get(doodle.size()-1).y);
 					}
 					
 					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
@@ -776,8 +780,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 	private void updateUnits() {
 		
-		for(Soldier soldier:GameSession.getInstance().soldiers) {
-			soldier.update(delta);
+		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
+			GameSession.getInstance().soldiers.get(i).update(delta);
 		}
 		
 		for(Polygon pol : circles.keySet()) {

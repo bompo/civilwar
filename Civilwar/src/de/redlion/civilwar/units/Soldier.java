@@ -1,5 +1,7 @@
 package de.redlion.civilwar.units;
 
+import java.util.Vector;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.math.MathUtils;
@@ -9,7 +11,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 public class Soldier {
 
 	public int id;
-	public float angle = MathUtils.random(-90, 90);
+	public float angle = 0;
 	public int angleSpin = 1;
 
 	private float shotCooldownTime = 6f;
@@ -43,11 +45,18 @@ public class Soldier {
 	//render stuff
 	public StillModelNode instance;	
 	public BoundingBox instanceBB;
+	
+
+	private float bounceSpeed = 5;
+	public float bounce = MathUtils.random();
+	public boolean inAir = false;
+	public Vector2 lastPosition = new Vector2();
 
 	public Soldier(int id, Vector2 position, Vector2 facing) {
 		this.id = id;
 
 		this.position.set(position);
+		this.lastPosition.set(position);
 		this.facing.set(facing);
 		this.facing.rotate(angle);
 		
@@ -75,13 +84,47 @@ public class Soldier {
 			return;
 		}
 		
-		angle = angle + delta * 20.f * angleSpin;
-		if(angle > 15) {
-			angleSpin = -1;
+//		angle = angle + delta * 20.f * angleSpin;
+//		if(angle > 15) {
+//			angleSpin = -1;
+//		}
+//		if(angle < -15) {
+//			angleSpin = 1;
+//		}
+		
+		// bounce if move
+		if(lastPosition.dst(position)>0) {
+			if(inAir == false) {
+				bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
+				if(bounce > 1) {
+					inAir = true;
+					bounce = 1;
+				}
+			}
+			if(inAir == true) {
+				bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
+				if(bounce < 0) {
+					inAir = false;
+					bounce = 0;
+				}				
+			}
+		} else {
+			if(inAir == false) {
+				bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
+				if(bounce > 1) {
+					inAir = true;
+					bounce = 1;
+				}
+			}
+			if(inAir == true) {
+				bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
+				if(bounce < 0) {
+					bounce = 0;
+				}				
+			}
 		}
-		if(angle < -15) {
-			angleSpin = 1;
-		}		
+		
+		this.lastPosition.set(position);
 	}
 	
 	public void turn(float direction) {
