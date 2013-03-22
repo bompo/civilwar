@@ -25,6 +25,7 @@ import de.redlion.civilwar.Configuration;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.collision.HeightMap;
 import de.redlion.civilwar.render.LightManager.LightQuality;
+import de.redlion.civilwar.shader.Bloom;
 import de.redlion.civilwar.units.EnemySoldier;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
