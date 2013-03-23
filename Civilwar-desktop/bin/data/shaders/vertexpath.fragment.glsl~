@@ -61,6 +61,8 @@ void main()
 
 	gl_FragColor.rgb = light.rgb;
 	#ifdef translucentFlag
-	gl_FragColor.a = 0.5;
+	#ifdef diffuseTextureFlag
+	    gl_FragColor.a = diffColor.a;
+	#endif
 	#endif
 }

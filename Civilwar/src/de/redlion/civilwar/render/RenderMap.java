@@ -228,12 +228,12 @@ public class RenderMap {
 			soldier.heightInterpolator = soldier.heightInterpolator + (1.f/ (float) GameSession.getInstance().soldiers.size);
 			float height = Interpolation.linear.apply(soldier.height, soldier.heightTarget, soldier.heightInterpolator);
 			
-			soldier.instance.matrix.trn(soldier.position.x, height + 0.01f, soldier.position.y);
+			soldier.instance.matrix.trn(soldier.position.x, height + 0.05f, soldier.position.y);
 			soldier.instance.matrix.scl(0.1f);
 			protoRenderer.draw(modelShadowPlaneObj, soldier.instance);
 			
 			soldier.instance.matrix.scl(10.0f);
-			soldier.instance.matrix.trn(0, (soldier.bounce / 10.f)  - 0.01f, 0);
+			soldier.instance.matrix.trn(0, (soldier.bounce / 10.f)  - 0.05f, 0);
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());			
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.X, -soldier.bounce * 10.f);
