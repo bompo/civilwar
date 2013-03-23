@@ -362,22 +362,21 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				ArrayList<Vector2> triangleStrip = triangleStrips.get(pol);
 				
-				if(!triangleStrip.isEmpty()) {
+				if(!triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
 					r.begin(ShapeType.FilledTriangle);
 					
 					Vector2 p0 = triangleStrip.get(0);
 					Vector2 p1 = triangleStrip.get(1);
-					
+
 					for(Vector2 p2 : triangleStrip) {
-						
+
 						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
 					}
-					
 					r.end();
 					
 					if(paths.containsKey(pol)) {
@@ -410,7 +409,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //						Gdx.app.log("angle", angle + "");
 						
 						//correction due to sprite?
-						angle += 30;
+						angle += 60;
 						
 						arrowhead.setPosition(a.x, a.y);
 						arrowhead.setRotation(-angle);
@@ -573,6 +572,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 					}
 					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							v.add(new Vector2(edgeScrollingSpeed,0));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
+						
+					}
+					
 					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
 					for(int i = 0; i<currentDoodle.size() -1; i++) {
 						
@@ -636,6 +652,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 					}
 					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
+						
+					}
+					
 					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
 					for(int i = 0; i<currentDoodle.size() -1; i++) {
 						
@@ -696,6 +729,23 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 						doodle.clear();
 						doodle.addAll(newDoodle);
+						
+					}
+					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							v.add(new Vector2(0,edgeScrollingSpeed));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
 						
 					}
 					
