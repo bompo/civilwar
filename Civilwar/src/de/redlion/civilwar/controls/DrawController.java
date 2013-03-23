@@ -61,7 +61,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {		
-		Gdx.app.log("fling", "" + "drag");
+//		Gdx.app.log("fling", "" + "drag");
 		boolean move = false;
 		
 		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 2 && pointer == 0)
@@ -109,6 +109,12 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(temp.dst(lastPoint) > MIN_DISTANCE || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
+				SinglePlayerGameScreen.currentTriStrip.clear();
+				currentTriangleStrip.clear();
+				makeTriangleStrip(SinglePlayerGameScreen.currentDoodle);
+				
+				
+				SinglePlayerGameScreen.currentTriStrip.addAll(currentTriangleStrip);
 			}
 			last.set(x,y);
 			
@@ -141,7 +147,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		
-		Gdx.app.log("fling", "up");		
+//		Gdx.app.log("fling", "up");		
 		switch(pointer) {
 		case 0: oneFingerDown = false;
 				howmanyfingers--;
@@ -416,7 +422,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
-		Gdx.app.log("fling", "down 1 " + howmanyfingers);
+//		Gdx.app.log("fling", "down 1 " + howmanyfingers);
 		switch(pointer) {
 		case 0: oneFingerDown = true;
 				howmanyfingers = 1;
@@ -647,7 +653,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	@Override
 	public boolean touchDown (float x, float y, int pointer, int button) {
-		Gdx.app.log("fling", "down 2 " + howmanyfingers);
+//		Gdx.app.log("fling", "down 2 " + howmanyfingers);
 		currentTriangleStrip.clear();
 		SinglePlayerGameScreen.currentDoodle.clear();
 		deletePath.clear();
@@ -661,7 +667,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		if((Math.abs(velocityY) + Math.abs(velocityX)) > MIN_FLICK_VELOCITY) {
 			fling = true;
 		}
-		Gdx.app.log("fling", "" + fling);
+//		Gdx.app.log("fling", "" + fling);
 		return true;
 	}
 

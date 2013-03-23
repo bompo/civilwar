@@ -85,7 +85,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
 	public static HashMap<Polygon, ArrayList<Vector2>> triangleStrips; //maps polygons to triangle strips
 	public static ArrayList<Polygon> circleHasPath;
-	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn
+	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn - simplified version
+	public static ArrayList<Vector2> currentTriStrip; //tristrip of what is being drawn
 	
 //	public static Ray circleRay;
 
@@ -128,6 +129,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		triangleStrips = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
+		currentTriStrip = new ArrayList<Vector2>();
 
 		arrowhead = Resources.getInstance().arrowhead;
 		
@@ -172,6 +174,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			doodles.clear();
 			triangleStrips.clear();
 			currentDoodle.clear();
+			currentTriStrip.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -207,6 +210,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			doodles.clear();
 			triangleStrips.clear();
 			currentDoodle.clear();
+			currentTriStrip.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -419,26 +423,46 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 			}
-			
+			// renders currentdoodle
 			if(!currentDoodle.isEmpty()) {
-				r.setColor(1, 0, 0, 1);
-				r.begin(ShapeType.Line);
+//				r.setColor(1, 0, 0, 1);
+//				r.begin(ShapeType.FilledTriangle);
+//				
+//				Vector2 v0 = currentDoodle.get(0);
+//				
+//				for(Vector2 v1 : currentDoodle) {
+//					
+//					r.line(v0.x, v0.y, v1.x, v1.y);
+//					v0 = v1;
+//					
+//				}
+//				
+//				r.end();
 				
-				Vector2 v0 = currentDoodle.get(0);
+				Vector2 v0 = currentDoodle.get(currentDoodle.size()-1);
 				
-				for(Vector2 v1 : currentDoodle) {
+				if(currentTriStrip.size() >= 2) {
+					r.setColor(1, 0, 0, 1);
+					r.begin(ShapeType.FilledTriangle);
 					
-					r.line(v0.x, v0.y, v1.x, v1.y);
-					v0 = v1;
+					Vector2 p0 = currentTriStrip.get(0);
+					Vector2 p1 = currentTriStrip.get(1);
 					
+					for(Vector2 p2 : currentTriStrip) {
+						
+						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
+						
+					}
+					
+					r.end();
 				}
-				
-				r.end();
 				
 				
 				/* edge scrolling */
 				
-				if(v0.x > Gdx.graphics.getWidth() - 50) {
+				if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE) {
 					
 					Vector3 temp = new Vector3(Vector3.Z);
 					temp.mul(0.01f * Constants.MOVESPEED);
@@ -501,9 +525,24 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					currentDoodle.clear();
 					currentDoodle.addAll(newCurrentDoodle);
 					
+					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+					for(int i = 0; i<currentTriStrip.size() -1; i++) {
+						
+						Vector2 v = currentTriStrip.get(i);
+						
+						v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+						
+						newCurrentTristrip.add(v);
+						
+					}
+					
+					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+					currentTriStrip.clear();
+					currentTriStrip.addAll(newCurrentTristrip);
+					
 				}
 				
-				if(v0.x < 50) {
+				if(v0.x < Constants.EDGE_DISTANCE) {
 					
 					Vector3 temp = new Vector3(Vector3.Z);
 					temp.mul(0.01f * Constants.MOVESPEED);
@@ -549,9 +588,24 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					currentDoodle.clear();
 					currentDoodle.addAll(newCurrentDoodle);
 					
+					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+					for(int i = 0; i<currentTriStrip.size() -1; i++) {
+						
+						Vector2 v = currentTriStrip.get(i);
+						
+						v.add(new Vector2(edgeScrollingSpeed,0));
+						
+						newCurrentTristrip.add(v);
+						
+					}
+					
+					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+					currentTriStrip.clear();
+					currentTriStrip.addAll(newCurrentTristrip);
+					
 				}
 				
-				if(v0.y > Gdx.graphics.getHeight() - 50) {
+				if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE) {
 					
 					Vector3 temp = new Vector3(Vector3.X);
 					temp.mul(0.01f * Constants.MOVESPEED);
@@ -597,9 +651,24 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					currentDoodle.clear();
 					currentDoodle.addAll(newCurrentDoodle);
 					
+					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+					for(int i = 0; i<currentTriStrip.size() -1; i++) {
+						
+						Vector2 v = currentTriStrip.get(i);
+						
+						v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+						
+						newCurrentTristrip.add(v);
+						
+					}
+					
+					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+					currentTriStrip.clear();
+					currentTriStrip.addAll(newCurrentTristrip);
+					
 				}
 				
-				if(v0.y < 50) {
+				if(v0.y < Constants.EDGE_DISTANCE) {
 					
 					Vector3 temp = new Vector3(Vector3.X);
 					temp.mul(0.01f * Constants.MOVESPEED);
@@ -644,6 +713,21 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
 					currentDoodle.clear();
 					currentDoodle.addAll(newCurrentDoodle);
+					
+					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+					for(int i = 0; i<currentTriStrip.size() -1; i++) {
+						
+						Vector2 v = currentTriStrip.get(i);
+						
+						v.add(new Vector2(0,edgeScrollingSpeed));
+						
+						newCurrentTristrip.add(v);
+						
+					}
+					
+					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+					currentTriStrip.clear();
+					currentTriStrip.addAll(newCurrentTristrip);
 					
 				}
 				
