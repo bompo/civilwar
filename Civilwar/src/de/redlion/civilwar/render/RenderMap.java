@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
+import com.badlogic.gdx.graphics.g3d.materials.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.Material;
 import com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute;
 import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
@@ -42,6 +43,7 @@ public class RenderMap {
 	StillModel modelLandscapeObj;
 	
 	StillModel modelSoldierObj;
+	StillModel modelShadowPlaneObj;
 	StillModel modelEnemySoldierObj;
 	StillModel modelSelectedSoldierObj;
 	Texture texSoldierDiff;
@@ -61,6 +63,7 @@ public class RenderMap {
 	float time;
 
 	Texture whiteTex;
+	Texture texBlobShadow;
 	
 	StillModelNode instanceLand;	
 	BoundingBox instanceLandBB;
@@ -115,6 +118,11 @@ public class RenderMap {
 		texSoldierDiff = new Texture(Gdx.files.internal("data/soldier_diff.png"), true);		
 		texEnemySoldierDiff = new Texture(Gdx.files.internal("data/enemy_soldier_diff.png"), true);
 		
+		modelShadowPlaneObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/plane.g3dt"));
+		texBlobShadow = new Texture(Gdx.files.internal("data/shadow.png"), false);
+		texBlobShadow.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
+		texBlobShadow.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		
 		modelWeaponObj = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/rifle.g3dt"));
 		texWeaponDiff = new Texture(Gdx.files.internal("data/rifle_diff.png"), true);
 		
@@ -142,12 +150,16 @@ public class RenderMap {
 
 		MaterialAttribute materialAttributeWeaponDiffTex = new TextureAttribute(texWeaponDiff, 0, TextureAttribute.diffuseTexture);
 		
+		MaterialAttribute materialAttributeShadowDiffTex = new TextureAttribute(texBlobShadow, 0, TextureAttribute.diffuseTexture);
+		
 		MaterialAttribute materialAttributeLandscapeDiffTex = new TextureAttribute(texAOMap, 0, TextureAttribute.diffuseTexture);
+		MaterialAttribute alphaBlending = new BlendingAttribute("translucent");
 		
 		materialSoldier = new Material("soldier", materialAttributeSoldierDiffTex);
 		Material materialEnemySoldier = new Material("enemySoldier", materialAttributeEnemySoldierDiffTex);
 		Material materialLandscape = new Material("landscape", materialAttributeLandscapeDiffTex);
 		Material materialWeapon = new Material("weapon", materialAttributeWeaponDiffTex);
+		Material materialShadow = new Material("shadow", materialAttributeShadowDiffTex, alphaBlending);
 		
 		//debug
 		Texture texCircledSoldierDiff = new Texture(Gdx.files.internal("data/white.png"), true);
@@ -159,6 +171,8 @@ public class RenderMap {
 		modelEnemySoldierObj.setMaterial(materialEnemySoldier);
 		modelSelectedSoldierObj.setMaterial(circledSoldier);
 		modelLandscapeObj.setMaterial(materialLandscape);
+		
+		modelShadowPlaneObj.setMaterial(materialShadow);
 		
 		
 		// create instances
@@ -213,8 +227,13 @@ public class RenderMap {
 			soldier.heightInterpolator = soldier.heightInterpolator + (1.f/ (float) GameSession.getInstance().soldiers.size);
 			float height = Interpolation.linear.apply(soldier.height, soldier.heightTarget, soldier.heightInterpolator);
 			
-			soldier.instance.matrix.trn(soldier.position.x, height + (soldier.bounce / 10.f), soldier.position.y);
-			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());
+			soldier.instance.matrix.trn(soldier.position.x, height + 0.01f, soldier.position.y);
+			soldier.instance.matrix.scl(0.1f);
+			protoRenderer.draw(modelShadowPlaneObj, soldier.instance);
+			
+			soldier.instance.matrix.scl(10.0f);
+			soldier.instance.matrix.trn(0, (soldier.bounce / 10.f)  - 0.01f, 0);
+			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());			
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.X, -soldier.bounce * 10.f);
 			

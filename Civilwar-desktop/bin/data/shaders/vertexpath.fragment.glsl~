@@ -4,7 +4,12 @@
 //#define fogColorFlag
 
 #ifdef GL_ES
-precision highp float;
+#define LOWP lowp
+#define MED mediump
+precision lowp float;
+#else
+#define MED
+#define LOWP
 #endif
 
 #ifdef diffuseTextureFlag
@@ -56,6 +61,6 @@ void main()
 
 	gl_FragColor.rgb = light.rgb;
 	#ifdef translucentFlag
-	gl_FragColor.a = v_diffuse.a;
+	gl_FragColor.a = 0.5;
 	#endif
 }
