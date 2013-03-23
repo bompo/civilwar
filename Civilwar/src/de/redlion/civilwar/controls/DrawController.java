@@ -45,7 +45,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	final float MAX_DISTANCE = 45.0f; //used for circleTesting
 	final int SMOOTHING_ITERATIONS = 2;
 	final float MIN_DISTANCE = 10.0f; //used for doodling
-	final int MAX_THICKNESS = 30;
+	final int MAX_THICKNESS = 13;
 	final int MIN_FLICK_VELOCITY = 3000;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
@@ -59,9 +59,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		this.camera = camera;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {		
-		Gdx.app.log("fling", "" + "drag");
+//		Gdx.app.log("fling", "" + "drag");
 		boolean move = false;
 		
 		if(Gdx.app.getType().equals(ApplicationType.Android) && howmanyfingers == 2 && pointer == 0)
@@ -109,6 +110,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(temp.dst(lastPoint) > MIN_DISTANCE || SinglePlayerGameScreen.currentDoodle.isEmpty()) {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
+				SinglePlayerGameScreen.currentTriStrip.clear();
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+				
+				SinglePlayerGameScreen.currentTriStrip.addAll(currentTriangleStrip);
 			}
 			last.set(x,y);
 			
@@ -141,7 +146,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		
-		Gdx.app.log("fling", "up");		
+//		Gdx.app.log("fling", "up");		
 		switch(pointer) {
 		case 0: oneFingerDown = false;
 				howmanyfingers--;
@@ -274,11 +279,13 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 							}
 							else {
 								SinglePlayerGameScreen.currentDoodle.clear();
+								SinglePlayerGameScreen.currentTriStrip.clear();
 								currentTriangleStrip.clear();
 							}
 						}
 						else {
 							SinglePlayerGameScreen.currentDoodle.clear();
+							SinglePlayerGameScreen.currentTriStrip.clear();
 							currentTriangleStrip.clear();
 						}
 					}
@@ -312,6 +319,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						}
 						if(deletedoodle) {
 							SinglePlayerGameScreen.currentDoodle.clear();
+							SinglePlayerGameScreen.currentTriStrip.clear();
 							currentTriangleStrip.clear();
 						}
 					}
@@ -319,11 +327,13 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				}
 				else {
 					SinglePlayerGameScreen.currentDoodle.clear();
+					SinglePlayerGameScreen.currentTriStrip.clear();
 					currentTriangleStrip.clear();
 				}
 			}
 			else {
 				SinglePlayerGameScreen.currentDoodle.clear();
+				SinglePlayerGameScreen.currentTriStrip.clear();
 				currentTriangleStrip.clear();
 			}
 			
@@ -416,7 +426,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	@Override
 	public boolean touchDown (int x, int y, int pointer, int button) {
-		Gdx.app.log("fling", "down 1 " + howmanyfingers);
+//		Gdx.app.log("fling", "down 1 " + howmanyfingers);
 		switch(pointer) {
 		case 0: oneFingerDown = true;
 				howmanyfingers = 1;
@@ -446,6 +456,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		if(howmanyfingers != 1) {
 			currentTriangleStrip.clear();
 			SinglePlayerGameScreen.currentDoodle.clear();
+			SinglePlayerGameScreen.currentTriStrip.clear();
 			deletePath.clear();
 		}
 
@@ -614,11 +625,12 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		Vector2 p1 = new Vector2();
 //		Vector2 p2 = new Vector2();
 		tmp = new Vector2();
+		currentTriangleStrip.clear();
 		
 		if(input.size() % 2 != 0)
 			input.add(input.get(input.size()-1));
 		
-		float thickness = 13;
+		float thickness = MAX_THICKNESS;
 		
 		for(int j=0;j<input.size();j++) {
 			
@@ -647,9 +659,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	@Override
 	public boolean touchDown (float x, float y, int pointer, int button) {
-		Gdx.app.log("fling", "down 2 " + howmanyfingers);
+//		Gdx.app.log("fling", "down 2 " + howmanyfingers);
 		currentTriangleStrip.clear();
 		SinglePlayerGameScreen.currentDoodle.clear();
+		SinglePlayerGameScreen.currentTriStrip.clear();
 		deletePath.clear();
 		
 		return false;
@@ -661,7 +674,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		if((Math.abs(velocityY) + Math.abs(velocityX)) > MIN_FLICK_VELOCITY) {
 			fling = true;
 		}
-		Gdx.app.log("fling", "" + fling);
+//		Gdx.app.log("fling", "" + fling);
 		return true;
 	}
 
