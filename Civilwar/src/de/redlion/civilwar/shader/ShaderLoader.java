@@ -8,9 +8,9 @@ public final class ShaderLoader {
 	static final public ShaderProgram createShader(String vertexName,
 			String fragmentName) {
 		String vertexShader = Gdx.files.internal("data/shaders/" + vertexName
-				+ ".vertex").readString();
+				+ ".vertex.glsl").readString();
 		String fragmentShader = Gdx.files.internal("data/shaders/" + fragmentName
-				+ ".fragment").readString();
+				+ ".fragment.glsl").readString();
 		ShaderProgram.pedantic = false;
 		ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
 		if (!shader.isCompiled()) {

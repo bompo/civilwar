@@ -45,7 +45,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	final float MAX_DISTANCE = 45.0f; //used for circleTesting
 	final int SMOOTHING_ITERATIONS = 2;
 	final float MIN_DISTANCE = 10.0f; //used for doodling
-	final int MAX_THICKNESS = 10;
+	final int MAX_THICKNESS = 30;
 	final int MIN_FLICK_VELOCITY = 3000;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
@@ -92,7 +92,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			rotation.transform(temp);
 			camera.translate(temp);
 			camera.update();
-			
 			
 			updateDoodles(x,y);
 			last.set(x, y);
@@ -493,8 +492,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 		ArrayList<PlayerSoldier> soldiers = new ArrayList<PlayerSoldier>();
 		
-		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
-			Soldier s = GameSession.getInstance().soldiers.get(i);
+		for(Soldier s : GameSession.getInstance().soldiers) {
 			if(s instanceof PlayerSoldier) {
 				PlayerSoldier p = (PlayerSoldier) s;
 				if(polygon.contains(p.position.x, p.position.y)) {
@@ -550,7 +548,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		Vector2 trans = new Vector2();
 		
 		trans.set(x,y).sub(last);
-		trans.y *= -1;
+		trans.y *= -1;		
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
 			
@@ -614,23 +612,27 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	private void makeTriangleStrip(ArrayList<Vector2> input) {
 		
 		Vector2 p1 = new Vector2();
-		Vector2 p2 = new Vector2();
+//		Vector2 p2 = new Vector2();
 		tmp = new Vector2();
 		
 		if(input.size() % 2 != 0)
 			input.add(input.get(input.size()-1));
 		
-		float thickness = 5;
+		float thickness = 13;
 		
-		for(int j=0;j<input.size();j+=2) {
+		for(int j=0;j<input.size();j++) {
 			
 			p1 = input.get(j);
-			p2 = input.get(j+1);
+//			p2 = input.get(j+1);
 			
-			if(thickness < MAX_THICKNESS)
-				thickness += (input.size() -j) / 100;
+//			if(thickness < MAX_THICKNESS)
+//				thickness += (input.size() -j) / 100;
 			
-			tmp.set(p2).sub(p1).nor();
+			if(input.size() - j < 30)
+				thickness -= (input.size() - j) / 50;
+			
+//			tmp.set(p2).sub(p1).nor();
+			tmp.set(1,0);
 			tmp.set(-tmp.y, tmp.x);
 			tmp.mul(thickness / 2);
 			
