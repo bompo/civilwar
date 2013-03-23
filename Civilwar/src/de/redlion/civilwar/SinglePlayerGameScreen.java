@@ -532,47 +532,52 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 					}
 					
-					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-					for(int i = 0; i<currentDoodle.size() -1; i++) {
+					if(!currentDoodle.isEmpty()) {
+						ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+						for(int i = 0; i<currentDoodle.size() -1; i++) {
+							
+							Vector2 v = currentDoodle.get(i);
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+							
+							newCurrentDoodle.add(v);
+							
+						}
 						
-						Vector2 v = currentDoodle.get(i);
-						if(v0.x < Constants.EDGE_DISTANCE)
-							v.add(new Vector2(edgeScrollingSpeed,0));
-						else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
-							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-						else if(v0.y < Constants.EDGE_DISTANCE)
-							v.add(new Vector2(0,edgeScrollingSpeed));
-						else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
-							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-						
-						newCurrentDoodle.add(v);
-						
+					
+						newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+						currentDoodle.clear();
+						currentDoodle.addAll(newCurrentDoodle);
 					}
 					
-					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
-					currentDoodle.clear();
-					currentDoodle.addAll(newCurrentDoodle);
-					
-					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
-					for(int i = 0; i<currentTriStrip.size() -1; i++) {
+					if(!currentTriStrip.isEmpty()) {
+						ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+						for(int i = 0; i<currentTriStrip.size() -1; i++) {
+							
+							Vector2 v = currentTriStrip.get(i);
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+							
+							newCurrentTristrip.add(v);
+							
+						}
 						
-						Vector2 v = currentTriStrip.get(i);
-						if(v0.x < Constants.EDGE_DISTANCE)
-							v.add(new Vector2(edgeScrollingSpeed,0));
-						else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
-							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-						else if(v0.y < Constants.EDGE_DISTANCE)
-							v.add(new Vector2(0,edgeScrollingSpeed));
-						else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
-							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-						
-						newCurrentTristrip.add(v);
-						
+						newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+						currentTriStrip.clear();
+						currentTriStrip.addAll(newCurrentTristrip);
 					}
-					
-					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
-					currentTriStrip.clear();
-					currentTriStrip.addAll(newCurrentTristrip);
 				}
 				
 				
