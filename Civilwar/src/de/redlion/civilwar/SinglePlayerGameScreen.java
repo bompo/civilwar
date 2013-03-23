@@ -460,14 +460,30 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 				/* edge scrolling */
+
+				if(edgeScrollingSpeed < 25)
+					edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
 				
-//				if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE) {}
+				if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
+					edgeScrollingSpeed = 1.0f;
+				else {
+					Vector3 temp = new Vector3();
+					if(v0.x < Constants.EDGE_DISTANCE)
+						temp.set(0,0,1);
+					else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+						temp.set(-1,0,0);
+					else if(v0.y < Constants.EDGE_DISTANCE)
+						temp.set(1,0,0);
+					else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+						temp.set(0,0,-1);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.update();
 				
-				
-					
-					if(edgeScrollingSpeed < 25)
-						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
-					
 					for(ArrayList<Vector2> doodle : doodles.values()) {
 						
 						
@@ -557,32 +573,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
 					currentTriStrip.clear();
 					currentTriStrip.addAll(newCurrentTristrip);
-					
-					if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
-						edgeScrollingSpeed = 1.0f;
-					else {
-						Vector3 temp = new Vector3();
-						if(v0.x < Constants.EDGE_DISTANCE)
-							temp.set(0,0,1);
-						else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
-							temp.set(-1,0,0);
-						else if(v0.y < Constants.EDGE_DISTANCE)
-							temp.set(1,0,0);
-						else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
-							temp.set(0,0,-1);
-						temp.mul(0.01f * Constants.MOVESPEED);
-						temp.mul(edgeScrollingSpeed);
-						Quaternion rotation = new Quaternion();
-						drawController.camera.combined.getRotation(rotation);
-						rotation.transform(temp);
-						drawController.camera.translate(temp.mul(-1));
-						drawController.camera.update();
-					}
-
-				
-//				if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE) {}
-				
-//				if(v0.y < Constants.EDGE_DISTANCE) {}
+				}
 				
 				
 			}			
