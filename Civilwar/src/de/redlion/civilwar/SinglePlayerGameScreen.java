@@ -460,329 +460,127 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 				/* edge scrolling */
-				
-				if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE) {
-					
-					Vector3 temp = new Vector3(Vector3.Z);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
-					Quaternion rotation = new Quaternion();
-					drawController.camera.combined.getRotation(rotation);
-					rotation.transform(temp);
-					drawController.camera.translate(temp);
-					drawController.camera.update();
-					
-					if(edgeScrollingSpeed < 25)
-						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
-					
-					for(ArrayList<Vector2> doodle : doodles.values()) {
-						
-						
-						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-						for(Vector2 v : doodle) {
-							
-							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-									
-							newDoodle.add(v);
-							
-						}
-						
-						doodle.clear();
-						doodle.addAll(newDoodle);
-						arrowhead.setPosition(doodle.get(doodle.size()-1).x, doodle.get(doodle.size()-1).y);
-					}
-					
-					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
-						
-						
-						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-						for(Vector2 v : triStrip) {
-							
-							v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-									
-							newStrip.add(v);
-							
-						}
-						
-						triStrip.clear();
-						triStrip.addAll(newStrip);
-						
-					}
-					
-					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-					for(int i = 0; i<currentDoodle.size() -1; i++) {
-						
-						Vector2 v = currentDoodle.get(i);
-						
-						v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-						
-						newCurrentDoodle.add(v);
-						
-					}
-					
-					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
-					currentDoodle.clear();
-					currentDoodle.addAll(newCurrentDoodle);
-					
-					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
-					for(int i = 0; i<currentTriStrip.size() -1; i++) {
-						
-						Vector2 v = currentTriStrip.get(i);
-						
-						v.add(new Vector2(-1 * edgeScrollingSpeed,0));
-						
-						newCurrentTristrip.add(v);
-						
-					}
-					
-					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
-					currentTriStrip.clear();
-					currentTriStrip.addAll(newCurrentTristrip);
-					
-				}
-				
-				if(v0.x < Constants.EDGE_DISTANCE) {
-					
-					Vector3 temp = new Vector3(Vector3.Z);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
-					Quaternion rotation = new Quaternion();
-					drawController.camera.combined.getRotation(rotation);
-					rotation.transform(temp);
-					drawController.camera.translate(temp.mul(-1));
-					drawController.camera.update();
-					
-					if(edgeScrollingSpeed < 25)
-						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
-					
-					for(ArrayList<Vector2> doodle : doodles.values()) {
-						
-						
-						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-						for(Vector2 v : doodle) {
-							
-							v.add(new Vector2(edgeScrollingSpeed,0));
-									
-							newDoodle.add(v);
-							
-						}
-						
-						doodle.clear();
-						doodle.addAll(newDoodle);
-						
-					}
-					
-					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
-						
-						
-						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-						for(Vector2 v : triStrip) {
-							
-							v.add(new Vector2(edgeScrollingSpeed,0));
-									
-							newStrip.add(v);
-							
-						}
-						
-						triStrip.clear();
-						triStrip.addAll(newStrip);
-						
-					}
-					
-					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-					for(int i = 0; i<currentDoodle.size() -1; i++) {
-						
-						Vector2 v = currentDoodle.get(i);
-						
-						v.add(new Vector2(edgeScrollingSpeed,0));
-						
-						newCurrentDoodle.add(v);
-						
-					}
-					
-					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
-					currentDoodle.clear();
-					currentDoodle.addAll(newCurrentDoodle);
-					
-					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
-					for(int i = 0; i<currentTriStrip.size() -1; i++) {
-						
-						Vector2 v = currentTriStrip.get(i);
-						
-						v.add(new Vector2(edgeScrollingSpeed,0));
-						
-						newCurrentTristrip.add(v);
-						
-					}
-					
-					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
-					currentTriStrip.clear();
-					currentTriStrip.addAll(newCurrentTristrip);
-					
-				}
-				
-				if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE) {
-					
-					Vector3 temp = new Vector3(Vector3.X);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
-					Quaternion rotation = new Quaternion();
-					drawController.camera.combined.getRotation(rotation);
-					rotation.transform(temp);
-					drawController.camera.translate(temp);
-					drawController.camera.update();
-					
-					if(edgeScrollingSpeed < 25)
-						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
-					
-					for(ArrayList<Vector2> doodle : doodles.values()) {
-						
-						
-						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-						for(Vector2 v : doodle) {
-							
-							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-									
-							newDoodle.add(v);
-							
-						}
-						
-						doodle.clear();
-						doodle.addAll(newDoodle);
-						
-					}
-					
-					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
-						
-						
-						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-						for(Vector2 v : triStrip) {
-							
-							v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-									
-							newStrip.add(v);
-							
-						}
-						
-						triStrip.clear();
-						triStrip.addAll(newStrip);
-						
-					}
-					
-					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-					for(int i = 0; i<currentDoodle.size() -1; i++) {
-						
-						Vector2 v = currentDoodle.get(i);
-						
-						v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-						
-						newCurrentDoodle.add(v);
-						
-					}
-					
-					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
-					currentDoodle.clear();
-					currentDoodle.addAll(newCurrentDoodle);
-					
-					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
-					for(int i = 0; i<currentTriStrip.size() -1; i++) {
-						
-						Vector2 v = currentTriStrip.get(i);
-						
-						v.add(new Vector2(0,-1 * edgeScrollingSpeed));
-						
-						newCurrentTristrip.add(v);
-						
-					}
-					
-					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
-					currentTriStrip.clear();
-					currentTriStrip.addAll(newCurrentTristrip);
-					
-				}
-				
-				if(v0.y < Constants.EDGE_DISTANCE) {
-					
-					Vector3 temp = new Vector3(Vector3.X);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
-					Quaternion rotation = new Quaternion();
-					drawController.camera.combined.getRotation(rotation);
-					rotation.transform(temp);
-					drawController.camera.translate(temp.mul(-1));
-					drawController.camera.update();
-					
-					if(edgeScrollingSpeed < 25)
-						edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
-					
-					for(ArrayList<Vector2> doodle : doodles.values()) {
-						
-						
-						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-						for(Vector2 v : doodle) {
-							
-							v.add(new Vector2(0,edgeScrollingSpeed));
-									
-							newDoodle.add(v);
-							
-						}
-						
-						doodle.clear();
-						doodle.addAll(newDoodle);
-						
-					}
-					
-					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
-						
-						
-						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-						for(Vector2 v : triStrip) {
-							
-							v.add(new Vector2(0,edgeScrollingSpeed));
-									
-							newStrip.add(v);
-							
-						}
-						
-						triStrip.clear();
-						triStrip.addAll(newStrip);
-						
-					}
-					
-					ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
-					for(int i = 0; i<currentDoodle.size() -1; i++) {
-						
-						Vector2 v = currentDoodle.get(i);
-						
-						v.add(new Vector2(0,edgeScrollingSpeed));
-						
-						newCurrentDoodle.add(v);
-						
-					}
-					
-					newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
-					currentDoodle.clear();
-					currentDoodle.addAll(newCurrentDoodle);
-					
-					ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
-					for(int i = 0; i<currentTriStrip.size() -1; i++) {
-						
-						Vector2 v = currentTriStrip.get(i);
-						
-						v.add(new Vector2(0,edgeScrollingSpeed));
-						
-						newCurrentTristrip.add(v);
-						
-					}
-					
-					newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
-					currentTriStrip.clear();
-					currentTriStrip.addAll(newCurrentTristrip);
-					
-				}
+
+				if(edgeScrollingSpeed < 25)
+					edgeScrollingSpeed += Gdx.graphics.getDeltaTime() * Constants.EDGE_SCROLL_SPEED;
 				
 				if(v0.x >= 50 && v0.x <= Gdx.graphics.getWidth() - 50 && v0.y >= 50 && v0.y <= Gdx.graphics.getHeight() - 50)					
 					edgeScrollingSpeed = 1.0f;
+				else {
+					Vector3 temp = new Vector3();
+					if(v0.x < Constants.EDGE_DISTANCE)
+						temp.set(0,0,1);
+					else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+						temp.set(-1,0,0);
+					else if(v0.y < Constants.EDGE_DISTANCE)
+						temp.set(1,0,0);
+					else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+						temp.set(0,0,-1);
+					temp.mul(0.01f * Constants.MOVESPEED);
+					temp.mul(edgeScrollingSpeed);
+					Quaternion rotation = new Quaternion();
+					drawController.camera.combined.getRotation(rotation);
+					rotation.transform(temp);
+					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.update();
+				
+					for(ArrayList<Vector2> doodle : doodles.values()) {
+						
+						
+						ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+						for(Vector2 v : doodle) {
+							
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+									
+							newDoodle.add(v);
+							
+						}
+						
+						doodle.clear();
+						doodle.addAll(newDoodle);
+						
+					}
+					
+					for(ArrayList<Vector2> triStrip : triangleStrips.values()) {
+						
+						
+						ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+						for(Vector2 v : triStrip) {
+							
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+									
+							newStrip.add(v);
+							
+						}
+						
+						triStrip.clear();
+						triStrip.addAll(newStrip);
+						
+					}
+					
+					if(!currentDoodle.isEmpty()) {
+						ArrayList<Vector2> newCurrentDoodle = new ArrayList<Vector2>();
+						for(int i = 0; i<currentDoodle.size() -1; i++) {
+							
+							Vector2 v = currentDoodle.get(i);
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+							
+							newCurrentDoodle.add(v);
+							
+						}
+						
+					
+						newCurrentDoodle.add(currentDoodle.get(currentDoodle.size()-1));
+						currentDoodle.clear();
+						currentDoodle.addAll(newCurrentDoodle);
+					}
+					
+					if(!currentTriStrip.isEmpty()) {
+						ArrayList<Vector2> newCurrentTristrip = new ArrayList<Vector2>();
+						for(int i = 0; i<currentTriStrip.size() -1; i++) {
+							
+							Vector2 v = currentTriStrip.get(i);
+							if(v0.x < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(edgeScrollingSpeed,0));
+							else if(v0.y > Gdx.graphics.getHeight() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,-1 * edgeScrollingSpeed));
+							else if(v0.y < Constants.EDGE_DISTANCE)
+								v.add(new Vector2(0,edgeScrollingSpeed));
+							else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
+								v.add(new Vector2(-1 * edgeScrollingSpeed,0));
+							
+							newCurrentTristrip.add(v);
+							
+						}
+						
+						newCurrentTristrip.add(currentTriStrip.get(currentTriStrip.size()-1));
+						currentTriStrip.clear();
+						currentTriStrip.addAll(newCurrentTristrip);
+					}
+				}
+				
+				
 			}			
 
 		}

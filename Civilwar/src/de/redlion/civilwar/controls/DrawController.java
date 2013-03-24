@@ -111,7 +111,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 				SinglePlayerGameScreen.currentTriStrip.clear();
-				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(), false);
 				
 				SinglePlayerGameScreen.currentTriStrip.addAll(currentTriangleStrip);
 			}
@@ -196,7 +196,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					SinglePlayerGameScreen.currentDoodle.clear();
 					SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
 				}
-				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());	
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(),true);	
 			}	
 			
 			
@@ -239,7 +239,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 						SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 						SinglePlayerGameScreen.circles.put(poly, so);
-						
+						SinglePlayerGameScreen.currentTriStrip.clear();
 //						("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 					}
 					else
@@ -273,6 +273,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 							if(!so.isEmpty()) {
 								SinglePlayerGameScreen.doodles.put(poly, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 								SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
+								SinglePlayerGameScreen.currentTriStrip.clear();
 								SinglePlayerGameScreen.circles.put(poly, so);
 								
 //								("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
@@ -302,6 +303,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 									SinglePlayerGameScreen.triangleStrips.put(pCopy, (ArrayList<Vector2>) currentTriangleStrip.clone());
 									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
+									SinglePlayerGameScreen.currentTriStrip.clear();
 									
 									for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
 										pS.wayPoints.clear();
@@ -620,7 +622,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 	}
 	
-	private void makeTriangleStrip(ArrayList<Vector2> input) {
+	private void makeTriangleStrip(ArrayList<Vector2> input, boolean taper) {
 		
 		Vector2 p1 = new Vector2();
 //		Vector2 p2 = new Vector2();
@@ -640,8 +642,11 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 //			if(thickness < MAX_THICKNESS)
 //				thickness += (input.size() -j) / 100;
 			
-			if(input.size() - j < 30)
-				thickness -= (input.size() - j) / 50;
+			if(input.size() - j < 15 && taper && thickness > 0) {
+				thickness -= (input.size() - j) / 10;
+				System.out.println("" + thickness + " " + (input.size() - j));
+			}
+			
 			
 //			tmp.set(p2).sub(p1).nor();
 			tmp.set(1,0);
