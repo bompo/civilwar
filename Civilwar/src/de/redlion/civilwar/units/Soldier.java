@@ -1,7 +1,5 @@
 package de.redlion.civilwar.units;
 
-import java.util.Vector;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.math.MathUtils;
@@ -15,17 +13,17 @@ public class Soldier {
 	public int angleSpin = 1;
 
 	private float shotCooldownTime = 6f;
-	private float shotCapacity = 5f;
+	private float shotCapacity = 1f;
 	private float shotReloadRate = 1f;
+	private float shotAimingTime = 4f;
 
 	private float shots = shotCapacity;
 	private float cooldown = 0;
+	private float aimingTime = 0;
 	
 	protected float turnSpeed = 100.0f;
 	protected float accel = 1.0f;
-	protected float hitPoints = 0;
-
-	protected float maxHitPoints = 0;
+	protected float hitPoints = 1;
 
 	private float delta = 0.0f;
 
@@ -68,14 +66,6 @@ public class Soldier {
 		
 		this.delta = delta;
 		
-		ai.update();
-		
-		cooldown = Math.max(0, cooldown - delta*50f);
-		shots = Math.min(shots + (shotReloadRate * delta), shotCapacity);
-
-		velocity.mul( (float) Math.pow(0.97f, delta * 30.f));
-		position.add(velocity.x * delta, velocity.y * delta);
-		
 		//death check
 		if(!alive){
 			if(angle < 90 && angle > -90) {
@@ -83,6 +73,17 @@ public class Soldier {
 			}
 			return;
 		}
+		
+		ai.update();
+		
+		cooldown = Math.max(0, cooldown - delta);
+		aimingTime = Math.max(0, aimingTime - delta);
+		shots = Math.min(shots + (shotReloadRate * delta), shotCapacity);
+
+		velocity.mul( (float) Math.pow(0.97f, delta * 30.f));
+		position.add(velocity.x * delta, velocity.y * delta);
+		
+
 		
 //		angle = angle + delta * 20.f * angleSpin;
 //		if(angle > 15) {
@@ -93,7 +94,7 @@ public class Soldier {
 //		}
 		
 		// bounce if move
-		if(lastPosition.dst(position)>0) {
+		if(lastPosition.dst(position) > 0.01f) {
 			if(inAir == false) {
 				bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
 				if(bounce > 1) {
@@ -175,6 +176,10 @@ public class Soldier {
 	public boolean isEmpty() {
 		return shots < 1;
 	}
+	
+	public void aim() {
+		aimingTime = shotAimingTime;
+	}
 
 	public boolean isReloaded() {
 		return shots == shotCapacity;
@@ -184,19 +189,29 @@ public class Soldier {
 		return cooldown == 0;
 	}
 
+	public boolean isAimed() {
+		return aimingTime == 0;
+	}
+	
 	public boolean isReadyToShoot() {
-		return isCooledDown() && !isEmpty();
+		return isCooledDown() && !isEmpty() && isAimed();
 	}
 
 	public void shoot() {
 		if (cooldown == 0 && shots >= 1) {
 			shots -= 1;
 			cooldown = shotCooldownTime;
+			
+			//bullets always hit the enemy
+			ai.target.hit();
 		}
 	}
 	
 	public void hit() {
-		alive = false;
+		hitPoints = hitPoints - 1;
+		if(hitPoints <= 0) {
+			alive = false;
+		}
 	}
 
 }

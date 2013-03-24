@@ -234,9 +234,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			updateAI();
 			updatePolygons();
 		}
-
-		collisionTest();
-		updateAI();
 		
 		renderMap.render();
 
@@ -750,7 +747,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(Gdx.graphics.getDeltaTime()));
 					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(Gdx.graphics.getDeltaTime()));
 				}
-			}			
+			}
 		}
 		
 	}

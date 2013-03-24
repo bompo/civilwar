@@ -6,6 +6,7 @@ public class EnemySoldier extends Soldier {
 
 	public EnemySoldier(int id, Vector2 position, Vector2 facing) {
 		super(id, position, facing);
+		ai = new EnemyAI(this);
 		// TODO Auto-generated constructor stub
 	}
 	

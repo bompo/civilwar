@@ -27,7 +27,7 @@ import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.collision.HeightMap;
 import de.redlion.civilwar.render.LightManager.LightQuality;
 import de.redlion.civilwar.shader.Bloom;
-import de.redlion.civilwar.units.EnemySoldier;
+import de.redlion.civilwar.units.DefaultAI;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -175,7 +175,6 @@ public class RenderMap {
 		
 		modelShadowPlaneObj.setMaterial(materialShadow);
 		
-		
 		// create instances
 		{
 			instanceLandBB = new BoundingBox();		
@@ -237,6 +236,7 @@ public class RenderMap {
 			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());			
 			soldier.instance.matrix.rotate(Vector3.Y, -90);
 			soldier.instance.matrix.rotate(Vector3.X, -soldier.bounce * 10.f);
+			soldier.instance.matrix.rotate(Vector3.X,-soldier.angle * 1.f);
 
 			if((soldier instanceof PlayerSoldier)) {
 				if(!((PlayerSoldier) soldier).circled) {
@@ -250,6 +250,10 @@ public class RenderMap {
 			}
 			
 			//TODO animate if attacking
+			if(soldier.ai.state.equals(DefaultAI.STATE.SHOOTING) || soldier.ai.state.equals(DefaultAI.STATE.AIMING) ) {				
+				soldier.instance.matrix.rotate(Vector3.X, 80);
+				soldier.instance.matrix.trn(0, 0.15f, 0.12f);
+			}
 			protoRenderer.draw(modelWeaponObj, soldier.instance);
 		}
 
