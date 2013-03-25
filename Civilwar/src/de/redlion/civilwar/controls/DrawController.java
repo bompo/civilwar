@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.input.GestureDetector.GestureAdapter;
@@ -15,10 +14,10 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
-
 import de.redlion.civilwar.Constants;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
+import de.redlion.civilwar.units.DefaultAI;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -54,6 +53,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	ArrayList<Vector2> currentTriangleStrip = new ArrayList<Vector2>();
 	
 	Ray picker;
+	
+	Polygon picked;
 
 	public DrawController (final OrthographicCamera camera) {
 		this.camera = camera;
@@ -83,6 +84,18 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			del = true;
 		else if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && !Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
 			del = true;
+		
+		boolean shooting = false;
+		
+		if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+			if(picked != null && SinglePlayerGameScreen.circles.get(picked).get(0).ai.state.equals(DefaultAI.STATE.SHOOTING)) {
+				shooting = true;
+				del = false;
+				draw = false;
+				move = false;
+			}
+				
+		}
 		
 		if(move) {
 			delta.set(x, y).sub(last);
@@ -134,6 +147,23 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			deletePath.add(projected);
 			lastPoint.set(temp);
 			last.set(x,y);
+		}
+		else if(shooting) {
+			
+			Vector3 projected = new Vector3();
+			
+			picker = camera.getPickRay(x, y);
+
+			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+
+			for(PlayerSoldier p: SinglePlayerGameScreen.circles.get(picked)) {
+				Vector2 temp = new Vector2(projected.x, projected.z);
+				temp.set(p.position.cpy().sub(temp));
+				temp.y = -temp.y;
+				
+				p.facing.set(temp);
+			}
+			
 		}
 		
 		if(howmanyfingers == 1 || (howmanyfingers >= 2 && pointer == 0))
@@ -450,6 +480,25 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 		if(howmanyfingers == 1  && pointer == 0) {
 			last.set(x, y);
+	
+			//pick polygon
+			Vector3 projected = new Vector3();
+			
+			picker = camera.getPickRay(x, y);
+
+			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+			
+			for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
+				if(p.contains(projected.x, projected.z)) {
+					picked = p;
+					//debuggings
+					for(PlayerSoldier pS: SinglePlayerGameScreen.circles.get(p)) {
+						pS.ai.setState(DefaultAI.STATE.SHOOTING);
+					}
+				}
+				
+			}
+			
 		}
 		
 		if(howmanyfingers == 5)
@@ -461,7 +510,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			SinglePlayerGameScreen.currentTriStrip.clear();
 			deletePath.clear();
 		}
-
+		
 		return false;
 	}
 	
@@ -644,7 +693,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 			if(input.size() - j < 15 && taper && thickness > 0) {
 				thickness -= (input.size() - j) / 10;
-				System.out.println("" + thickness + " " + (input.size() - j));
+//				System.out.println("" + thickness + " " + (input.size() - j));
 			}
 			
 			

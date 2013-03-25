@@ -40,6 +40,10 @@ public class DefaultAI {
 		state = STATE.MOVING;
 	}
 	
+	public void setState(STATE state) {
+		this.state = state;
+	}
+	
 	public void update() {
 
 		if (target != null) {			

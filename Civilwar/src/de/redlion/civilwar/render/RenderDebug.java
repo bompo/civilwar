@@ -31,23 +31,23 @@ public class RenderDebug {
 		font.draw(batch, Gdx.graphics.getFramesPerSecond() + " fps", 20, 30);
 		batch.end();
 
-		shapeRenderer.setProjectionMatrix(cam.combined);
-		shapeRenderer.setColor(1, 0, 0, 1);
-		shapeRenderer.begin(ShapeType.Line);
-		for (Polygon p : SinglePlayerGameScreen.circles.keySet()) {
-
-			float[] temp = p.getTransformedVertices();
-			float x1 = temp[0];
-			float y1 = temp[1];
-			for (int j = 0; j < temp.length; j += 2) {
-				shapeRenderer.line(x1, y1, temp[j], temp[j+1]);
-				x1 = temp[j];
-				y1 = temp[j+1];
-			}
-			
-		}	
-		
-		shapeRenderer.end();
+//		shapeRenderer.setProjectionMatrix(cam.combined);
+//		shapeRenderer.setColor(1, 0, 0, 1);
+//		shapeRenderer.begin(ShapeType.Line);
+//		for (Polygon p : SinglePlayerGameScreen.circles.keySet()) {
+//
+//			float[] temp = p.getTransformedVertices();
+//			float x1 = temp[0];
+//			float y1 = temp[1];
+//			for (int j = 0; j < temp.length; j += 2) {
+//				shapeRenderer.line(x1, y1, temp[j], temp[j+1]);
+//				x1 = temp[j];
+//				y1 = temp[j+1];
+//			}
+//			
+//		}	
+//		
+//		shapeRenderer.end();
 
 		/*
 		diffuseShader.begin();
