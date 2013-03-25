@@ -42,8 +42,7 @@ public class DefaultAI {
 	
 	public void update() {
 
-		if (target != null) {
-			
+		if (target != null) {			
 			to_target.set(target.position.x - soldier.position.x, target.position.y - soldier.position.y);
 			float dist_squared = to_target.dot(to_target);
 
@@ -58,24 +57,33 @@ public class DefaultAI {
 				}
 
 				if (!soldier.isEmpty() && !too_close) {
-					state = STATE.IDLE;
+					state = STATE.MOVING;
 				}
-			} 
+			}
 			if (state.equals(STATE.MOVING)) {
 				// go towards the target and attack!
 				soldier.goTowards(target.position, true);
 
-				// maybe shoot
-				if (soldier.isReloaded()) {
-					if (dist_squared <= shot_range * shot_range && to_target.dot(soldier.facing) > 0 && Math.pow(to_target.dot(soldier.facing), 2) > 0.97 * dist_squared) {
-						soldier.shoot();
+				// is target enemy in range?
+				if (dist_squared <= shot_range * shot_range && to_target.dot(soldier.facing) > 0 && Math.pow(to_target.dot(soldier.facing), 2) > 0.97 * dist_squared) {
+					if (soldier.isReloaded()) {
+						state = STATE.AIMING;
+						soldier.aim();
+					} else {
+						state = STATE.RUNNING;
 					}
-				}
+				} 				
 
 				// if out of shots then run away
 				if (soldier.isEmpty()) {
 					state = STATE.RUNNING;
 				}
+			}
+			if (state.equals(STATE.AIMING)) {
+				if(soldier.isReadyToShoot()) {
+					soldier.shoot();
+				}
+				
 			}
 		}
 	}
