@@ -44,7 +44,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	final float MAX_DISTANCE = 45.0f; //used for circleTesting
 	final int SMOOTHING_ITERATIONS = 2;
 	final float MIN_DISTANCE = 10.0f; //used for doodling
-	final int MAX_THICKNESS = 13;
+	final int MAX_THICKNESS_VERTICAL = 7;
+	final int MAX_THICKNESS_HORIZONTAL = 5;
 	final int MIN_FLICK_VELOCITY = 3000;
 	
 	ArrayList<Vector3> deletePath = new ArrayList<Vector3>();
@@ -681,7 +682,9 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		if(input.size() % 2 != 0)
 			input.add(input.get(input.size()-1));
 		
-		float thickness = MAX_THICKNESS;
+		float thickness_v = MAX_THICKNESS_VERTICAL;
+		float thickness_h = 5;
+		
 		
 		for(int j=0;j<input.size();j++) {
 			
@@ -691,22 +694,29 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 //			if(thickness < MAX_THICKNESS)
 //				thickness += (input.size() -j) / 100;
 			
-			if(input.size() - j < 15 && taper && thickness > 0) {
-				thickness -= (input.size() - j) / 10;
-//				System.out.println("" + thickness + " " + (input.size() - j));
-			}
+//			if(input.size() - j < 15 && taper && thickness_v > 0) {
+//				thickness_v -= (input.size() - j) / 12;
+//				thickness_h = 1;
+//			}
 			
 			
 //			tmp.set(p2).sub(p1).nor();
-			tmp.set(1,0);
-			tmp.set(-tmp.y, tmp.x);
-			tmp.mul(thickness / 2);
+			tmp.set(0,-1);
+			tmp.mul(thickness_v);
 			
 			Vector2 a = p1.cpy().add(tmp);
 			Vector2 b = p1.cpy().sub(tmp);
 			
+			tmp.set(1,0);
+			tmp.mul(thickness_h);
+			
+			a.add(tmp);
+			b.sub(tmp);
+
 			currentTriangleStrip.add(a);
 			currentTriangleStrip.add(b);
+
+			
 		}
 		
 	}
