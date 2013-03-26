@@ -88,7 +88,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 		boolean shooting = false;
 		
-		if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+		if(Gdx.app.getType().equals(ApplicationType.Desktop) && SinglePlayerGameScreen.paused && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
 			if(picked != null && SinglePlayerGameScreen.circles.get(picked).get(0).ai.state.equals(DefaultAI.STATE.SHOOTING)) {
 				shooting = true;
 				del = false;
@@ -156,13 +156,22 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			picker = camera.getPickRay(x, y);
 
 			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+			
+			Vector2 median = new Vector2();
+			
+			for(PlayerSoldier p: SinglePlayerGameScreen.circles.get(picked)) {
+				median.add(p.position);
+			}
+			
+			median.div(SinglePlayerGameScreen.circles.get(picked).size());
 
 			for(PlayerSoldier p: SinglePlayerGameScreen.circles.get(picked)) {
 				Vector2 temp = new Vector2(projected.x, projected.z);
-				temp.set(p.position.cpy().sub(temp));
+				temp.set(median.cpy().sub(temp));
 				temp.y = -temp.y;
 				
 				p.facing.set(temp);
+				
 			}
 			
 		}
@@ -453,6 +462,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				}
 			}
 		}
+		picked = null;
 		fling = false;
 		return false;
 	}
@@ -482,6 +492,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		if(howmanyfingers == 1  && pointer == 0) {
 			last.set(x, y);
 	
+			if(Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
 			//pick polygon
 			Vector3 projected = new Vector3();
 			
@@ -489,17 +500,18 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 
 			Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
 			
-			for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
-				if(p.contains(projected.x, projected.z)) {
-					picked = p;
-					//debuggings
-					for(PlayerSoldier pS: SinglePlayerGameScreen.circles.get(p)) {
-						pS.ai.setState(DefaultAI.STATE.SHOOTING);
-					}
-				}
-				
-			}
 			
+				for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
+					if(p.contains(projected.x, projected.z)) {
+						picked = p;
+						//debuggings
+						for(PlayerSoldier pS: SinglePlayerGameScreen.circles.get(p)) {
+							pS.ai.setState(DefaultAI.STATE.SHOOTING);
+						}
+					}
+					
+				}
+			}
 		}
 		
 		if(howmanyfingers == 5)
