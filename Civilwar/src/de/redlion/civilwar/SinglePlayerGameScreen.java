@@ -713,24 +713,24 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			GameSession.getInstance().soldiers.get(i).update(delta);
 		}
 		
-		for(Polygon pol : circles.keySet()) {
-			
-			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
-			
-			for(PlayerSoldier playerSoldier : soldiers) {
-			
-				ArrayList<Vector3> wayPoints = paths.get(pol);
-				
-				if(wayPoints != null && wayPoints.size() > 0) {
-					playerSoldier.goTowards(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z), false);
-					if(playerSoldier.position.dst(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z))<0.5f) {
-						wayPoints.remove(0);
-					}
-				}
-				
-			}
-			
-		}
+//		for(Polygon pol : circles.keySet()) {
+//			
+//			ArrayList<PlayerSoldier> soldiers = circles.get(pol);
+//			
+//			for(PlayerSoldier playerSoldier : soldiers) {
+//			
+//				ArrayList<Vector3> wayPoints = paths.get(pol);
+//				
+//				if(wayPoints != null && wayPoints.size() > 0) {
+//					playerSoldier.goTowards(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z), false);
+//					if(playerSoldier.position.dst(new Vector2(wayPoints.get(0).x, wayPoints.get(0).z))<0.5f) {
+//						wayPoints.remove(0);
+//					}
+//				}
+//				
+//			}
+//			
+//		}
 	
 	}
 

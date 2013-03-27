@@ -17,6 +17,7 @@ public class PlayerSoldier extends Soldier {
 		this.dogTag =  dogTag;
 		this.ai = new DefaultAI(this);
 		circled = false;
+		
 	}
 	
 	public void update(float delta) {
@@ -30,11 +31,11 @@ public class PlayerSoldier extends Soldier {
 	
 	public void followPath() {
 		
+		super.stopped = false;
 		Vector2 next = null;
 		Vector3 next3D = new Vector3();
 		
 		for(Vector3 point : wayPoints) {
-			
 			Vector2 point2D = new Vector2(point.x, point.z);
 			
 			if(next == null || position.dst(next) > position.dst(point2D)) {
@@ -67,6 +68,11 @@ public class PlayerSoldier extends Soldier {
 		}	
 		
 		
+	}
+	
+	public void stop() {
+		wayPoints.clear();
+		super.stopped = true;
 	}
 
 }

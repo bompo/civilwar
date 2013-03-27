@@ -166,11 +166,13 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			median.div(SinglePlayerGameScreen.circles.get(picked).size());
 
 			for(PlayerSoldier p: SinglePlayerGameScreen.circles.get(picked)) {
-				Vector2 temp = new Vector2(projected.x, projected.z);
-				temp.set(median.cpy().sub(temp));
-				temp.y = -temp.y;
-				
-				p.facing.set(temp);
+				if(p.alive) {
+					Vector2 temp = new Vector2(projected.x, projected.z);
+					temp.set(median.cpy().sub(temp));
+					temp.y = -temp.y;
+	
+					p.facing.set(temp);
+				}
 				
 			}
 			
@@ -347,6 +349,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 									
 									for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
 										pS.wayPoints.clear();
+										pS.ai.setState(DefaultAI.STATE.MOVING);
 										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(pCopy));
 									}
 									
@@ -504,9 +507,9 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 					if(p.contains(projected.x, projected.z)) {
 						picked = p;
-						//debuggings
 						for(PlayerSoldier pS: SinglePlayerGameScreen.circles.get(p)) {
 							pS.ai.setState(DefaultAI.STATE.SHOOTING);
+							pS.stop();
 						}
 					}
 					
@@ -571,7 +574,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(s instanceof PlayerSoldier) {
 				PlayerSoldier p = (PlayerSoldier) s;
 				if(polygon.contains(p.position.x, p.position.y)) {
-//					("", p.dogTag + "");
 					p.circled = true;
 					soldiers.add(p);
 				}

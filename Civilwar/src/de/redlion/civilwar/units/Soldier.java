@@ -39,6 +39,7 @@ public class Soldier {
 	public DefaultAI ai = new DefaultAI(this);
 	
 	public boolean alive = true;
+	public boolean stopped = false;
 	
 	//render stuff
 	public StillModelNode instance;	
@@ -74,61 +75,66 @@ public class Soldier {
 			return;
 		}
 		
-		ai.update();
+		
 		
 		cooldown = Math.max(0, cooldown - delta);
 		aimingTime = Math.max(0, aimingTime - delta);
 		shots = Math.min(shots + (shotReloadRate * delta), shotCapacity);
+		
+		ai.update();
 
-		velocity.mul( (float) Math.pow(0.97f, delta * 30.f));
-		position.add(velocity.x * delta, velocity.y * delta);
-		
+		if(!stopped) {
 
-		
-//		angle = angle + delta * 20.f * angleSpin;
-//		if(angle > 15) {
-//			angleSpin = -1;
-//		}
-//		if(angle < -15) {
-//			angleSpin = 1;
-//		}
-		
-		// bounce if move
-		if(lastPosition.dst(position) > 0.01f) {
-			if(inAir == false) {
-				bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
-				if(bounce > 1) {
-					inAir = true;
-					bounce = 1;
+			velocity.mul( (float) Math.pow(0.97f, delta * 30.f));
+			position.add(velocity.x * delta, velocity.y * delta);
+			
+//			angle = angle + delta * 20.f * angleSpin;
+//			if(angle > 15) {
+//				angleSpin = -1;
+//			}
+//			if(angle < -15) {
+//				angleSpin = 1;
+//			}
+			
+			// bounce if move
+			
+			if(lastPosition.dst(position) > 0.01f) {
+				if(inAir == false) {
+					bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
+					if(bounce > 1) {
+						inAir = true;
+						bounce = 1;
+					}
+				}
+				if(inAir == true) {
+					bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
+					if(bounce < 0) {
+						inAir = false;
+						bounce = 0;
+					}				
+				}
+			} else {
+				if(inAir == false) {
+					bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
+					if(bounce > 1) {
+						inAir = true;
+						bounce = 1;
+					}
+				}
+				if(inAir == true) {
+					bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
+					if(bounce < 0) {
+						bounce = 0;
+					}				
 				}
 			}
-			if(inAir == true) {
-				bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
-				if(bounce < 0) {
-					inAir = false;
-					bounce = 0;
-				}				
-			}
-		} else {
-			if(inAir == false) {
-				bounce += Gdx.graphics.getDeltaTime()*bounceSpeed;
-				if(bounce > 1) {
-					inAir = true;
-					bounce = 1;
-				}
-			}
-			if(inAir == true) {
-				bounce -= Gdx.graphics.getDeltaTime()*bounceSpeed;
-				if(bounce < 0) {
-					bounce = 0;
-				}				
-			}
-		}
+		}		
 		
 		this.lastPosition.set(position);
 	}
 	
 	public void turn(float direction) {
+
 		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
 		
 		facing.rotate(direction * turnSpeed * delta).nor();
