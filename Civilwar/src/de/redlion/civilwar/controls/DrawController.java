@@ -351,6 +351,11 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 										pS.wayPoints.clear();
 										pS.ai.setState(DefaultAI.STATE.MOVING);
 										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(pCopy));
+										Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
+										direction.nor();
+										direction.mul(-1000);
+										Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
+										pS.wayPoints.add(last);
 									}
 									
 									SinglePlayerGameScreen.circleHasPath.add(p);

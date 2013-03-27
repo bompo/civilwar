@@ -69,24 +69,24 @@ public class DefaultAI {
 				soldier.goTowards(target.position, true);
 
 				// is target enemy in range?
-				if (dist_squared <= shot_range * shot_range && to_target.dot(soldier.facing) > 0 && Math.pow(to_target.dot(soldier.facing), 2) > 0.97 * dist_squared) {
-					if (soldier.isReloaded()) {
-						state = STATE.AIMING;
-						soldier.aim();
-					} else {
-						state = STATE.RUNNING;
-					}
-				} 				
-
-				// if out of shots then run away
-				if (soldier.isEmpty()) {
-					state = STATE.RUNNING;
-				}
+//				if (dist_squared <= shot_range * shot_range && to_target.dot(soldier.facing) > 0 && Math.pow(to_target.dot(soldier.facing), 2) > 0.97 * dist_squared) {
+//					if (soldier.isReloaded()) {
+//						state = STATE.AIMING;
+//						soldier.aim();
+//					} else {
+//						state = STATE.RUNNING;
+//					}
+//				} 				
+//
+//				// if out of shots then run away
+//				if (soldier.isEmpty()) {
+//					state = STATE.RUNNING;
+//				}
 			}
 			if (state.equals(STATE.AIMING)) {
-				if(soldier.isReadyToShoot()) {
-					soldier.shoot();
-				}
+//				if(soldier.isReadyToShoot()) {
+//					soldier.shoot();
+//				}
 				
 			}
 		}

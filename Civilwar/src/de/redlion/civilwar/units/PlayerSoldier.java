@@ -44,10 +44,13 @@ public class PlayerSoldier extends Soldier {
 			}
 		}
 		
-		if(position.dst(next) > 0.3f)
+		int index = wayPoints.indexOf(next3D);	
+		
+//		System.out.println(next3D.toString());
+		
+		if(position.dst(next) > 1.3f)
 			super.goTowards(next, false);
 		else {
-			int index = wayPoints.indexOf(next3D);
 			
 			if(index != -1) {
 				
@@ -64,6 +67,7 @@ public class PlayerSoldier extends Soldier {
 				}
 				
 			}
+			
 			
 		}	
 		
