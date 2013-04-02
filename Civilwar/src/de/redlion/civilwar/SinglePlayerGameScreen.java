@@ -742,10 +742,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		for(int soldier1ID = 0; soldier1ID < GameSession.getInstance().soldiers.size; soldier1ID++) {
 			Soldier soldier1 = GameSession.getInstance().soldiers.get(soldier1ID);
 			for(int soldier2ID = 0; soldier2ID < GameSession.getInstance().soldiers.size; soldier2ID++) {
-				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);	
-				while(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
-					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(Gdx.graphics.getDeltaTime()));
-					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(Gdx.graphics.getDeltaTime()));
+				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);
+				if(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
+					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(.1f));
+					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(.1f));
 				}
 			}
 		}
