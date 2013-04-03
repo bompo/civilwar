@@ -208,6 +208,7 @@ public class RenderMap {
 		protoRenderer.begin();
 		protoRenderer.draw(modelLandscapeObj, instanceLand);
 		
+		/*
 		//update height per frame
 		Soldier tempSoldier = GameSession.getInstance().soldiers.get(soldierSelector);
 		Ray ray = new Ray(new Vector3(tempSoldier.position.x + (tempSoldier.velocity.x * Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size), -100, tempSoldier.position.y + (tempSoldier.velocity.y* Gdx.graphics.getDeltaTime()*GameSession.getInstance().soldiers.size)), Vector3.Y);
@@ -217,15 +218,20 @@ public class RenderMap {
 		tempSoldier.heightTarget = localIntersection.y;
 		tempSoldier.heightInterpolator = 0;
 		soldierSelector = (soldierSelector + 1) % GameSession.getInstance().soldiers.size;
+		*/
 		
 		//render soldier
 		for(int i = 0; i < GameSession.getInstance().soldiers.size; i++) {
 			Soldier soldier = GameSession.getInstance().soldiers.get(i);
 
 			soldier.instance.matrix.idt();
-
+			
+			/*
 			soldier.heightInterpolator = soldier.heightInterpolator + (1.f/ (float) GameSession.getInstance().soldiers.size);
 			float height = Interpolation.linear.apply(soldier.height, soldier.heightTarget, soldier.heightInterpolator);
+			*/
+			
+			float height = heightMap.getHeight(soldier.position.x, soldier.position.y);
 
 			soldier.instance.matrix.trn(soldier.position.x, height + 0.05f, soldier.position.y);
 			soldier.instance.matrix.scl(0.15f);

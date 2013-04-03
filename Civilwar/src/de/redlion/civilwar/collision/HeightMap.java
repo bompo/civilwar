@@ -2,11 +2,16 @@ package de.redlion.civilwar.collision;
 
 import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
 import com.badlogic.gdx.graphics.g3d.model.still.StillSubMesh;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 
 import de.redlion.civilwar.Helper;
 
 public class HeightMap {
+	
+	final int HEIGHTMAPSIZE = 256; 
 	
 	public float[] map;
 	public float[][] heightMap; 
@@ -27,7 +32,7 @@ public class HeightMap {
 		
 		System.out.println(boundingBox);
 		
-		heightMap = new float[513][513];
+		heightMap = new float[HEIGHTMAPSIZE][HEIGHTMAPSIZE];
 				
 		//iterate through model and generate grid from vertices height
 		len = plane.subMeshes.length;
@@ -48,17 +53,34 @@ public class HeightMap {
 				map[j + 2] = z;
 				
 				j = j + 3;
-				
-				//scale value to 512x512 height map
-				int x1 = (int) Math.floor(Helper.map(x, boundingBox.min.x, boundingBox.max.x, 0, 512));
-				int z1 = (int) Math.floor(Helper.map(z, boundingBox.min.z, boundingBox.max.z, 0, 512));
-				
-				heightMap[x1][z1] = y;
 			}
-			
+		}
+		
+		//ray collision test for each point of the height map
+		Ray ray = new Ray(Vector3.X, Vector3.Y);
+		Vector3 localIntersection = new Vector3();
+		for(int x = 0; x < HEIGHTMAPSIZE; x++) {
+			for(int z = 0; z < HEIGHTMAPSIZE; z++) {
+				
+				float x1 = Helper.map(x, 0, HEIGHTMAPSIZE, boundingBox.min.x, boundingBox.max.x);
+				float z1 = Helper.map(z, 0, HEIGHTMAPSIZE, boundingBox.min.z, boundingBox.max.z);
+				
+				ray.set(new Vector3(x1, -100, z1), Vector3.Y);
+				
+				Intersector.intersectRayTriangles(ray, map, localIntersection);				
+				heightMap[x][z] = localIntersection.y;				
+			}
 		}
 			
 		
+	}
+	
+	public float getHeight(float x, float z) {
+		//TODO do fancy interpolation stuff or move this to GPU?
+		int x1 = (int) Math.floor(Helper.map(x, boundingBox.min.x, boundingBox.max.x, 0, HEIGHTMAPSIZE));
+		int z1 = (int) Math.floor(Helper.map(z, boundingBox.min.z, boundingBox.max.z, 0, HEIGHTMAPSIZE));
+		
+		return heightMap[x1][z1];
 	}
 	
 }
