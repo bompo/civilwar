@@ -239,8 +239,8 @@ public class RenderMap {
 
 			soldier.instance.matrix.scl(7.5f);
 			soldier.instance.matrix.trn(0, (soldier.bounce / 10.f)  - 0.05f, 0);
-			soldier.instance.matrix.rotate(Vector3.Y, soldier.facing.angle());			
-			soldier.instance.matrix.rotate(Vector3.Y, -90);
+			soldier.instance.matrix.rotate(Vector3.Y, -soldier.facing.angle());			
+			soldier.instance.matrix.rotate(Vector3.Y, 90);
 			soldier.instance.matrix.rotate(Vector3.X, -soldier.bounce * 10.f);
 			soldier.instance.matrix.rotate(Vector3.X,-soldier.angle * 1.f);
 

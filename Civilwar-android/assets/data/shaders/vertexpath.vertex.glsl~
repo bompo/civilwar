@@ -92,8 +92,8 @@ void main()
 	vec3  aggCol = dirLightCol;
 	
 	#ifdef normalsFlag
-	vec3 normal = u_normalMatrix * normalize(a_normal);	
-	aggCol *= wrapLight(normal, -dirLightDir);
+	    vec3 normal = u_normalMatrix * normalize(a_normal);	
+	    aggCol *= wrapLight(normal, -dirLightDir);
 	#endif
 
 #if LIGHTS_NUM > 0		
