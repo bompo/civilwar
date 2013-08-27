@@ -38,7 +38,7 @@ public class HeightMap {
 
 		System.out.println(boundingBox);
 
-		FileHandle fileIn = Gdx.files.external("heightMap.dat");
+		FileHandle fileIn = Gdx.files.internal("data/heightMap.dat");
 		System.out.println(fileIn.exists());
 		if (fileIn.exists()) {
 			try {
