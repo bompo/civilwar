@@ -38,6 +38,30 @@ public class HeightMap {
 
 		System.out.println(boundingBox);
 
+		heightMap = new float[HEIGHTMAPSIZE][HEIGHTMAPSIZE];
+
+		// iterate through model and generate grid from vertices height
+		len = plane.subMeshes.length;
+		for (int i = 0; i < len; i++) {
+			StillSubMesh subMesh = plane.subMeshes[i];
+
+			map = new float[subMesh.mesh.getNumVertices() * 3];
+
+			int j = 0;
+			for (int n = 0; n < subMesh.mesh.getNumVertices() * 8; n = n + 8) {
+				// y is height
+				float x = subMesh.mesh.getVerticesBuffer().get(n);
+				float y = subMesh.mesh.getVerticesBuffer().get(n + 1);
+				float z = subMesh.mesh.getVerticesBuffer().get(n + 2);
+
+				map[j] = x;
+				map[j + 1] = y;
+				map[j + 2] = z;
+
+				j = j + 3;
+			}
+		}
+
 		FileHandle fileIn = Gdx.files.internal("data/heightMap.dat");
 		System.out.println(fileIn.exists());
 		if (fileIn.exists()) {
@@ -48,30 +72,6 @@ public class HeightMap {
 				e.printStackTrace();
 			}
 		} else {
-
-			heightMap = new float[HEIGHTMAPSIZE][HEIGHTMAPSIZE];
-
-			// iterate through model and generate grid from vertices height
-			len = plane.subMeshes.length;
-			for (int i = 0; i < len; i++) {
-				StillSubMesh subMesh = plane.subMeshes[i];
-
-				map = new float[subMesh.mesh.getNumVertices() * 3];
-
-				int j = 0;
-				for (int n = 0; n < subMesh.mesh.getNumVertices() * 8; n = n + 8) {
-					// y is height
-					float x = subMesh.mesh.getVerticesBuffer().get(n);
-					float y = subMesh.mesh.getVerticesBuffer().get(n + 1);
-					float z = subMesh.mesh.getVerticesBuffer().get(n + 2);
-
-					map[j] = x;
-					map[j + 1] = y;
-					map[j + 2] = z;
-
-					j = j + 3;
-				}
-			}
 
 			// ray collision test for each point of the height map
 			Ray ray = new Ray(Vector3.X, Vector3.Y);
