@@ -169,6 +169,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				if(p.alive) {
 					Vector2 temp = new Vector2(projected.x, projected.z);
 					temp.set(median.cpy().sub(temp));
+					temp.x = -temp.x;
 					temp.y = -temp.y;
 	
 					p.facing.set(temp);
