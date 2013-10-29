@@ -62,7 +62,7 @@ public class HeightMap {
 			}
 		}
 
-		FileHandle fileIn = Gdx.files.internal("data/heightMap.dat");
+		FileHandle fileIn = Gdx.files.external("heightMap.dat");
 		System.out.println(fileIn.exists());
 		if (fileIn.exists()) {
 			try {
