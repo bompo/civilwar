@@ -15,6 +15,9 @@ public class KeyController extends InputAdapter{
 			
 			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
 			
+			if(SinglePlayerGameScreen.paused)
+				SinglePlayerGameScreen.drawController.start();
+			
 		}
 		
 		return false;

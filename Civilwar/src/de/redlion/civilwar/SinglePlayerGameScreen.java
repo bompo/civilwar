@@ -60,7 +60,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	float delta;
 	
 	OrthoCamController camController;
-	DrawController  drawController;
+	public static DrawController  drawController;
 	KeyController keyController;
 	GestureController gestureController;
 	GestureDetector gestureDetector;
@@ -83,7 +83,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<Vector3>> paths;  //maps projected polygons to their associated paths
 	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what has been drawn on screen
+	public static HashMap<Polygon, ArrayList<Vector2>> generatedDoodles; //maps polygons to doodles that have been generated from polygons
 	public static HashMap<Polygon, ArrayList<Vector2>> triangleStrips; //maps polygons to triangle strips
+	public static HashMap<Polygon, ArrayList<Vector2>> generatedTriangleStrips; //maps polygons to triangle strips that have been generated from polygons
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn - simplified version
 	public static ArrayList<Vector2> currentTriStrip; //tristrip of what is being drawn
@@ -126,7 +128,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circles = new  LinkedHashMap<Polygon, ArrayList<PlayerSoldier>>();
 		paths = new LinkedHashMap<Polygon, ArrayList<Vector3>>();
 		doodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
+		generatedDoodles = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		triangleStrips = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
+		generatedTriangleStrips = new LinkedHashMap<Polygon, ArrayList<Vector2>>();
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
 		currentTriStrip = new ArrayList<Vector2>();
@@ -172,7 +176,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
+			generatedDoodles.clear();
 			triangleStrips.clear();
+			generatedTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			multiplexer = new InputMultiplexer();
@@ -208,7 +214,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
+			generatedDoodles.clear();
 			triangleStrips.clear();
+			generatedTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			multiplexer = new InputMultiplexer();
@@ -359,7 +367,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				ArrayList<Vector2> triangleStrip = triangleStrips.get(pol);
 				
-				if(!triangleStrip.isEmpty()) {					
+				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
 					r.begin(ShapeType.FilledTriangle);
@@ -419,6 +427,38 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 			}
+			
+			//draw generated doodles
+			for(Polygon pol : generatedDoodles.keySet()) {
+				
+				ArrayList<Vector2> doodle = generatedDoodles.get(pol);
+				
+				ArrayList<Vector2> triangleStrip = generatedTriangleStrips.get(pol);
+				
+				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
+					
+					r.setColor(1, 0, 0, 1);
+					r.begin(ShapeType.FilledTriangle);
+					
+					Vector2 p0 = triangleStrip.get(0);
+					Vector2 p1 = triangleStrip.get(1);
+
+					for(Vector2 p2 : triangleStrip) {
+
+						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
+						
+					}
+					r.end();
+					
+					//draw paths, add them to generated doodles
+					
+				}
+				
+				
+			}
+			
 			// renders currentdoodle
 			if(!currentDoodle.isEmpty()) {
 //				r.setColor(1, 0, 0, 1);
