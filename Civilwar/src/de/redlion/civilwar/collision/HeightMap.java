@@ -1,6 +1,5 @@
 package de.redlion.civilwar.collision;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -63,7 +62,9 @@ public class HeightMap {
 		}
 
 		FileHandle fileIn = Gdx.files.external("heightMap.dat");
-		System.out.println(fileIn.exists());
+		if (!fileIn.exists()) {
+			fileIn = Gdx.files.internal("data/heightMap.dat");
+		}
 		if (fileIn.exists()) {
 			try {
 				ObjectInputStream iis = new ObjectInputStream(fileIn.read());
