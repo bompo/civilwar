@@ -65,63 +65,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	public DrawController (final OrthographicCamera camera) {
 		this.camera = camera;
 	}
-	
-	/**
-	 * calls makeTriangleStrip on existing polygons
-	 */
-	@SuppressWarnings("unchecked")
-	public void start() {
-		
-		for(Polygon pol : SinglePlayerGameScreen.circles.keySet()) {
-			
-			float[] vertices = pol.getTransformedVertices();
-			
-			if(vertices.length > 0) {
-				
-				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
-				
-				int l = 0;
-				for(int k=0;k<vertices3D.length;k++) {
-					
-					if(k%3 == 1)
-						vertices3D[k] = 0;
-					else {
-						vertices3D[k] = vertices[l];
-						l++;
-					}
-					
-				}
-				
-				ArrayList<Vector2> tempDoodle = new ArrayList<Vector2>();
-				
-				for(int i=0; i<vertices3D.length;i+=3) {
-					
-					if(i+2 > vertices3D.length)
-						break;
-					
-					Vector3 v = new Vector3(vertices3D[i],vertices3D[i+1],vertices3D[i+2]);
-					
-					camera.project(v);
-					
-					tempDoodle.add(new Vector2(v.x,v.y));
-					
-				}
-				tempDoodle.add(tempDoodle.get(0));
-				
-//				Polygon pCopy = new Polygon(pol.getTransformedVertices());
-
-				SinglePlayerGameScreen.generatedDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
-				
-				makeTriangleStrip(tempDoodle, false);
-				
-				SinglePlayerGameScreen.generatedTriangleStrips.put(pol, (ArrayList<Vector2>) currentTriangleStrip.clone());
-				
-			}
-			
-			
-		}
-		
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -765,7 +708,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 	}
 	
-	private void makeTriangleStrip(ArrayList<Vector2> input, boolean taper) {
+	@SuppressWarnings("unchecked")
+	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input, boolean taper) {
 		
 		Vector2 p1 = new Vector2();
 //		Vector2 p2 = new Vector2();
@@ -809,8 +753,9 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			currentTriangleStrip.add(a);
 			currentTriangleStrip.add(b);
 
-			
 		}
+
+		return (ArrayList<Vector2>) currentTriangleStrip.clone();
 		
 	}
 	
