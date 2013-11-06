@@ -349,6 +349,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					else {
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
+							
 							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
 								
 								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
@@ -467,6 +468,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					}
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.generatedDoodles.remove(pop);
+					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 					
 				}
@@ -474,7 +476,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(!pathsToDelete.isEmpty()) {
 				for(Polygon pop : pathsToDelete) {
 					SinglePlayerGameScreen.doodles.remove(pop);
-					SinglePlayerGameScreen.generatedDoodles.remove(pop);
+//					SinglePlayerGameScreen.generatedDoodles.remove(pop);
+					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 					
 					if(!SinglePlayerGameScreen.circles.isEmpty()) {
@@ -634,6 +637,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.circles.remove(pop);
 				SinglePlayerGameScreen.doodles.remove(pop);
 				SinglePlayerGameScreen.generatedDoodles.remove(pop);
+				SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 				SinglePlayerGameScreen.paths.remove(pop);
 			}
 			

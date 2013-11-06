@@ -3,6 +3,7 @@ package de.redlion.civilwar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -695,7 +696,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 	}
 	
-	private void updatePolygons() {
+	private static void updatePolygons() {
 		
 		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
 		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
@@ -879,7 +880,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void generateDoodles() {
-		
+
 		for(Polygon pol : circles.keySet()) {
 			
 			float[] vertices = pol.getTransformedVertices();
@@ -940,6 +941,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			generatedPathDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
 			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle, true));
+			
+
 		}
 		
 	}
