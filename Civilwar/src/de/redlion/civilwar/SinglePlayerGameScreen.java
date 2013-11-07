@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -31,6 +33,7 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.SortedIntList;
 
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.GestureController;
@@ -914,19 +917,27 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		for(Polygon pol : paths.keySet()) {
 			
-			boolean toDelete = false;
+			int toDelete = -1;
+			ConcurrentSkipListSet<Integer> set = new ConcurrentSkipListSet<Integer>();
 			
 			if(!paths.get(pol).isEmpty()) {
 				for(PlayerSoldier s : circles.get(pol)) {
-//					System.out.println("wayyy " + s.wayPoints.get(0));
-//					System.out.println("path " + paths.get(pol).get(0));
-					 if(s.wayPoints.get(0).equals(paths.get(pol).get(0))) {
-						 toDelete = true;
-						 break;
-					 }
+					int waypoint = -1;
+					for(Vector3 v : paths.get(pol)) {
+						 if(s.wayPoints.get(0).equals(v)) {
+							 waypoint = paths.get(pol).indexOf(v);
+							 break;
+						 }
+					}
+					if(waypoint > -1)
+						set.add(waypoint);
 				}
-				if(toDelete) {
-					paths.get(pol).remove(0);
+				
+				toDelete = set.first();
+				
+				//delete all points on path that are no longer waypoints
+				if(toDelete > -1) {
+					paths.get(pol).removeAll(paths.get(pol).subList(0, toDelete));
 				}
 			}
 			
