@@ -186,6 +186,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			//does remove depend on some kind of order?
 			if(SinglePlayerGameScreen.paths.remove(picked) != null) {
 				SinglePlayerGameScreen.doodles.remove(picked);
+				SinglePlayerGameScreen.pathDoodles.remove(picked);
 				SinglePlayerGameScreen.generatedDoodles.remove(picked);
 				SinglePlayerGameScreen.circleHasPath.remove(picked);
 			}
