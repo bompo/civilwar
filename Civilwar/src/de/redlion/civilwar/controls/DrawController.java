@@ -354,18 +354,23 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 								
 								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
 									//workaround because same polygon can't be in doodles twice
+		
+//									Polygon pCopy = new Polygon(p.getTransformedVertices());
+//									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
+//									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+//									SinglePlayerGameScreen.triangleStrips.put(pCopy, (ArrayList<Vector2>) currentTriangleStrip.clone());
+//									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
+//									SinglePlayerGameScreen.currentTriStrip.clear();
 									
-									Polygon pCopy = new Polygon(p.getTransformedVertices());
-									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
-									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-									SinglePlayerGameScreen.triangleStrips.put(pCopy, (ArrayList<Vector2>) currentTriangleStrip.clone());
-									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
+									SinglePlayerGameScreen.pathDoodles.put(p, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+									SinglePlayerGameScreen.pathTriangleStrips.put(p, (ArrayList<Vector2>) currentTriangleStrip.clone());
+									SinglePlayerGameScreen.paths.put(p, (ArrayList<Vector3>) tempList.clone());
 									SinglePlayerGameScreen.currentTriStrip.clear();
 									
 									for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
 										pS.wayPoints.clear();
 										pS.ai.setState(DefaultAI.STATE.MOVING);
-										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(pCopy));
+										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p));
 										Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
 										direction.nor();
 										direction.mul(-1000);
@@ -467,6 +472,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						a.wayPoints.clear();
 					}
 					SinglePlayerGameScreen.doodles.remove(pop);
+					SinglePlayerGameScreen.pathDoodles.remove(pop);
 					SinglePlayerGameScreen.generatedDoodles.remove(pop);
 					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
@@ -475,10 +481,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			}
 			if(!pathsToDelete.isEmpty()) {
 				for(Polygon pop : pathsToDelete) {
-					SinglePlayerGameScreen.doodles.remove(pop);
-//					SinglePlayerGameScreen.generatedDoodles.remove(pop);
+					SinglePlayerGameScreen.pathDoodles.remove(pop);
 					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
+					SinglePlayerGameScreen.circleHasPath.remove(pop);
 					
 					if(!SinglePlayerGameScreen.circles.isEmpty()) {
 						for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(pop)) {
@@ -636,9 +642,11 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				}
 				SinglePlayerGameScreen.circles.remove(pop);
 				SinglePlayerGameScreen.doodles.remove(pop);
+				SinglePlayerGameScreen.pathDoodles.remove(pop);
 				SinglePlayerGameScreen.generatedDoodles.remove(pop);
 				SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 				SinglePlayerGameScreen.paths.remove(pop);
+				SinglePlayerGameScreen.circleHasPath.remove(pop);
 			}
 			
 		}
