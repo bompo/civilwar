@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -911,17 +912,21 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	private void updatePaths() {
 		
-		int toDelete = -1;
-		
 		for(Polygon pol : paths.keySet()) {
+			
+			boolean toDelete = false;
+			
 			if(!paths.get(pol).isEmpty()) {
-				for(Vector3 v : paths.get(pol)) {
-					 if(pol.contains(v.x, v.z)) {
-						toDelete = paths.get(pol).indexOf(v);
-					}
+				for(PlayerSoldier s : circles.get(pol)) {
+//					System.out.println("wayyy " + s.wayPoints.get(0));
+//					System.out.println("path " + paths.get(pol).get(0));
+					 if(s.wayPoints.get(0).equals(paths.get(pol).get(0))) {
+						 toDelete = true;
+						 break;
+					 }
 				}
-				if(toDelete > -1) {
-					paths.get(pol).removeAll(paths.get(pol).subList(0, toDelete));
+				if(toDelete) {
+					paths.get(pol).remove(0);
 				}
 			}
 			
@@ -1014,7 +1019,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					Vector3 v = new Vector3(vertices3D[i],vertices3D[i+1],vertices3D[i+2]);
 					
 					renderMap.cam.project(v);
-					
 					tempDoodle.add(new Vector2(v.x,v.y));
 					
 				}
@@ -1034,6 +1038,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			ArrayList<Vector2> tempDoodle = new ArrayList<Vector2>();
 			
+			Vector3 origin = new Vector3(pol.getOriginX(),0,pol.getOriginY());
+			renderMap.cam.project(origin);
+			//add origin for beauty reasons
+			tempDoodle.add(new Vector2(origin.x, origin.y));
 			for(Vector3 v : paths.get(pol)) {
 				
 				Vector3 vCpy = v.cpy();
