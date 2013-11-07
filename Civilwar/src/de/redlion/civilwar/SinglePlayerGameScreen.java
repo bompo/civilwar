@@ -529,40 +529,43 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					}
 					r.end();
 					
-					Vector2 a = doodle.get(doodle.size()-1).cpy();
-					Vector2 b = doodle.get(doodle.size()-2).cpy();
+					if(paths.containsKey(pol)) {
 					
-					Vector2 c = a.cpy().sub(b);
-					
-					Vector2 d = new Vector2(0, 1);
-					
-//					r.setColor(1, 1, 1, 1);
-//					r.begin(ShapeType.Line);
-//					r.line(a.x, a.y, c.x + a.x, c.y + a.y);
-//					r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
-//					r.end();
-					
-					float dot = c.cpy().dot(d);
-					float angle = dot / (d.len() * c.len());
-					
-					angle = (float) Math.acos(angle);
-					angle = (float) Math.toDegrees(angle);
-					
-					if(a.x < b.x)
-						angle *= -1;
-					
-					
-//					Gdx.app.log("angle", angle + "");
-					
-					//correction due to sprite?
-					angle += 60;
-					
-					arrowhead.setPosition(a.x, a.y);
-					arrowhead.setRotation(-angle);
-					arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
-					batch.begin();
-					arrowhead.draw(batch);
-					batch.end();
+						Vector2 a = doodle.get(doodle.size()-1).cpy();
+						Vector2 b = doodle.get(doodle.size()-2).cpy();
+						
+						Vector2 c = a.cpy().sub(b);
+						
+						Vector2 d = new Vector2(0, 1);
+						
+	//					r.setColor(1, 1, 1, 1);
+	//					r.begin(ShapeType.Line);
+	//					r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+	//					r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+	//					r.end();
+						
+						float dot = c.cpy().dot(d);
+						float angle = dot / (d.len() * c.len());
+						
+						angle = (float) Math.acos(angle);
+						angle = (float) Math.toDegrees(angle);
+						
+						if(a.x < b.x)
+							angle *= -1;
+						
+						
+	//					Gdx.app.log("angle", angle + "");
+						
+						//correction due to sprite?
+						angle += 60;
+						
+						arrowhead.setPosition(a.x, a.y);
+						arrowhead.setRotation(-angle);
+						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
+						batch.begin();
+						arrowhead.draw(batch);
+						batch.end();
+					}
 					
 				}
 				
@@ -908,11 +911,22 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	private void updatePaths() {
 		
+		int toDelete = -1;
+		
 		for(Polygon pol : paths.keySet()) {
-			if(!paths.get(pol).isEmpty() && pol.contains(paths.get(pol).get(0).x, paths.get(pol).get(0).z)) {
-				paths.get(pol).remove(0);
-				System.out.println("hi");
+			if(!paths.get(pol).isEmpty()) {
+				for(Vector3 v : paths.get(pol)) {
+					 if(pol.contains(v.x, v.z)) {
+						toDelete = paths.get(pol).indexOf(v);
+					}
+				}
+				if(toDelete > -1) {
+					paths.get(pol).removeAll(paths.get(pol).subList(0, toDelete));
+				}
 			}
+			
+			if(paths.get(pol).size() <= 1)
+				paths.remove(pol);
 		}
 	
 	}
@@ -996,8 +1010,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				ArrayList<Vector2> tempDoodle = new ArrayList<Vector2>();
 				
 				for(int i=0; i<vertices3D.length;i+=3) {
-					
-					System.out.println("i:" + i + " length:" + vertices3D.length);
+
 					Vector3 v = new Vector3(vertices3D[i],vertices3D[i+1],vertices3D[i+2]);
 					
 					renderMap.cam.project(v);

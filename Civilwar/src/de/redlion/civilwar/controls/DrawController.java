@@ -188,6 +188,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.doodles.remove(picked);
 				SinglePlayerGameScreen.pathDoodles.remove(picked);
 				SinglePlayerGameScreen.generatedDoodles.remove(picked);
+				SinglePlayerGameScreen.generatedPathDoodles.remove(picked);
 				SinglePlayerGameScreen.circleHasPath.remove(picked);
 			}
 			
