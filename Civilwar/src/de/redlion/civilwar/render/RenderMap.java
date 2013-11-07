@@ -70,6 +70,7 @@ public class RenderMap {
 	BoundingBox instanceLandBB;
 
 	public OrthographicCamera cam;
+	public OrthographicCamera birdsEye;
 	PerspectiveCamera currCam;
 	
 	public HeightMap heightMap;
@@ -144,6 +145,12 @@ public class RenderMap {
 			cam.up.set(camUp);
 		}
 		cam.update();
+		
+		birdsEye = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		birdsEye.zoom = 0.015f;
+		birdsEye.position.set(-1,18,0);
+		birdsEye.lookAt(0, 0, 0);
+		birdsEye.update();
 		
 		// set materials
 		MaterialAttribute materialAttributeSoldierDiffTex = new TextureAttribute(texSoldierDiff, 0, TextureAttribute.diffuseTexture);

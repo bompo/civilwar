@@ -170,6 +170,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		renderMap = new RenderMap(camPos,camDir,camUp);
 
 		r.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+		
 		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		camController = new OrthoCamController(renderMap.cam);
@@ -383,6 +384,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 		
 		if(paused) {
+			
+//			r.setProjectionMatrix(renderMap.cam.combined);
 			batch.begin();
 			font.draw(batch, "PAUSED", 700, 35);
 			batch.end();
@@ -1052,7 +1055,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			Vector3 origin = new Vector3(pol.getOriginX(),0,pol.getOriginY());
 			renderMap.cam.project(origin);
 			//add origin for beauty reasons
-			tempDoodle.add(new Vector2(origin.x, origin.y));
+			if(!pol.contains(paths.get(pol).get(0).x,paths.get(pol).get(0).y))
+				tempDoodle.add(new Vector2(origin.x, origin.y));
 			for(Vector3 v : paths.get(pol)) {
 				
 				Vector3 vCpy = v.cpy();

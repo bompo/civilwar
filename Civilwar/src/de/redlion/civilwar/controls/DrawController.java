@@ -654,9 +654,18 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	private void updateDoodles(int x, int y) {
 		
 		Vector2 trans = new Vector2();
+		Vector3 temp = new Vector3();
+		temp.set(x,0,y).sub(last.x,0,last.y);
+		temp.x *= -1;
 		
-		trans.set(x,y).sub(last);
-		trans.y *= -1;		
+//		trans.set(x,y).sub(last);
+//		trans.y *= -1;
+		Quaternion rotation = new Quaternion();
+		camera.combined.getRotation(rotation);
+		rotation.transform(temp);
+		
+		temp.mul(-1);
+		trans.set(temp.x,temp.z);
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
 			
@@ -664,7 +673,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
 			for(Vector2 v : doodle) {
 				
-				v.add(trans);
+				v.add(trans.x,trans.y);
 				
 				newDoodle.add(v);
 				
