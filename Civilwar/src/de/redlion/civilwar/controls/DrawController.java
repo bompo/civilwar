@@ -198,7 +198,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 		return false;
 	}
-
+ 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {

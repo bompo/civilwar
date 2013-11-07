@@ -332,6 +332,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
 				
+				while(vertices3D.length%3 != 0) {
+					vertices3D = new float[1+vertices3D.length];
+				}
+				
 				Mesh polygonalMesh = new Mesh(true, vertices3D.length, vertices3D.length / 3, VertexAttribute.Position());
 				
 				int l = 0;
@@ -905,8 +909,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	private void updatePaths() {
 		
 		for(Polygon pol : paths.keySet()) {
-			if(!paths.get(pol).isEmpty() && pol.contains(paths.get(pol).get(0).x, paths.get(pol).get(0).z))
+			if(!paths.get(pol).isEmpty() && pol.contains(paths.get(pol).get(0).x, paths.get(pol).get(0).z)) {
 				paths.get(pol).remove(0);
+				System.out.println("hi");
+			}
 		}
 	
 	}
@@ -971,6 +977,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
 				
+				while(vertices3D.length%3 != 0) {
+					vertices3D = new float[1+vertices3D.length];
+				}
+				
 				int l = 0;
 				for(int k=0;k<vertices3D.length;k++) {
 					
@@ -987,9 +997,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				for(int i=0; i<vertices3D.length;i+=3) {
 					
-					if(i+2 > vertices3D.length)
-						break;
-					
+					System.out.println("i:" + i + " length:" + vertices3D.length);
 					Vector3 v = new Vector3(vertices3D[i],vertices3D[i+1],vertices3D[i+2]);
 					
 					renderMap.cam.project(v);
