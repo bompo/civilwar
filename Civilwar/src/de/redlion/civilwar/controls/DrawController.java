@@ -267,6 +267,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			}
 			
 			if(SinglePlayerGameScreen.currentDoodle.size() > 11) {
+				//is it a circle?
 				if(SinglePlayerGameScreen.circles.isEmpty() && circleTest((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone())) {
 					
 					float[] points = new float[tempList.size() * 2 + 2];
@@ -299,7 +300,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						SinglePlayerGameScreen.currentDoodle.clear();
 				}
 				else if(!SinglePlayerGameScreen.circles.isEmpty()) {
-					
+					//is it a disjoint circle or a path?
 					if(circleTest((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone())) {
 					
 						float[] points = new float[tempList.size() * 2 + 2];
@@ -344,21 +345,14 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						}
 					}
 					else {
+						//is it a path?
 						boolean deletedoodle = true;
 						for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
 							
-							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
-								
-								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
-									//workaround because same polygon can't be in doodles twice
-		
-//									Polygon pCopy = new Polygon(p.getTransformedVertices());
-//									SinglePlayerGameScreen.circles.put(pCopy, SinglePlayerGameScreen.circles.get(p));
-//									SinglePlayerGameScreen.doodles.put(pCopy,(ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-//									SinglePlayerGameScreen.triangleStrips.put(pCopy, (ArrayList<Vector2>) currentTriangleStrip.clone());
-//									SinglePlayerGameScreen.paths.put(pCopy, (ArrayList<Vector3>) tempList.clone());
-//									SinglePlayerGameScreen.currentTriStrip.clear();
-									
+//							if(p.contains(tempList.get(0).x, tempList.get(0).z) && SinglePlayerGameScreen.paths.get(p) == null) {
+							if(p.contains(tempList.get(0).x, tempList.get(0).z)) {
+//								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
+								if(SinglePlayerGameScreen.paths.get(p) == null)	{
 									SinglePlayerGameScreen.pathDoodles.put(p, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 									SinglePlayerGameScreen.pathTriangleStrips.put(p, (ArrayList<Vector2>) currentTriangleStrip.clone());
 									SinglePlayerGameScreen.paths.put(p, (ArrayList<Vector3>) tempList.clone());
@@ -381,6 +375,22 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 //									("","" + SinglePlayerGameScreen.currentDoodle.get(0));
 									deletedoodle = false;
 									break;
+								} else {
+									//there already is another path
+									
+									//check if there is more than one soldier in the circle
+									if(SinglePlayerGameScreen.circles.get(p).size() > 1) {
+										
+										int newNumber = SinglePlayerGameScreen.circles.get(p).size() / 2;
+										
+										for(int i=0;i<newNumber;i++) {
+											
+											
+											
+										}
+										
+									}
+									
 								}
 							}
 						}
