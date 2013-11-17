@@ -72,7 +72,7 @@ public class RenderMap {
 		
 		lights = new Environment();
         lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.0f, 0.0f, 0.0f, 1.f));
-        lights.add(new DirectionalLight().set(0.99f, 0.99f, 0.99f, -0.4f, -10.0f, 0.2f));
+        lights.add(new DirectionalLight().set(0.99f, 0.99f, 0.99f, -0.4f, -1.0f, 0.2f));
 
 		assets = new AssetManager();
 		assets.load("data/soldier.g3db", Model.class);

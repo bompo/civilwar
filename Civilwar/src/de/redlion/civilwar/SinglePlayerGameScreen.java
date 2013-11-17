@@ -779,30 +779,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	}
 	
 	private static void updatePolygons() {
-		
-//		for(Polygon pol : circles.keySet()) {
-//			
-//			FloatArray polygon = new FloatArray(circles.get(pol).size() * 2);
-//			
-//			for(PlayerSoldier soldier : circles.get(pol)) {
-//				polygon.add(soldier.position.x);
-//				polygon.add(soldier.position.y);
-//			}
-//			
-//			
-//			ShortArray triangles = new EarClippingTriangulator().computeTriangles(polygon);
-//			
-//			
-//			
-//		}
-//		
-//		
-		
-		
-		
-		
-		
-		
+				
 		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
 		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
 		HashMap<Polygon, ArrayList<Vector3>> updatedPaths = new HashMap<Polygon, ArrayList<Vector3>>();
@@ -903,7 +880,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			originY /= newVertices.length / 2;
 			
 			newPoly.setOrigin(originX, originY);
-			newPoly.scale(1.5f);
+			newPoly.scale(1.f);
 			
 			updatedList.put(newPoly, circles.get(pol));
 			

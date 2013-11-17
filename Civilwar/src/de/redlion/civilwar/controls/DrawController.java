@@ -738,6 +738,12 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	@SuppressWarnings("unchecked")
 	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input, boolean taper) {
+		//Catmull
+//		Array<Path<Vector2>> paths = new Array<Path<Vector2>>();
+//		Vector2[] stockArr = new Vector2[input.size()];
+//	    stockArr = input.toArray(stockArr);
+//		
+//		paths.add(new CatmullRomSpline<Vector2>(stockArr, true));
 		
 		Vector2 p1 = new Vector2();
 //		Vector2 p2 = new Vector2();
