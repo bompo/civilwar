@@ -1,6 +1,10 @@
 package de.redlion.civilwar.controls;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import sun.dc.pr.PathDasher;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
@@ -14,6 +18,9 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Single;
+
+import de.redlion.civilwar.BoundingPolygon;
 import de.redlion.civilwar.Constants;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
@@ -381,13 +388,111 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 									//check if there is more than one soldier in the circle
 									if(SinglePlayerGameScreen.circles.get(p).size() > 1) {
 										
+										//find intersection of path with circle
+										
+										ArrayList<Vector3> trail = SinglePlayerGameScreen.paths.get(p);
+										
+										Vector2 firstPointOutsidePolygon = new Vector2();
+										
+										List<Vector2> circle = new ArrayList<Vector2>();
+										float[] vertices = p.getTransformedVertices();
+
+										for(int k=0;k<vertices.length;k+=2) {
+											
+											if(k+2>vertices.length)
+												break;
+											
+											circle.add(new Vector2(vertices[k],vertices[k+1]));
+										}
+
+										for(Vector3 point : trail) {
+											
+											if(!Intersector.isPointInPolygon(circle, new Vector2(point.x, point.z))) {
+												firstPointOutsidePolygon = new Vector2(point.x, point.z);
+												break;
+											}
+										}
+										
+										//sort soldiers by distance to intersection point
+										ArrayList<PlayerSoldier> sortedSoldiers = new ArrayList<PlayerSoldier>();
+										
+										for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p)) {
+											
+											if(sortedSoldiers.isEmpty()) {
+												sortedSoldiers.add(pS);
+											}
+											else if(pS.position.dst(firstPointOutsidePolygon) <= sortedSoldiers.get(0).position.dst(firstPointOutsidePolygon)) {
+												
+												sortedSoldiers.add(0, pS);
+											}
+											else {
+												
+												int l = 1;
+												
+												while(pS.position.dst(firstPointOutsidePolygon) > sortedSoldiers.get(l).position.dst(firstPointOutsidePolygon)) {
+													l++;
+													if(l >= sortedSoldiers.size())
+														break;
+												}
+												
+												sortedSoldiers.add(l, pS);
+											}
+										}
+										
 										int newNumber = SinglePlayerGameScreen.circles.get(p).size() / 2;
 										
-										for(int i=0;i<newNumber;i++) {
-											
-											
-											
+										ArrayList<PlayerSoldier> newSoldiers1 = new ArrayList<PlayerSoldier>(sortedSoldiers.subList(0, newNumber));
+										ArrayList<PlayerSoldier> newSoldiers2 = new ArrayList<PlayerSoldier>(sortedSoldiers.subList(newNumber+1, sortedSoldiers.size()-1));
+										
+										Polygon p1 = new Polygon(new float[10]);
+										Polygon p2 = new Polygon(new float[10]);
+										
+										SinglePlayerGameScreen.circles.put(p1, newSoldiers1);
+										SinglePlayerGameScreen.circles.put(p2, newSoldiers2);
+										SinglePlayerGameScreen.circles.remove(p);
+										
+										SinglePlayerGameScreen.paths.put(p1, (ArrayList<Vector3>) SinglePlayerGameScreen.paths.get(p).clone());
+										SinglePlayerGameScreen.pathDoodles.put(p2, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+										SinglePlayerGameScreen.pathTriangleStrips.put(p2, (ArrayList<Vector2>) currentTriangleStrip.clone());
+										SinglePlayerGameScreen.paths.put(p2, (ArrayList<Vector3>) tempList.clone());
+										SinglePlayerGameScreen.currentTriStrip.clear();
+										SinglePlayerGameScreen.paths.remove(p);
+										
+										for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p1)) {
+											pS.wayPoints.clear();
+											pS.ai.setState(DefaultAI.STATE.MOVING);
+											pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p1));
+											Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
+											direction.nor();
+											direction.mul(-1000);
+											Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
+											pS.wayPoints.add(last);
 										}
+										
+										for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(p2)) {
+											pS.wayPoints.clear();
+											pS.ai.setState(DefaultAI.STATE.MOVING);
+											pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p2));
+											Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
+											direction.nor();
+											direction.mul(-1000);
+											Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
+											pS.wayPoints.add(last);
+										}
+										
+										SinglePlayerGameScreen.circleHasPath.add(p1);
+										SinglePlayerGameScreen.circleHasPath.add(p2);
+										SinglePlayerGameScreen.circleHasPath.remove(p);
+										
+										SinglePlayerGameScreen.pathDoodles.put(p1, (ArrayList<Vector2>) SinglePlayerGameScreen.pathDoodles.get(p));
+										SinglePlayerGameScreen.pathTriangleStrips.put(p1, SinglePlayerGameScreen.pathTriangleStrips.get(p));
+										SinglePlayerGameScreen.pathDoodles.put(p2, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+										SinglePlayerGameScreen.pathTriangleStrips.put(p2, (ArrayList<Vector2>) currentTriangleStrip.clone());
+										SinglePlayerGameScreen.pathTriangleStrips.remove(p);
+										SinglePlayerGameScreen.pathDoodles.remove(p);
+										
+										SinglePlayerGameScreen.updatePolygons();
+//										SinglePlayerGameScreen.updatePaths();
 										
 									}
 									
