@@ -5,8 +5,8 @@ import java.io.ObjectOutputStream;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
-import com.badlogic.gdx.graphics.g3d.model.still.StillSubMesh;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -23,27 +23,25 @@ public class HeightMap {
 
 	BoundingBox boundingBox;
 
-	public HeightMap(StillModel plane) {
+	public HeightMap(Model plane) {
 		boundingBox = new BoundingBox();
 
 		// get max bounds from model
-		int len = plane.subMeshes.length;
+		int len = plane.meshParts.size;
 		for (int i = 0; i < len; i++) {
-			StillSubMesh subMesh = plane.subMeshes[i];
+			MeshPart subMesh = plane.meshParts.get(i);
 			BoundingBox bb = new BoundingBox();
-			subMesh.getBoundingBox(bb);
+			bb = subMesh.mesh.calculateBoundingBox();
 			boundingBox.ext(bb);
 		}
-
-		System.out.println(boundingBox);
 
 		heightMap = new float[HEIGHTMAPSIZE][HEIGHTMAPSIZE];
 
 		// iterate through model and generate grid from vertices height
-		len = plane.subMeshes.length;
+		len = plane.meshParts.size;
 		for (int i = 0; i < len; i++) {
-			StillSubMesh subMesh = plane.subMeshes[i];
-
+			MeshPart subMesh = plane.meshParts.get(i);
+			
 			map = new float[subMesh.mesh.getNumVertices() * 3];
 
 			int j = 0;
@@ -53,9 +51,9 @@ public class HeightMap {
 				float y = subMesh.mesh.getVerticesBuffer().get(n + 1);
 				float z = subMesh.mesh.getVerticesBuffer().get(n + 2);
 
-				map[j] = x;
-				map[j + 1] = y;
-				map[j + 2] = z;
+				map[j] = y;
+				map[j + 1] = z;
+				map[j + 2] = x;
 
 				j = j + 3;
 			}
@@ -81,9 +79,9 @@ public class HeightMap {
 				for (int z = 0; z < HEIGHTMAPSIZE; z++) {
 
 					float x1 = Helper.map(x, 0, HEIGHTMAPSIZE, boundingBox.min.x, boundingBox.max.x);
-					float z1 = Helper.map(z, 0, HEIGHTMAPSIZE, boundingBox.min.z, boundingBox.max.z);
+					float z1 = Helper.map(z, 0, HEIGHTMAPSIZE, boundingBox.min.y, boundingBox.max.y);
 
-					ray.set(new Vector3(x1, -100, z1), Vector3.Y);
+					ray.set(new Vector3(x1, z1, -100), Vector3.Y);
 
 					Intersector.intersectRayTriangles(ray, map, localIntersection);
 					heightMap[x][z] = localIntersection.y;
@@ -105,7 +103,7 @@ public class HeightMap {
 	public float getHeight(float x, float z) {
 		// TODO do fancy interpolation stuff or move this to GPU?
 		int x1 = (int) Math.floor(Helper.map(x, boundingBox.min.x, boundingBox.max.x, 0, HEIGHTMAPSIZE));
-		int z1 = (int) Math.floor(Helper.map(z, boundingBox.min.z, boundingBox.max.z, 0, HEIGHTMAPSIZE));
+		int z1 = (int) Math.floor(Helper.map(z, boundingBox.min.y, boundingBox.max.y, 0, HEIGHTMAPSIZE));
 
 		return heightMap[x1][z1];
 	}

@@ -1,5 +1,6 @@
 package de.redlion.civilwar.collision;
 
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Sphere;
 
 import de.redlion.civilwar.units.Soldier;
@@ -15,7 +16,7 @@ public class Octree {
 
 	   // insert a GameObject at the quadtree
 	   public void insertObject(final Soldier obj) {
-	      node.insertObject(obj, new Sphere(obj.instance.origin, obj.instance.getBoundingSphereRadius()));
+	      node.insertObject(obj, new Sphere(new Vector3(obj.position.x, obj.height, obj.position.y), 1));
 	   }
 	   
 	   // clean the quadtree

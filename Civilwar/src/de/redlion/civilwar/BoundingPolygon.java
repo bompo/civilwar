@@ -95,7 +95,7 @@ public class BoundingPolygon {
                         return polygon;
 
 
-                float tolerance = 2.0f / 180.0f * (float) Math.PI; // 2 degrees
+                float tolerance = 1.0f / 180.0f * (float) Math.PI; // 2 degrees
 
 
                 Array<Integer> toRemove = null;

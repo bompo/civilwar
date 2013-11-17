@@ -3,37 +3,34 @@ package de.redlion.civilwar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.StillModelNode;
-import com.badlogic.gdx.graphics.g3d.loaders.ModelLoaderRegistry;
-import com.badlogic.gdx.graphics.g3d.materials.Material;
-import com.badlogic.gdx.graphics.g3d.materials.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.still.StillModel;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.SortedIntList;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.ShortArray;
 
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.GestureController;
@@ -56,7 +53,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	BitmapFont font;
 	
 	public static RenderMap renderMap;
-	RenderDebug renderDebug;
 	ShaderProgram diff;
 
 	float fade = 1.0f;
@@ -65,7 +61,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	float delta;
 	
 	OrthoCamController camController;
-	static DrawController drawController;
+	DrawController drawController;
 	KeyController keyController;
 	GestureController gestureController;
 	GestureDetector gestureDetector;
@@ -81,7 +77,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	Sprite arrowhead;
 	
 	ShapeRenderer r;
-	StillModel sphere;
 	
 	public static boolean paused = false;
 
@@ -109,13 +104,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		//refresh references 
 		//TODO Observer Pattern for newGame
 		renderMap = new RenderMap();
-		renderDebug = new RenderDebug();
+		
 		diff = new ShaderProgram(DiffuseShader.mVertexShader, DiffuseShader.mFragmentShader);
-		
-		sphere = ModelLoaderRegistry.loadStillModel(Gdx.files.internal("data/sphere.g3dt"));		
-		
-		Material mat = new Material("sphere", new TextureAttribute(new Texture(Gdx.files.internal("data/black.png"), true), 0, TextureAttribute.diffuseTexture));
-		sphere.setMaterial(mat);
 		
 //		Gdx.input.setInputProcessor(new SinglePlayerControls(player));
 
@@ -174,7 +164,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		camController = new OrthoCamController(renderMap.cam);
-		keyController = new KeyController();
+		keyController = new KeyController(this);
 		drawController = new DrawController(renderMap.cam);
 		gestureController = new GestureController();
 		gestureDetector = new GestureDetector(drawController);
@@ -271,9 +261,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		
-		if (Configuration.getInstance().debug) {
-			renderDebug.render(renderMap.cam);
-		}		
 
 		// FadeInOut
 		if (!finished && fade > 0) {
@@ -328,59 +315,58 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //
 //		}
 		
-		//draw polygons for debugging
-		for(Polygon pol : circles.keySet()) {
-			diff.begin();
-			float[] vertices = pol.getTransformedVertices();
-			
-			if(vertices.length > 0) {
-				
-				float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
-				
-				while(vertices3D.length%3 != 0) {
-					vertices3D = new float[1+vertices3D.length];
-				}
-				
-				Mesh polygonalMesh = new Mesh(true, vertices3D.length, vertices3D.length / 3, VertexAttribute.Position());
-				
-				int l = 0;
-				for(int k=0;k<vertices3D.length;k++) {
-					
-					if(k%3 == 1)
-						vertices3D[k] = 0;
-					else {
-						vertices3D[k] = vertices[l];
-						l++;
-					}
-					
-				}
-				
-				polygonalMesh.setVertices(vertices3D);
-				short[] indices =  new short[vertices3D.length/3];
-				
-				for(short j=0;j<indices.length;j++) {
-					indices[j] = j;
-				}
-				
-				polygonalMesh.setIndices(indices);
-				
-				for(int i=0; i<vertices.length;i+=2) {
-
-					StillModelNode node = new StillModelNode();
-					node.matrix.translate(vertices[i],0,vertices[i+1]);
-					node.matrix.scl(0.02f);
-					RenderMap.protoRenderer.draw(sphere, node);
-					
-					diff.setUniformMatrix("VPMatrix", renderMap.cam.combined);
-					diff.setUniformMatrix("MMatrix", model);
-					diff.setUniformi("uSampler", 0);
-					polygonalMesh.render(diff, GL20.GL_LINE_LOOP);
-					
-				}
-				
-			}
-			diff.end();
-		}
+	
+        
+        //draw polygons for debugging
+		diff.begin();
+        for(Polygon pol : circles.keySet()) {
+        		
+                float[] vertices = pol.getTransformedVertices();
+                
+                if(vertices.length > 0) {
+                        
+                        float[] vertices3D = new float[(int) Math.ceil(vertices.length + vertices.length/3)];
+                        
+                        while(vertices3D.length%3 != 0) {
+                                vertices3D = new float[1+vertices3D.length];
+                        }
+                        
+                        Mesh polygonalMesh = new Mesh(true, vertices3D.length, vertices3D.length / 3, VertexAttribute.Position());
+                        
+                        int l = 0;
+                        for(int k=0;k<vertices3D.length;k++) {
+                                
+                                if(k%3 == 1)
+                                        vertices3D[k] = 0;
+                                else {
+                                        vertices3D[k] = vertices[l];
+                                        l++;
+                                }
+                                
+                        }
+                        
+                        polygonalMesh.setVertices(vertices3D);
+                        short[] indices =  new short[vertices3D.length/3];
+                        
+                        for(short j=0;j<indices.length;j++) {
+                                indices[j] = j;
+                        }
+                        
+                        polygonalMesh.setIndices(indices);
+                        
+                        for(int i=0; i<vertices.length;i+=2) {
+                                
+                                diff.setUniformMatrix("VPMatrix", renderMap.cam.combined);
+                                diff.setUniformMatrix("MMatrix", model);
+                                diff.setUniformi("uSampler", 0);
+                                polygonalMesh.render(diff, GL20.GL_LINE_LOOP);
+                                
+                        }
+                        
+                }
+        }
+        diff.end();
+        
 		
 		
 		if(paused) {
@@ -399,14 +385,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.FilledTriangle);
+					r.begin(ShapeType.Filled);
 					
 					Vector2 p0 = triangleStrip.get(0);
 					Vector2 p1 = triangleStrip.get(1);
 
 					for(Vector2 p2 : triangleStrip) {
 
-						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
@@ -426,14 +412,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.FilledTriangle);
+					r.begin(ShapeType.Filled);
 					
 					Vector2 p0 = triangleStrip.get(0);
 					Vector2 p1 = triangleStrip.get(1);
 
 					for(Vector2 p2 : triangleStrip) {
 
-						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
@@ -493,14 +479,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.FilledTriangle);
+					r.begin(ShapeType.Filled);
 					
 					Vector2 p0 = triangleStrip.get(0);
 					Vector2 p1 = triangleStrip.get(1);
 
 					for(Vector2 p2 : triangleStrip) {
 
-						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
@@ -522,14 +508,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
 					
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.FilledTriangle);
+					r.begin(ShapeType.Filled);
 					
 					Vector2 p0 = triangleStrip.get(0);
 					Vector2 p1 = triangleStrip.get(1);
 
 					for(Vector2 p2 : triangleStrip) {
 
-						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
@@ -600,14 +586,14 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				if(currentTriStrip.size() >= 2) {
 					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.FilledTriangle);
+					r.begin(ShapeType.Filled);
 					
 					Vector2 p0 = currentTriStrip.get(0);
 					Vector2 p1 = currentTriStrip.get(1);
 					
 					for(Vector2 p2 : currentTriStrip) {
 						
-						r.filledTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 						p0 = p1;
 						p1 = p2;
 						
@@ -793,6 +779,29 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	}
 	
 	private static void updatePolygons() {
+		
+//		for(Polygon pol : circles.keySet()) {
+//			
+//			FloatArray polygon = new FloatArray(circles.get(pol).size() * 2);
+//			
+//			for(PlayerSoldier soldier : circles.get(pol)) {
+//				polygon.add(soldier.position.x);
+//				polygon.add(soldier.position.y);
+//			}
+//			
+//			
+//			ShortArray triangles = new EarClippingTriangulator().computeTriangles(polygon);
+//			
+//			
+//			
+//		}
+//		
+//		
+		
+		
+		
+		
+		
 		
 		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
 		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
@@ -999,8 +1008,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	/**
 	 * generates Doodles and Trianglestrips for polygons
 	 */
-	@SuppressWarnings("unchecked")
-	public static void generateDoodles() {
+	public void generateDoodles() {
 
 		for(Polygon pol : circles.keySet()) {
 			

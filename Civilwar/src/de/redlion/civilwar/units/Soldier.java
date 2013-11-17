@@ -1,7 +1,6 @@
 package de.redlion.civilwar.units;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.StillModelNode;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -42,7 +41,6 @@ public class Soldier {
 	public boolean stopped = false;
 	
 	//render stuff
-	public StillModelNode instance;	
 	public BoundingBox instanceBB;
 	
 
@@ -59,8 +57,7 @@ public class Soldier {
 		this.facing.set(facing);
 		this.facing.rotate(angle);
 		
-		instanceBB = new BoundingBox();		
-		instance = new StillModelNode();
+		instanceBB = new BoundingBox();
 	}
 	
 	public void update(float delta) {
@@ -154,7 +151,7 @@ public class Soldier {
 	}
 
 	public void goTowardsOrAway(Vector2 targetPos, boolean forceThrust, boolean isAway) {
-		Vector2 target_direction = targetPos.tmp().sub(position);
+		Vector2 target_direction = targetPos.cpy().sub(position);
 		if (isAway) {
 			target_direction.mul(-1);
 		}

@@ -250,7 +250,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
 				}
 				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(),true);	
-			}	
+			}
 			
 			
 			for(Vector2 temp : SinglePlayerGameScreen.currentDoodle) {
