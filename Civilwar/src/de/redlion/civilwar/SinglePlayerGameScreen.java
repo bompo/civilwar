@@ -406,7 +406,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			for(Polygon pol : pathDoodles.keySet()) {
 				
-				
 				ArrayList<Vector2> triangleStrip = pathTriangleStrips.get(pol);
 				
 				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
@@ -427,7 +426,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					r.end();
 				}
 				
-				if(paths.containsKey(pol)) {
+//				if(paths.containsKey(pol)) {
 					
 					ArrayList<Vector2> doodle = pathDoodles.get(pol);
 					
@@ -467,7 +466,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					batch.begin();
 					arrowhead.draw(batch);
 					batch.end();
-				}
+//				}
 			}
 			//draw generated doodles
 			for(Polygon pol : generatedDoodles.keySet()) {
@@ -778,8 +777,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		}
 	}
 	
-	private static void updatePolygons() {
-				
+	public static void updatePolygons() {
 		HashMap<Polygon, ArrayList<PlayerSoldier>> updatedList = new HashMap<Polygon, ArrayList<PlayerSoldier>>();
 		ArrayList<Polygon> updatedCircleHasPath = new ArrayList<Polygon>();
 		HashMap<Polygon, ArrayList<Vector3>> updatedPaths = new HashMap<Polygon, ArrayList<Vector3>>();
@@ -902,7 +900,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		
 	}
 	
-	private void updatePaths() {
+	public static void updatePaths() {
 		
 		for(Polygon pol : paths.keySet()) {
 			
