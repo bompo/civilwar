@@ -1,7 +1,10 @@
 package de.redlion.civilwar.controls;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
@@ -41,6 +44,12 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	//used for mapping a circle to its intersection points with new paths, i.e. where the new sub circles will be calculated from
 	public HashMap<Polygon, HashMap<Vector2, ArrayList<Vector3>>> subCircleHelper = new HashMap<Polygon, HashMap<Vector2,ArrayList<Vector3>>>();
+	//used for mapping a polygon to it's uncommitted polygons (for deletion)
+	public HashMap<Polygon, ArrayList<Polygon>> tempPolys = new HashMap<Polygon, ArrayList<Polygon>>();
+	//maps uncommitted paths to temporary polygons (for deletion)
+	public HashMap<ArrayList<Vector3>, Polygon> pathHelper = new HashMap<ArrayList<Vector3>, Polygon>();
+	//maps uncommitted paths to Intersection points (for deletion)
+	public HashMap<ArrayList<Vector3>, Vector2> intersectionHelper = new HashMap<ArrayList<Vector3>, Vector2>();
 			
 	final Vector2 lastPoint = new Vector2();
 	
@@ -300,7 +309,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						SinglePlayerGameScreen.triangleStrips.put(poly, (ArrayList<Vector2>) currentTriangleStrip.clone());
 						SinglePlayerGameScreen.circles.put(poly, so);
 						SinglePlayerGameScreen.currentTriStrip.clear();
-//						("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 					}
 					else
 						SinglePlayerGameScreen.currentDoodle.clear();
@@ -336,7 +344,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 								SinglePlayerGameScreen.currentTriStrip.clear();
 								SinglePlayerGameScreen.circles.put(poly, so);
 								
-//								("POLYGON ADDED: ", "Polygon Number: " + SinglePlayerGameScreen.circles.size() + " with id " + poly.toString());
 							}
 							else {
 								SinglePlayerGameScreen.currentDoodle.clear();
@@ -377,8 +384,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 									
 									SinglePlayerGameScreen.circleHasPath.add(p);
 									
-//									("PATH ADDED: ", "Path Number: " + SinglePlayerGameScreen.paths.size() + " from Polygon " + p.toString());
-//									("","" + SinglePlayerGameScreen.currentDoodle.get(0));
 									deletedoodle = false;
 									break;
 								} else {
@@ -445,9 +450,17 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 										intersections.put(firstPointOutsidePolygon, trail);
 										subCircleHelper.put(p, intersections);		
 										
-										//for drawing currentdoodles
+										//for drawing currentdoodles and for possible deletions
 										Polygon tempP = new Polygon(p.getVertices());
 										
+										ArrayList<Polygon> tempPolygons = new ArrayList<Polygon>();
+										if(tempPolys.containsKey(p))
+											tempPolygons = tempPolys.get(p);
+										tempPolygons.add(tempP);
+										
+										tempPolys.put(p, tempPolygons);
+										pathHelper.put((ArrayList<Vector3>) tempList.clone(), tempP);
+										intersectionHelper.put((ArrayList<Vector3>) tempList.clone(), firstPointOutsidePolygon);
 										SinglePlayerGameScreen.pathDoodles.put(tempP, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
 										SinglePlayerGameScreen.pathTriangleStrips.put(tempP, (ArrayList<Vector2>) currentTriangleStrip.clone());
 										
@@ -484,6 +497,11 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			ArrayList<Polygon> toDelete = new ArrayList<Polygon>();
 			ArrayList<Polygon> pathsToDelete = new ArrayList<Polygon>();
 			
+			//ONLY used for paths, not yet committed by divideCircles
+			ArrayList<ArrayList<Vector3>> pathDoodlesToDelete = new ArrayList<ArrayList<Vector3>>();
+			//ONLY used for paths, not yet committed by divideCircles inside subCircleHelper
+			ArrayList<Vector2> subCirclePathsToDelete = new ArrayList<Vector2>();
+			
 			//deletePath must start and end outside polygon but must contain at least one point inside polygon
 			boolean checkPoly = false;
 				
@@ -499,7 +517,6 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 							
 							if(pol.contains(vec.x, vec.z) && deletePath.indexOf(vec) != 0 && deletePath.indexOf(vec) != deletePath.size() -1) {
 								toDelete.add(pol);
-//								("", "Circle deleted :(");
 								break;
 							}
 							
@@ -530,6 +547,35 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						}						
 					}					
 				}
+				//check paths that haven't been committed yet
+				for(Polygon polyg : subCircleHelper.keySet()) {
+					
+					for(ArrayList<Vector3> trail : subCircleHelper.get(polyg).values()) {
+						
+						if(!trail.isEmpty()) {
+							
+							if(trail.size()%2 != 0)
+								trail.add(trail.get(trail.size() - 1));
+							
+							Vector2 start = new Vector2(deletePath.get(0).x,deletePath.get(0).z);
+							Vector2 end = new Vector2(deletePath.get(deletePath.size()-1).x,deletePath.get(deletePath.size()-1).z);
+							
+							for(int i=0; i<trail.size();i+=2) {
+								
+								Vector2 point1 = new Vector2(trail.get(i).x,trail.get(i).z);
+								Vector2 point2 = new Vector2(trail.get(i+1).x,trail.get(i+1).z);
+								
+								if(Intersector.intersectSegments(point1, point2, start, end, new Vector2())) {
+									pathDoodlesToDelete.add(trail);
+									subCirclePathsToDelete.add(intersectionHelper.get(trail));
+								}
+								
+							}						
+						}	
+						
+					}
+									
+				}
 				
 			}
 			
@@ -545,6 +591,15 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					SinglePlayerGameScreen.generatedDoodles.remove(pop);
 					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
+					
+					subCircleHelper.remove(pop);
+					for(Polygon push : tempPolys.get(pop)) {
+						
+						SinglePlayerGameScreen.doodles.remove(push);
+						SinglePlayerGameScreen.pathDoodles.remove(push);
+						
+					}
+					tempPolys.remove(pop);
 					
 				}
 			}
@@ -563,6 +618,21 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					
 				}
 			}
+			if(!pathDoodlesToDelete.isEmpty()) {
+				for(ArrayList<Vector3> trail : pathDoodlesToDelete) {
+					SinglePlayerGameScreen.pathDoodles.remove(pathHelper.get(trail));	
+				}
+			}
+			if(!subCirclePathsToDelete.isEmpty()) {
+				for(Vector2 v : subCirclePathsToDelete) {
+					for(Polygon pop : subCircleHelper.keySet()) {
+						if(subCircleHelper.get(pop).containsKey(v)) {
+							subCircleHelper.get(pop).remove(v);
+						}
+					}
+				}
+			}
+			
 		}
 		picked = null;
 		fling = false;

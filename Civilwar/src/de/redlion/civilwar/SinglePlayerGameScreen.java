@@ -184,6 +184,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			drawController.subCircleHelper.clear();
+			drawController.tempPolys.clear();
+			drawController.pathHelper.clear();
+			drawController.intersectionHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -229,6 +232,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			drawController.subCircleHelper.clear();
+			drawController.tempPolys.clear();
+			drawController.pathHelper.clear();
+			drawController.intersectionHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
