@@ -17,10 +17,7 @@ public class KeyController extends InputAdapter{
 		
 		if(keycode == Input.Keys.SPACE || keycode == Input.Keys.VOLUME_DOWN) {
 			
-			SinglePlayerGameScreen.paused = !SinglePlayerGameScreen.paused;
-			
-			if(SinglePlayerGameScreen.paused)
-				singlePlayerGameScreen.generateDoodles();
+			SinglePlayerGameScreen.paused = !singlePlayerGameScreen.paused;
 			
 		}
 		

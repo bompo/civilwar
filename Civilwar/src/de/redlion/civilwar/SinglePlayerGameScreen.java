@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,27 +15,20 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.ShortArray;
-
 import de.redlion.civilwar.controls.DrawController;
 import de.redlion.civilwar.controls.GestureController;
 import de.redlion.civilwar.controls.KeyController;
 import de.redlion.civilwar.controls.OrthoCamController;
-import de.redlion.civilwar.render.RenderDebug;
 import de.redlion.civilwar.render.RenderMap;
 import de.redlion.civilwar.shader.DiffuseShader;
 import de.redlion.civilwar.units.PlayerSoldier;
@@ -173,6 +165,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
 			
+			generateDoodles();
+			
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(gestureDetector);
 			multiplexer.addProcessor(keyController);
@@ -189,6 +183,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			generatedPathTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
+			drawController.subCircleHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -219,6 +214,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.addProcessor(gestureDetector);
 			multiplexer.addProcessor(keyController);
 			
+			generateDoodles();
+			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
 			doodles.clear();
@@ -231,6 +228,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			generatedPathTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
+			drawController.subCircleHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -983,7 +981,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	/**
 	 * generates Doodles and Trianglestrips for polygons
 	 */
-	public void generateDoodles() {
+	private void generateDoodles() {
 
 		for(Polygon pol : circles.keySet()) {
 			
