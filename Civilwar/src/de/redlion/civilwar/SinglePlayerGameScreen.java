@@ -617,12 +617,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						temp.set(1,0,0);
 					else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
 						temp.set(0,0,-1);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
+					temp.scl(0.01f * Constants.MOVESPEED);
+					temp.scl(edgeScrollingSpeed);
 					Quaternion rotation = new Quaternion();
 					drawController.camera.combined.getRotation(rotation);
 					rotation.transform(temp);
-					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.translate(temp.scl(-1));
 					drawController.camera.update();
 				
 					for(ArrayList<Vector2> doodle : doodles.values()) {
@@ -822,7 +822,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				Vector2 tempPos2 = positions.get(1).cpy();
 				
 				Vector2 mid = tempPos.cpy().add(tempPos2.cpy());
-				mid.mul(0.5f);
+				mid.scl(0.5f);
 				
 				//not perfect but it's a triangle...
 				mid.add(Math.signum(mid.x) / 5, Math.signum(mid.y) / 5);
@@ -974,8 +974,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			for(int soldier2ID = 0; soldier2ID < GameSession.getInstance().soldiers.size; soldier2ID++) {
 				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);
 				if(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
-					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(.1f));
-					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(.1f));
+					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).scl(.1f));
+					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).scl(.1f));
 				}
 			}
 		}

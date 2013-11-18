@@ -106,7 +106,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		
 		if(move) {
 			delta.set(x, y).sub(last);
-			delta.mul(0.01f * Constants.MOVESPEED);
+			delta.scl(0.01f * Constants.MOVESPEED);
 			Vector3 temp = new Vector3(delta.y, 0, -delta.x);
 			Quaternion rotation = new Quaternion();
 			camera.combined.getRotation(rotation);
@@ -370,7 +370,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p));
 										Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
 										direction.nor();
-										direction.mul(-1000);
+										direction.scl(-1000);
 										Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
 										pS.wayPoints.add(last);
 									}
@@ -739,7 +739,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p));
 				Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
 				direction.nor();
-				direction.mul(-1000);
+				direction.scl(-1000);
 				Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
 				pS.wayPoints.add(last);
 			}
@@ -822,7 +822,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		camera.combined.getRotation(rotation);
 		rotation.transform(temp);
 		
-		temp.mul(-1);
+		temp.scl(-1);
 		trans.set(temp.x,temp.z);
 		
 		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.doodles.values()) {
@@ -1023,13 +1023,13 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 //			tmp.set(p2).sub(p1).nor();
 			tmp.set(0,-1);
-			tmp.mul(thickness_v);
+			tmp.scl(thickness_v);
 			
 			Vector2 a = p1.cpy().add(tmp);
 			Vector2 b = p1.cpy().sub(tmp);
 			
 			tmp.set(1,0);
-			tmp.mul(thickness_h);
+			tmp.scl(thickness_h);
 			
 			a.add(tmp);
 			b.sub(tmp);
