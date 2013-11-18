@@ -900,6 +900,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static void updatePaths() {
 		
+		ArrayList<Polygon> deleteThese = new ArrayList<Polygon>();
+		
 		for(Polygon pol : paths.keySet()) {
 			
 			int toDelete = -1;
@@ -918,7 +920,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						set.add(waypoint);
 				}
 				
-				toDelete = set.first();
+				if(!set.isEmpty())
+					toDelete = set.first();
 				
 				//delete all points on path that are no longer waypoints
 				if(toDelete > -1) {
@@ -927,8 +930,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			
 			if(paths.get(pol).size() <= 1)
-				paths.remove(pol);
+				deleteThese.add(pol);
 		}
+		
+		paths.keySet().removeAll(deleteThese);
 	
 	}
 
