@@ -53,7 +53,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	float delta;
 	
 	OrthoCamController camController;
-	DrawController drawController;
+	public DrawController drawController;
 	KeyController keyController;
 	GestureController gestureController;
 	GestureDetector gestureDetector;
@@ -165,7 +165,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
 			
-			generateDoodles();
+//			generateDoodles();
 			
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(gestureDetector);
@@ -214,7 +214,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.addProcessor(gestureDetector);
 			multiplexer.addProcessor(keyController);
 			
-			generateDoodles();
+//			generateDoodles();
 			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
@@ -981,7 +981,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	/**
 	 * generates Doodles and Trianglestrips for polygons
 	 */
-	private void generateDoodles() {
+	@SuppressWarnings("unchecked")
+	public void generateDoodles() {
 
 		for(Polygon pol : circles.keySet()) {
 			
