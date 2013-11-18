@@ -842,7 +842,109 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 		}
 		
+		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.pathDoodles.values()) {
+			
+			
+			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+			for(Vector2 v : doodle) {
+				
+				v.add(trans.x,trans.y);
+				
+				newDoodle.add(v);
+				
+			}
+			
+			doodle.clear();
+			doodle.addAll(newDoodle);
+			
+		}
+		
 		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.triangleStrips.values()) {
+			
+			
+			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+			for(Vector2 v : triStrip) {
+				
+				v.add(trans);
+				
+				newStrip.add(v);
+				
+			}
+			
+			triStrip.clear();
+			triStrip.addAll(newStrip);
+			
+		}
+		
+		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.pathTriangleStrips.values()) {
+			
+			
+			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+			for(Vector2 v : triStrip) {
+				
+				v.add(trans);
+				
+				newStrip.add(v);
+				
+			}
+			
+			triStrip.clear();
+			triStrip.addAll(newStrip);
+			
+		}
+		
+		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedDoodles.values()) {
+			
+			
+			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+			for(Vector2 v : doodle) {
+				
+				v.add(trans.x,trans.y);
+				
+				newDoodle.add(v);
+				
+			}
+			
+			doodle.clear();
+			doodle.addAll(newDoodle);
+			
+		}
+		
+		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedPathDoodles.values()) {
+			
+			
+			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+			for(Vector2 v : doodle) {
+				
+				v.add(trans.x,trans.y);
+				
+				newDoodle.add(v);
+				
+			}
+			
+			doodle.clear();
+			doodle.addAll(newDoodle);
+			
+		}
+		
+		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedTriangleStrips.values()) {
+			
+			
+			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+			for(Vector2 v : triStrip) {
+				
+				v.add(trans);
+				
+				newStrip.add(v);
+				
+			}
+			
+			triStrip.clear();
+			triStrip.addAll(newStrip);
+			
+		}
+		
+		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedPathTriangleStrips.values()) {
 			
 			
 			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
