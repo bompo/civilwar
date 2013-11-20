@@ -917,7 +917,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				for(PlayerSoldier s : circles.get(pol)) {
 					int waypoint = -1;
 					for(Vector3 v : paths.get(pol)) {
-						 if(s.wayPoints.get(0).equals(v)) {
+						 if(!s.wayPoints.isEmpty() && s.wayPoints.get(0).equals(v)) {
 							 waypoint = paths.get(pol).indexOf(v);
 							 break;
 						 }
