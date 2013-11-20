@@ -44,7 +44,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	
 	//used for mapping a circle to its intersection points with new paths, i.e. where the new sub circles will be calculated from
 	public HashMap<Polygon, HashMap<Vector2, ArrayList<Vector3>>> subCircleHelper = new HashMap<Polygon, HashMap<Vector2,ArrayList<Vector3>>>();
-	//used for mapping a polygon to it's uncommitted polygons (for deletion)
+	//used for mapping a polygon to it's uncommitted contained polygons (for deletion)
 	public HashMap<Polygon, ArrayList<Polygon>> tempPolys = new HashMap<Polygon, ArrayList<Polygon>>();
 	//maps uncommitted paths to temporary polygons (for deletion)
 	public HashMap<ArrayList<Vector3>, Polygon> pathHelper = new HashMap<ArrayList<Vector3>, Polygon>();
@@ -140,7 +140,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.currentDoodle.add(temp);
 				lastPoint.set(temp);
 				SinglePlayerGameScreen.currentTriStrip.clear();
-				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(), false);
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(), 1,false);
 				
 				SinglePlayerGameScreen.currentTriStrip.addAll(currentTriangleStrip);
 			}
@@ -264,7 +264,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					SinglePlayerGameScreen.currentDoodle.clear();
 					SinglePlayerGameScreen.currentDoodle = smoothedDoodle;
 				}
-				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(),true);	
+				makeTriangleStrip((ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone(),1,true);	
 			}
 			
 			
@@ -838,6 +838,11 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		return soldiers;
 	}
 	
+	/**
+	 * checks if polygon is disjoint to or subsumes other polygons
+	 * @param polygon
+	 * @return
+	 */
 	boolean checkDisjoint(Polygon polygon) {
 		
 		float[] list = polygon.getTransformedVertices();
@@ -872,6 +877,13 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 				SinglePlayerGameScreen.paths.remove(pop);
 				SinglePlayerGameScreen.circleHasPath.remove(pop);
+				if(tempPolys.containsKey(pop)) {
+					for(Polygon push : tempPolys.get(pop)) {
+						SinglePlayerGameScreen.pathDoodles.remove(push);
+					}
+				}
+				subCircleHelper.remove(pop);
+				tempPolys.remove(pop);
 			}
 			
 		}
@@ -1057,7 +1069,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input, boolean taper) {
+	public ArrayList<Vector2> makeTriangleStrip(ArrayList<Vector2> input, int numSoldiers, boolean taper) {
 		//Catmull
 //		Array<Path<Vector2>> paths = new Array<Path<Vector2>>();
 //		Vector2[] stockArr = new Vector2[input.size()];

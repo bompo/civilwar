@@ -1035,7 +1035,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 				generatedDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
 				
-				generatedTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle, true));
+				generatedTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,1, true));
 				
 			}
 
@@ -1059,7 +1059,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			
 			generatedPathDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
-			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle, true));
+			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,1, true));
 			
 
 		}
