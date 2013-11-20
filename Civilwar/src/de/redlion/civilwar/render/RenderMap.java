@@ -21,6 +21,7 @@ import de.redlion.civilwar.Configuration;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.collision.HeightMap;
 import de.redlion.civilwar.shader.Bloom;
+import de.redlion.civilwar.units.Cannon;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -36,6 +37,7 @@ public class RenderMap {
 	ModelInstance modelEnemySoldierObj;
 	ModelInstance modelSelectedSoldierObj;
 	ModelInstance modelWeaponObj;
+	ModelInstance modelCannonObj;
 
 	int soldierSelector = 0;
 
@@ -79,7 +81,8 @@ public class RenderMap {
 		assets.load("data/soldier_enemy.g3db", Model.class);
 		assets.load("data/soldier_selected.g3db", Model.class);
 		assets.load("data/landscape.g3db", Model.class);
-		assets.load("data/shadow_plane.g3db", Model.class);		
+		assets.load("data/shadow_plane.g3db", Model.class);
+		assets.load("data/cannon.g3db", Model.class);	
 
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.zoom = 0.015f;
@@ -122,6 +125,7 @@ public class RenderMap {
 	    
 		modelEnemySoldierObj = new ModelInstance(assets.get("data/soldier_enemy.g3db", Model.class));
 		modelSelectedSoldierObj = new ModelInstance(assets.get("data/soldier_selected.g3db", Model.class));
+		modelCannonObj = new ModelInstance(assets.get("data/cannon.g3db", Model.class));
 
 		heightMap = new HeightMap(modelLandscapeObj.model);
 
@@ -201,6 +205,29 @@ public class RenderMap {
 			} else {
 				modelBatch.render(modelEnemySoldierObj);
 			}
+		}
+		
+		// render cannon
+		for (int i = 0; i < GameSession.getInstance().cannons.size; i++) {
+			Cannon cannons = GameSession.getInstance().cannons.get(i);
+
+			float height = heightMap.getHeight(cannons.position.x, cannons.position.y);
+
+			tmp.idt();
+			tmp.trn(cannons.position.x, height + 0.05f, cannons.position.y);
+			tmp.scl(0.15f, 1.f, 0.35f);
+			modelShadowPlaneObj.transform.set(tmp);
+			modelBatch.render(modelShadowPlaneObj);
+
+			tmp.idt();
+			tmp.trn(cannons.position.x, height + 0.05f, cannons.position.y);
+			tmp.scl(0.5f);
+			tmp.rotate(Vector3.Y, -cannons.facing.angle());
+			tmp.rotate(Vector3.X, -cannons.bounce * 10.f);
+			tmp.rotate(Vector3.X, -cannons.angle * 1.f);
+			modelCannonObj.transform.set(tmp);
+			
+			modelBatch.render(modelCannonObj);
 		}
 
 		modelBatch.end();
