@@ -1,11 +1,7 @@
 package de.redlion.civilwar.controls;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -197,8 +193,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(SinglePlayerGameScreen.paths.remove(picked) != null) {
 				SinglePlayerGameScreen.doodles.remove(picked);
 				SinglePlayerGameScreen.pathDoodles.remove(picked);
-				SinglePlayerGameScreen.generatedDoodles.remove(picked);
-				SinglePlayerGameScreen.generatedPathDoodles.remove(picked);
+//				SinglePlayerGameScreen.generatedDoodles.remove(picked);
+//				SinglePlayerGameScreen.generatedPathDoodles.remove(picked);
 				SinglePlayerGameScreen.circleHasPath.remove(picked);
 			}
 			
@@ -367,6 +363,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 //								if(SinglePlayerGameScreen.circleHasPath.indexOf(p) == -1) {
 								if(SinglePlayerGameScreen.paths.get(p) == null)	{
 									SinglePlayerGameScreen.pathDoodles.put(p, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+									//update triStrips to enlarge them, the more soldiers they have
+									makeTriangleStrip(SinglePlayerGameScreen.currentDoodle, SinglePlayerGameScreen.circles.get(p).size(), true);
 									SinglePlayerGameScreen.pathTriangleStrips.put(p, (ArrayList<Vector2>) currentTriangleStrip.clone());
 									SinglePlayerGameScreen.paths.put(p, (ArrayList<Vector3>) tempList.clone());
 									SinglePlayerGameScreen.currentTriStrip.clear();
@@ -462,7 +460,22 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 										pathHelper.put((ArrayList<Vector3>) tempList.clone(), tempP);
 										intersectionHelper.put((ArrayList<Vector3>) tempList.clone(), firstPointOutsidePolygon);
 										SinglePlayerGameScreen.pathDoodles.put(tempP, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
-										SinglePlayerGameScreen.pathTriangleStrips.put(tempP, (ArrayList<Vector2>) currentTriangleStrip.clone());
+										//update triStrips to enlarge them, the more soldiers they have
+										
+//										makeTriangleStrip(SinglePlayerGameScreen.currentDoodle, SinglePlayerGameScreen.circles.get(p).size() / tempPolys.get(p).size(), true);
+										
+//										SinglePlayerGameScreen.pathTriangleStrips.put(tempP, (ArrayList<Vector2>) currentTriangleStrip.clone());
+
+										for(Polygon pop : tempPolys.get(p)) {
+											if(SinglePlayerGameScreen.pathDoodles.containsKey(pop)) {
+											SinglePlayerGameScreen.pathTriangleStrips.put(pop, 
+													makeTriangleStrip(SinglePlayerGameScreen.pathDoodles.get(pop), SinglePlayerGameScreen.circles.get(p).size() / subCircleHelper.get(p).size(), true));
+											}
+										}
+										if(SinglePlayerGameScreen.pathDoodles.containsKey(p)) {
+										SinglePlayerGameScreen.pathTriangleStrips.put(p, 
+												makeTriangleStrip(SinglePlayerGameScreen.pathDoodles.get(p), SinglePlayerGameScreen.circles.get(p).size() / subCircleHelper.get(p).size(), true));
+										}
 										
 									}
 									
@@ -588,16 +601,18 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					}
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.pathDoodles.remove(pop);
-					SinglePlayerGameScreen.generatedDoodles.remove(pop);
-					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
+//					SinglePlayerGameScreen.generatedDoodles.remove(pop);
+//					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 					
 					subCircleHelper.remove(pop);
-					for(Polygon push : tempPolys.get(pop)) {
-						
-						SinglePlayerGameScreen.doodles.remove(push);
-						SinglePlayerGameScreen.pathDoodles.remove(push);
-						
+					if(tempPolys.containsKey(pop)) {
+						for(Polygon push : tempPolys.get(pop)) {
+							
+							SinglePlayerGameScreen.doodles.remove(push);
+							SinglePlayerGameScreen.pathDoodles.remove(push);
+							
+						}
 					}
 					tempPolys.remove(pop);
 					
@@ -606,7 +621,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			if(!pathsToDelete.isEmpty()) {
 				for(Polygon pop : pathsToDelete) {
 					SinglePlayerGameScreen.pathDoodles.remove(pop);
-					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
+//					SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 					SinglePlayerGameScreen.paths.remove(pop);
 					SinglePlayerGameScreen.circleHasPath.remove(pop);
 					
@@ -615,21 +630,34 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 							pS.wayPoints.clear();
 						}
 					}
-					
 				}
 			}
 			if(!pathDoodlesToDelete.isEmpty()) {
 				for(ArrayList<Vector3> trail : pathDoodlesToDelete) {
-					SinglePlayerGameScreen.pathDoodles.remove(pathHelper.get(trail));	
+					SinglePlayerGameScreen.pathDoodles.remove(pathHelper.get(trail));
 				}
 			}
 			if(!subCirclePathsToDelete.isEmpty()) {
+				Polygon push = new Polygon();
 				for(Vector2 v : subCirclePathsToDelete) {
 					for(Polygon pop : subCircleHelper.keySet()) {
 						if(subCircleHelper.get(pop).containsKey(v)) {
+							push = pop;
 							subCircleHelper.get(pop).remove(v);
 						}
 					}
+				}
+				if(tempPolys.containsKey(push)) {
+					for(Polygon temp : tempPolys.get(push)) {
+						if(SinglePlayerGameScreen.pathDoodles.containsKey(temp)) {
+							SinglePlayerGameScreen.pathTriangleStrips.put(temp, 
+									makeTriangleStrip(SinglePlayerGameScreen.pathDoodles.get(temp), SinglePlayerGameScreen.circles.get(push).size() / subCircleHelper.get(push).size(), true));
+							}
+					}
+					if(SinglePlayerGameScreen.pathDoodles.containsKey(push)) {
+						SinglePlayerGameScreen.pathTriangleStrips.put(push, 
+								makeTriangleStrip(SinglePlayerGameScreen.pathDoodles.get(push), SinglePlayerGameScreen.circles.get(push).size() / subCircleHelper.get(push).size(), true));
+						}
 				}
 			}
 			
@@ -873,8 +901,8 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 				SinglePlayerGameScreen.circles.remove(pop);
 				SinglePlayerGameScreen.doodles.remove(pop);
 				SinglePlayerGameScreen.pathDoodles.remove(pop);
-				SinglePlayerGameScreen.generatedDoodles.remove(pop);
-				SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
+//				SinglePlayerGameScreen.generatedDoodles.remove(pop);
+//				SinglePlayerGameScreen.generatedPathDoodles.remove(pop);
 				SinglePlayerGameScreen.paths.remove(pop);
 				SinglePlayerGameScreen.circleHasPath.remove(pop);
 				if(tempPolys.containsKey(pop)) {
@@ -975,73 +1003,73 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 		}
 		
-		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedDoodles.values()) {
-			
-			
-			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-			for(Vector2 v : doodle) {
-				
-				v.add(trans.x,trans.y);
-				
-				newDoodle.add(v);
-				
-			}
-			
-			doodle.clear();
-			doodle.addAll(newDoodle);
-			
-		}
+//		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedDoodles.values()) {
+//			
+//			
+//			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+//			for(Vector2 v : doodle) {
+//				
+//				v.add(trans.x,trans.y);
+//				
+//				newDoodle.add(v);
+//				
+//			}
+//			
+//			doodle.clear();
+//			doodle.addAll(newDoodle);
+//			
+//		}
+//		
+//		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedPathDoodles.values()) {
+//			
+//			
+//			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
+//			for(Vector2 v : doodle) {
+//				
+//				v.add(trans.x,trans.y);
+//				
+//				newDoodle.add(v);
+//				
+//			}
+//			
+//			doodle.clear();
+//			doodle.addAll(newDoodle);
+//			
+//		}
 		
-		for(ArrayList<Vector2> doodle : SinglePlayerGameScreen.generatedPathDoodles.values()) {
-			
-			
-			ArrayList<Vector2> newDoodle = new ArrayList<Vector2>();
-			for(Vector2 v : doodle) {
-				
-				v.add(trans.x,trans.y);
-				
-				newDoodle.add(v);
-				
-			}
-			
-			doodle.clear();
-			doodle.addAll(newDoodle);
-			
-		}
-		
-		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedTriangleStrips.values()) {
-			
-			
-			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-			for(Vector2 v : triStrip) {
-				
-				v.add(trans);
-				
-				newStrip.add(v);
-				
-			}
-			
-			triStrip.clear();
-			triStrip.addAll(newStrip);
-			
-		}
-		
-		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedPathTriangleStrips.values()) {
-			
-			
-			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
-			for(Vector2 v : triStrip) {
-				
-				v.add(trans);
-				
-				newStrip.add(v);
-				
-			}
-			
-			triStrip.clear();
-			triStrip.addAll(newStrip);
-			
-		}
+//		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedTriangleStrips.values()) {
+//			
+//			
+//			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+//			for(Vector2 v : triStrip) {
+//				
+//				v.add(trans);
+//				
+//				newStrip.add(v);
+//				
+//			}
+//			
+//			triStrip.clear();
+//			triStrip.addAll(newStrip);
+//			
+//		}
+//		
+//		for(ArrayList<Vector2> triStrip : SinglePlayerGameScreen.generatedPathTriangleStrips.values()) {
+//			
+//			
+//			ArrayList<Vector2> newStrip = new ArrayList<Vector2>();
+//			for(Vector2 v : triStrip) {
+//				
+//				v.add(trans);
+//				
+//				newStrip.add(v);
+//				
+//			}
+//			
+//			triStrip.clear();
+//			triStrip.addAll(newStrip);
+//			
+//		}
 		
 	}
 	
@@ -1088,8 +1116,16 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		float thickness_v = MAX_THICKNESS_VERTICAL;
 		float thickness_h = 5;
 		
+		float modFactor = numSoldiers * 1.5f;
 		
 		for(int j=0;j<input.size();j++) {
+			
+			if(modFactor > 1)
+				modFactor -= 0.2f;
+			if(modFactor < 1)
+				modFactor = 1;
+			if(modFactor > 20)
+				modFactor = 20;
 			
 			p1 = input.get(j);
 //			p2 = input.get(j+1);
@@ -1105,13 +1141,19 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 //			tmp.set(p2).sub(p1).nor();
 			tmp.set(0,-1);
-			tmp.scl(thickness_v);
+			if(numSoldiers > 1 && (modFactor / 4) >= 1)
+				tmp.scl(thickness_v * (modFactor / 4));
+			else
+				tmp.scl(thickness_v);
 			
 			Vector2 a = p1.cpy().add(tmp);
 			Vector2 b = p1.cpy().sub(tmp);
 			
 			tmp.set(1,0);
-			tmp.scl(thickness_h);
+			if(numSoldiers > 1 && (modFactor / 8) >= 1)
+				tmp.scl(thickness_h * (modFactor / 8));
+			else
+				tmp.scl(thickness_h);
 			
 			a.add(tmp);
 			b.sub(tmp);

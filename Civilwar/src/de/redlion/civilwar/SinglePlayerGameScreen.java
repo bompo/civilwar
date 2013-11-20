@@ -76,12 +76,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Polygon, ArrayList<PlayerSoldier>> circles; //maps projected polygons to what soldiers they encompass
 	public static HashMap<Polygon, ArrayList<Vector2>> doodles; //maps polygons to what circle has been drawn on screen
 	public static HashMap<Polygon, ArrayList<Vector2>> pathDoodles; //maps polygons to what path has been drawn on screen
-	public static HashMap<Polygon, ArrayList<Vector2>> generatedDoodles; //maps polygons to doodles that have been generated from polygons
-	public static HashMap<Polygon, ArrayList<Vector2>> generatedPathDoodles; //maps polygons to their generated doodlepaths
+	private HashMap<Polygon, ArrayList<Vector2>> generatedDoodles; //maps polygons to doodles that have been generated from polygons
+	private HashMap<Polygon, ArrayList<Vector2>> generatedPathDoodles; //maps polygons to their generated doodlepaths
 	public static HashMap<Polygon, ArrayList<Vector2>> triangleStrips; //maps polygons (circles) to triangle strips
 	public static HashMap<Polygon, ArrayList<Vector2>> pathTriangleStrips; //maps polygons (paths) to triangle strips
-	public static HashMap<Polygon, ArrayList<Vector2>> generatedTriangleStrips; //maps polygons to triangle strips that have been generated from polygons
-	public static HashMap<Polygon, ArrayList<Vector2>> generatedPathTriangleStrips; //maps polygons to triangle strips that have been generated from their paths
+	private HashMap<Polygon, ArrayList<Vector2>> generatedTriangleStrips; //maps polygons to triangle strips that have been generated from polygons
+	private HashMap<Polygon, ArrayList<Vector2>> generatedPathTriangleStrips; //maps polygons to triangle strips that have been generated from their paths
 	public static ArrayList<Polygon> circleHasPath;
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn - simplified version
 	public static ArrayList<Vector2> currentTriStrip; //tristrip of what is being drawn
@@ -473,100 +473,100 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 //				}
 			}
 			//draw generated doodles
-			for(Polygon pol : generatedDoodles.keySet()) {
-				
-				ArrayList<Vector2> doodle = generatedDoodles.get(pol);
-				
-				ArrayList<Vector2> triangleStrip = generatedTriangleStrips.get(pol);
-				
-				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
-					
-					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.Filled);
-					
-					Vector2 p0 = triangleStrip.get(0);
-					Vector2 p1 = triangleStrip.get(1);
-
-					for(Vector2 p2 : triangleStrip) {
-
-						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-						p0 = p1;
-						p1 = p2;
-						
-					}
-					r.end();
-					
-				}
-				
-				
-			}
+//			for(Polygon pol : generatedDoodles.keySet()) {
+//				
+//				ArrayList<Vector2> doodle = generatedDoodles.get(pol);
+//				
+//				ArrayList<Vector2> triangleStrip = generatedTriangleStrips.get(pol);
+//				
+//				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
+//					
+//					r.setColor(1, 0, 0, 1);
+//					r.begin(ShapeType.Filled);
+//					
+//					Vector2 p0 = triangleStrip.get(0);
+//					Vector2 p1 = triangleStrip.get(1);
+//
+//					for(Vector2 p2 : triangleStrip) {
+//
+//						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+//						p0 = p1;
+//						p1 = p2;
+//						
+//					}
+//					r.end();
+//					
+//				}
+//				
+//				
+//			}
 			
 			//draw generated path doodles
-			for(Polygon pol : generatedPathDoodles.keySet()) {
-				
-				ArrayList<Vector2> doodle = generatedPathDoodles.get(pol);
-				
-				ArrayList<Vector2> triangleStrip = generatedPathTriangleStrips.get(pol);
-				
-				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
-					
-					r.setColor(1, 0, 0, 1);
-					r.begin(ShapeType.Filled);
-					
-					Vector2 p0 = triangleStrip.get(0);
-					Vector2 p1 = triangleStrip.get(1);
-
-					for(Vector2 p2 : triangleStrip) {
-
-						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-						p0 = p1;
-						p1 = p2;
-						
-					}
-					r.end();
-					
-					if(paths.containsKey(pol)) {
-					
-						Vector2 a = doodle.get(doodle.size()-1).cpy();
-						Vector2 b = doodle.get(doodle.size()-2).cpy();
-						
-						Vector2 c = a.cpy().sub(b);
-						
-						Vector2 d = new Vector2(0, 1);
-						
-	//					r.setColor(1, 1, 1, 1);
-	//					r.begin(ShapeType.Line);
-	//					r.line(a.x, a.y, c.x + a.x, c.y + a.y);
-	//					r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
-	//					r.end();
-						
-						float dot = c.cpy().dot(d);
-						float angle = dot / (d.len() * c.len());
-						
-						angle = (float) Math.acos(angle);
-						angle = (float) Math.toDegrees(angle);
-						
-						if(a.x < b.x)
-							angle *= -1;
-						
-						
-	//					Gdx.app.log("angle", angle + "");
-						
-						//correction due to sprite?
-						angle += 60;
-						
-						arrowhead.setPosition(a.x, a.y);
-						arrowhead.setRotation(-angle);
-						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
-						batch.begin();
-						arrowhead.draw(batch);
-						batch.end();
-					}
-					
-				}
-				
-				
-			}
+//			for(Polygon pol : generatedPathDoodles.keySet()) {
+//				
+//				ArrayList<Vector2> doodle = generatedPathDoodles.get(pol);
+//				
+//				ArrayList<Vector2> triangleStrip = generatedPathTriangleStrips.get(pol);
+//				
+//				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
+//					
+//					r.setColor(1, 0, 0, 1);
+//					r.begin(ShapeType.Filled);
+//					
+//					Vector2 p0 = triangleStrip.get(0);
+//					Vector2 p1 = triangleStrip.get(1);
+//
+//					for(Vector2 p2 : triangleStrip) {
+//
+//						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+//						p0 = p1;
+//						p1 = p2;
+//						
+//					}
+//					r.end();
+//					
+//					if(paths.containsKey(pol)) {
+//					
+//						Vector2 a = doodle.get(doodle.size()-1).cpy();
+//						Vector2 b = doodle.get(doodle.size()-2).cpy();
+//						
+//						Vector2 c = a.cpy().sub(b);
+//						
+//						Vector2 d = new Vector2(0, 1);
+//						
+//	//					r.setColor(1, 1, 1, 1);
+//	//					r.begin(ShapeType.Line);
+//	//					r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+//	//					r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+//	//					r.end();
+//						
+//						float dot = c.cpy().dot(d);
+//						float angle = dot / (d.len() * c.len());
+//						
+//						angle = (float) Math.acos(angle);
+//						angle = (float) Math.toDegrees(angle);
+//						
+//						if(a.x < b.x)
+//							angle *= -1;
+//						
+//						
+//	//					Gdx.app.log("angle", angle + "");
+//						
+//						//correction due to sprite?
+//						angle += 60;
+//						
+//						arrowhead.setPosition(a.x, a.y);
+//						arrowhead.setRotation(-angle);
+//						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
+//						batch.begin();
+//						arrowhead.draw(batch);
+//						batch.end();
+//					}
+//					
+//				}
+//				
+//				
+//			}
 			
 			
 			// renders currentdoodle
@@ -1059,10 +1059,19 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			
 			generatedPathDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
-			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,1, true));
+			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,circles.get(pol).size(), true));
 			
 
 		}
+		
+		doodles.putAll(generatedDoodles);
+		triangleStrips.putAll(generatedTriangleStrips);
+		pathDoodles.putAll(generatedPathDoodles);
+		pathTriangleStrips.putAll(generatedPathTriangleStrips);
+		generatedDoodles.clear();
+		generatedPathDoodles.clear();
+		generatedTriangleStrips.clear();
+		generatedPathTriangleStrips.clear();
 		
 	}
 
