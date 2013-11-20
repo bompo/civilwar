@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Ellipse;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -53,7 +54,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	float delta;
 	
 	OrthoCamController camController;
-	DrawController drawController;
+	public DrawController drawController;
 	KeyController keyController;
 	GestureController gestureController;
 	GestureDetector gestureDetector;
@@ -165,7 +166,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(camController);
 			
-			generateDoodles();
+//			generateDoodles();
 			
 			multiplexer.addProcessor(drawController);
 			multiplexer.addProcessor(gestureDetector);
@@ -184,6 +185,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			drawController.subCircleHelper.clear();
+			drawController.tempPolys.clear();
+			drawController.pathHelper.clear();
+			drawController.intersectionHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -214,7 +218,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			multiplexer.addProcessor(gestureDetector);
 			multiplexer.addProcessor(keyController);
 			
-			generateDoodles();
+//			generateDoodles();
 			
 			Gdx.input.setInputProcessor(multiplexer);
 		} else {
@@ -229,6 +233,9 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentDoodle.clear();
 			currentTriStrip.clear();
 			drawController.subCircleHelper.clear();
+			drawController.tempPolys.clear();
+			drawController.pathHelper.clear();
+			drawController.intersectionHelper.clear();
 			multiplexer = new InputMultiplexer();
 			multiplexer.removeProcessor(drawController);
 			multiplexer.removeProcessor(gestureDetector);
@@ -617,12 +624,12 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						temp.set(1,0,0);
 					else if(v0.x > Gdx.graphics.getWidth() - Constants.EDGE_DISTANCE)
 						temp.set(0,0,-1);
-					temp.mul(0.01f * Constants.MOVESPEED);
-					temp.mul(edgeScrollingSpeed);
+					temp.scl(0.01f * Constants.MOVESPEED);
+					temp.scl(edgeScrollingSpeed);
 					Quaternion rotation = new Quaternion();
 					drawController.camera.combined.getRotation(rotation);
 					rotation.transform(temp);
-					drawController.camera.translate(temp.mul(-1));
+					drawController.camera.translate(temp.scl(-1));
 					drawController.camera.update();
 				
 					for(ArrayList<Vector2> doodle : doodles.values()) {
@@ -822,7 +829,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				Vector2 tempPos2 = positions.get(1).cpy();
 				
 				Vector2 mid = tempPos.cpy().add(tempPos2.cpy());
-				mid.mul(0.5f);
+				mid.scl(0.5f);
 				
 				//not perfect but it's a triangle...
 				mid.add(Math.signum(mid.x) / 5, Math.signum(mid.y) / 5);
@@ -900,6 +907,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	
 	public static void updatePaths() {
 		
+		ArrayList<Polygon> deleteThese = new ArrayList<Polygon>();
+		
 		for(Polygon pol : paths.keySet()) {
 			
 			int toDelete = -1;
@@ -909,7 +918,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				for(PlayerSoldier s : circles.get(pol)) {
 					int waypoint = -1;
 					for(Vector3 v : paths.get(pol)) {
-						 if(s.wayPoints.get(0).equals(v)) {
+						 if(!s.wayPoints.isEmpty() && s.wayPoints.get(0).equals(v)) {
 							 waypoint = paths.get(pol).indexOf(v);
 							 break;
 						 }
@@ -918,7 +927,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						set.add(waypoint);
 				}
 				
-				toDelete = set.first();
+				if(!set.isEmpty())
+					toDelete = set.first();
 				
 				//delete all points on path that are no longer waypoints
 				if(toDelete > -1) {
@@ -927,8 +937,10 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			
 			if(paths.get(pol).size() <= 1)
-				paths.remove(pol);
+				deleteThese.add(pol);
 		}
+		
+		paths.keySet().removeAll(deleteThese);
 	
 	}
 
@@ -969,8 +981,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			for(int soldier2ID = 0; soldier2ID < GameSession.getInstance().soldiers.size; soldier2ID++) {
 				Soldier soldier2 = GameSession.getInstance().soldiers.get(soldier2ID);
 				if(!soldier1.equals(soldier2) && soldier1.position.dst(soldier2.position) < .2f) {
-					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).mul(.1f));
-					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).mul(.1f));
+					soldier1.position.add(soldier1.position.cpy().sub(soldier2.position).scl(.1f));
+					soldier2.position.add(soldier2.position.cpy().sub(soldier1.position).scl(.1f));
 				}
 			}
 		}
@@ -981,7 +993,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	/**
 	 * generates Doodles and Trianglestrips for polygons
 	 */
-	private void generateDoodles() {
+	@SuppressWarnings("unchecked")
+	public void generateDoodles() {
 
 		for(Polygon pol : circles.keySet()) {
 			
@@ -1023,7 +1036,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 
 				generatedDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
 				
-				generatedTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle, true));
+				generatedTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,1, true));
 				
 			}
 
@@ -1047,7 +1060,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			}
 			
 			generatedPathDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
-			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle, true));
+			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,circles.get(pol).size(), true));
 			
 
 		}
