@@ -172,6 +172,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 			for(PlayerSoldier p: SinglePlayerGameScreen.circles.get(picked)) {
 				median.add(p.position);
+				p.wayPoints.clear();
 			}
 			
 			median.div(SinglePlayerGameScreen.circles.get(picked).size());
@@ -191,11 +192,21 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			//not sure if this will always work
 			//does remove depend on some kind of order?
 			if(SinglePlayerGameScreen.paths.remove(picked) != null) {
-				SinglePlayerGameScreen.doodles.remove(picked);
+//				SinglePlayerGameScreen.doodles.remove(picked);
 				SinglePlayerGameScreen.pathDoodles.remove(picked);
 //				SinglePlayerGameScreen.generatedDoodles.remove(picked);
 //				SinglePlayerGameScreen.generatedPathDoodles.remove(picked);
 				SinglePlayerGameScreen.circleHasPath.remove(picked);
+				if(subCircleHelper.containsKey(picked)) {
+					subCircleHelper.remove(picked);
+				}
+				if(tempPolys.containsKey(picked)) {
+					for(Polygon pol : tempPolys.get(picked)) {
+						if(SinglePlayerGameScreen.pathDoodles.containsKey(pol))
+							SinglePlayerGameScreen.pathDoodles.remove(pol);
+					}
+					tempPolys.remove(picked);
+				}
 			}
 			
 		}
