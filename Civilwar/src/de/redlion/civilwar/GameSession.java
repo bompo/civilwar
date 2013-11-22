@@ -29,7 +29,7 @@ public class GameSession {
 		soldiers = new Array<Soldier>();
 
 		for (int i = 0; i < 2; i++) {
-			Cannon s = new Cannon(1, new Vector2(1,1), new Vector2(0, 1));
+			Cannon s = new Cannon(1, new Vector2(1,-5), new Vector2(0, 1));
 			cannons.add(s);
 		}
 		

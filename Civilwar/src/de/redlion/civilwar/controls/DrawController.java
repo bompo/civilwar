@@ -38,6 +38,9 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 	private boolean fiveFingerDown = false;
 	private int howmanyfingers = 0;
 	
+	//if the currentDoodle starts within an existing circle, set this to true
+	public boolean willBePath = false;
+	
 	//used for mapping a circle to its intersection points with new paths, i.e. where the new sub circles will be calculated from
 	public HashMap<Polygon, HashMap<Vector2, ArrayList<Vector3>>> subCircleHelper = new HashMap<Polygon, HashMap<Vector2,ArrayList<Vector3>>>();
 	//used for mapping a polygon to it's uncommitted contained polygons (for deletion)
@@ -684,6 +687,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 		}
 		picked = null;
 		fling = false;
+		willBePath = false;
 		return false;
 	}
 	
@@ -731,6 +735,21 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					}
 					
 				}
+			} else if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+				
+				Vector3 projected = new Vector3();
+				
+				picker = camera.getPickRay(x, y);
+
+				Intersector.intersectRayTriangles(picker, SinglePlayerGameScreen.renderMap.heightMap.map, projected);
+				
+				for(Polygon p : SinglePlayerGameScreen.circles.keySet()) {
+					
+					if(p.contains(projected.x,projected.z))
+						willBePath = true;
+					
+				}
+				
 			}
 		}
 		

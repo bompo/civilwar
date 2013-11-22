@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Ellipse;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Quaternion;
@@ -32,6 +33,7 @@ import de.redlion.civilwar.controls.KeyController;
 import de.redlion.civilwar.controls.OrthoCamController;
 import de.redlion.civilwar.render.RenderMap;
 import de.redlion.civilwar.shader.DiffuseShader;
+import de.redlion.civilwar.units.Cannon;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
 
@@ -569,6 +571,47 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			}
 			
+			//draw circle if any existing paths touch it
+			for(ArrayList<Vector2> path : pathDoodles.values()) {
+				
+				for(Cannon can : GameSession.getInstance().cannons) {
+					
+					Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
+					renderMap.cam.project(pos);
+				
+					Vector2 current = new Vector2(path.get(path.size()-1).x,path.get(path.size()-1).y);
+					Vector2 pos2D = new Vector2(pos.x,pos.y);
+					
+					if(pos2D.dst(current) < 40) {
+						r.setColor(0, 0, 1, 1);
+						r.begin(ShapeType.Line);
+						r.circle(pos.x, pos.y, 40);
+						r.end();
+					}
+				}
+				
+			}
+			
+			for(ArrayList<Vector2> path : generatedPathDoodles.values()) {
+				
+				for(Cannon can : GameSession.getInstance().cannons) {
+					
+					Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
+					renderMap.cam.project(pos);
+				
+					Vector2 current = new Vector2(path.get(path.size()-1).x,path.get(path.size()-1).y);
+					Vector2 pos2D = new Vector2(pos.x,pos.y);
+					
+					if(pos2D.dst(current) < 40) {
+						r.setColor(0, 0, 1, 1);
+						r.begin(ShapeType.Line);
+						r.circle(pos.x, pos.y, 40);
+						r.end();
+					}
+				}
+				
+			}
+			
 			
 			// renders currentdoodle
 			if(!currentDoodle.isEmpty()) {
@@ -604,6 +647,29 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 					}
 					
 					r.end();
+				}
+				
+				//render circle around cannon
+				if(GameSession.getInstance().cannons.size > 0) {
+					
+					for(Cannon can : GameSession.getInstance().cannons) {
+						
+						Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
+						renderMap.cam.project(pos);
+						
+						Vector2 current = new Vector2(currentDoodle.get(currentDoodle.size()-1).x,currentDoodle.get(currentDoodle.size()-1).y);
+						Vector2 pos2D = new Vector2(pos.x,pos.y);
+						
+						//draw circle if currentDoodle touches it
+						if(drawController.willBePath && pos2D.dst(current) < 40) {
+							r.setColor(0, 0, 1, 1);
+							r.begin(ShapeType.Line);
+							r.circle(pos.x, pos.y, 40);
+							r.end();
+						}					
+						
+					}
+					
 				}
 				
 				
