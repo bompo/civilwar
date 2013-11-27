@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.input.GestureDetector.GestureAdapter;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import de.redlion.civilwar.Constants;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
+import de.redlion.civilwar.units.Cannon;
 import de.redlion.civilwar.units.DefaultAI;
 import de.redlion.civilwar.units.PlayerSoldier;
 import de.redlion.civilwar.units.Soldier;
@@ -387,11 +389,28 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 										pS.wayPoints.clear();
 										pS.ai.setState(DefaultAI.STATE.MOVING);
 										pS.wayPoints.addAll(SinglePlayerGameScreen.paths.get(p));
-										Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
-										direction.nor();
-										direction.scl(-1000);
-										Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
-										pS.wayPoints.add(last);
+										
+										boolean hasCannon = false;
+										
+										for(Cannon can : GameSession.getInstance().cannons) {
+											
+											Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
+											
+											if(pos.dst(pS.wayPoints.get(pS.wayPoints.size()-1)) < 40) {
+												hasCannon = true;
+												pS.walksToCannon = true;
+											}
+											
+										}
+										
+										if(!hasCannon) {
+											Vector3 direction = pS.wayPoints.get(pS.wayPoints.size()-2).cpy().sub(pS.wayPoints.get(pS.wayPoints.size()-1));
+											direction.nor();
+											direction.scl(-1000);
+											Vector3 last = pS.wayPoints.get(pS.wayPoints.size()-1).cpy().add(direction);
+											pS.wayPoints.add(last);
+										}
+										
 									}
 									
 									SinglePlayerGameScreen.circleHasPath.add(p);

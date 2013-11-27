@@ -40,6 +40,11 @@ public class Soldier {
 	public boolean alive = true;
 	public boolean stopped = false;
 	
+	public boolean walksToCannon = false;
+	public boolean pushesCannon = false;
+	//since not everybody should be pushing the cannon, others should walk next to it
+	public boolean walksNextToCannon = false;
+	
 	//render stuff
 	public BoundingBox instanceBB;
 	
