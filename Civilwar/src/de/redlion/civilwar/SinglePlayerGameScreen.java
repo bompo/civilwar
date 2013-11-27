@@ -89,6 +89,13 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static ArrayList<Vector2> currentDoodle; //what is currently being drawn - simplified version
 	public static ArrayList<Vector2> currentTriStrip; //tristrip of what is being drawn
 	
+	public static HashMap<Cannon, ArrayList<Vector2>> cannonPathDoodles; //maps cannons to what path has been drawn on screen
+	public static HashMap<Cannon, ArrayList<Vector2>> cannonPathTriangleStrips; //maps cannons (paths) to triangle strips
+	public static HashMap<Cannon, ArrayList<Vector2>> generatedCannonPathDoodles; //maps cannons to their generated doodlepaths
+	//maps cannons to triangle strips that have been generated from their paths
+	public static HashMap<Cannon, ArrayList<Vector2>> generatedCannonPathTriangleStrips; 
+	public static ArrayList<Cannon> cannonHasPath;
+	
 //	public static Ray circleRay;
 
 	public SinglePlayerGameScreen(Game game) {
@@ -132,6 +139,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		circleHasPath = new ArrayList<Polygon>();
 		currentDoodle = new ArrayList<Vector2>();
 		currentTriStrip = new ArrayList<Vector2>();
+		cannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
+		cannonPathTriangleStrips = new HashMap<Cannon, ArrayList<Vector2>>();
+		generatedCannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
+		generatedCannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
+		cannonHasPath = new ArrayList<Cannon>();
 
 		arrowhead = Resources.getInstance().arrowhead;
 		
@@ -186,6 +198,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			generatedPathTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
+			cannonPathDoodles.clear();
+			generatedCannonPathDoodles.clear();
+			cannonHasPath.clear();
+			cannonPathTriangleStrips.clear();
+			generatedCannonPathTriangleStrips.clear();
 			drawController.subCircleHelper.clear();
 			drawController.tempPolys.clear();
 			drawController.pathHelper.clear();
@@ -234,6 +251,11 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			generatedPathTriangleStrips.clear();
 			currentDoodle.clear();
 			currentTriStrip.clear();
+			cannonPathDoodles.clear();
+			generatedCannonPathDoodles.clear();
+			cannonPathTriangleStrips.clear();
+			generatedCannonPathTriangleStrips.clear();
+			cannonHasPath.clear();
 			drawController.subCircleHelper.clear();
 			drawController.tempPolys.clear();
 			drawController.pathHelper.clear();
