@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
 import de.redlion.civilwar.Constants;
+import de.redlion.civilwar.GameInstance;
 import de.redlion.civilwar.GameSession;
 import de.redlion.civilwar.SinglePlayerGameScreen;
 import de.redlion.civilwar.units.Cannon;
@@ -396,9 +397,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 											
 											Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
 											
-											if(pos.dst(pS.wayPoints.get(pS.wayPoints.size()-1)) < 40) {
+											if(pos.dst(pS.wayPoints.get(pS.wayPoints.size()-1)) < 1) {
 												hasCannon = true;
 												pS.walksToCannon = true;
+												pS.cannon = can;
 											}
 											
 										}
@@ -514,6 +516,27 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 								}
 							}
 						}
+						
+						//check for paths from cannons
+						for(Cannon c : GameSession.getInstance().cannons) {
+							
+							Vector3 pos = new Vector3(c.position.x, 0, c.position.y);
+							
+							if(pos.dst(tempList.get(0)) < 1) {
+								
+								deletedoodle = false;
+								
+								SinglePlayerGameScreen.cannonPathDoodles.put(c, (ArrayList<Vector2>) SinglePlayerGameScreen.currentDoodle.clone());
+								makeTriangleStrip(SinglePlayerGameScreen.currentDoodle, 0, true);
+								//TODO: maybe add number of soldiers from path leading to cannon?
+								SinglePlayerGameScreen.cannonPathTriangleStrips.put(c, (ArrayList<Vector2>) currentTriangleStrip.clone());
+								SinglePlayerGameScreen.currentTriStrip.clear();
+								
+								c.path = (ArrayList<Vector3>) tempList.clone();
+							}
+							
+						}
+						
 						if(deletedoodle) {
 							SinglePlayerGameScreen.currentDoodle.clear();
 							SinglePlayerGameScreen.currentTriStrip.clear();
@@ -541,6 +564,7 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 			
 			ArrayList<Polygon> toDelete = new ArrayList<Polygon>();
 			ArrayList<Polygon> pathsToDelete = new ArrayList<Polygon>();
+			ArrayList<Cannon> cannonPathsToDelete = new ArrayList<Cannon>();
 			
 			//ONLY used for paths, not yet committed by divideCircles
 			ArrayList<ArrayList<Vector3>> pathDoodlesToDelete = new ArrayList<ArrayList<Vector3>>();
@@ -621,16 +645,49 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					}
 									
 				}
+				//check cannon paths
+				for(Cannon cannon : GameSession.getInstance().cannons) {
+					
+					ArrayList<Vector3> trail = cannon.path;
+					if(!trail.isEmpty()) {
+						
+						if(trail.size()%2 != 0)
+							trail.add(trail.get(trail.size() - 1));
+						
+						Vector2 start = new Vector2(deletePath.get(0).x,deletePath.get(0).z);
+						Vector2 end = new Vector2(deletePath.get(deletePath.size()-1).x,deletePath.get(deletePath.size()-1).z);
+						
+						for(int i=0; i<trail.size();i+=2) {
+							
+							Vector2 point1 = new Vector2(trail.get(i).x,trail.get(i).z);
+							Vector2 point2 = new Vector2(trail.get(i+1).x,trail.get(i+1).z);
+							
+							if(Intersector.intersectSegments(point1, point2, start, end, new Vector2()))
+								cannonPathsToDelete.add(cannon);
+							
+						}						
+					}
+					
+				}
 				
 			}
 			
 			if(!toDelete.isEmpty()) {
 				for(Polygon pop : toDelete) {
 
+					Cannon ganon = null;
 					for(PlayerSoldier a : SinglePlayerGameScreen.circles.remove(pop)) {
 						a.circled  = false;
 						a.wayPoints.clear();
+						if(a.walksToCannon)
+							ganon = a.cannon;
+						a.wayPoints.clear();
 					}
+					
+					if(ganon != null) {
+						cannonPathsToDelete.add(ganon);
+					}
+					
 					SinglePlayerGameScreen.doodles.remove(pop);
 					SinglePlayerGameScreen.pathDoodles.remove(pop);
 					SinglePlayerGameScreen.generatedDoodles.remove(pop);
@@ -663,8 +720,14 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					}
 					
 					if(!SinglePlayerGameScreen.circles.isEmpty()) {
+						Cannon ganon = null;
 						for(PlayerSoldier pS : SinglePlayerGameScreen.circles.get(pop)) {
+							if(pS.walksToCannon)
+								ganon = pS.cannon;
 							pS.wayPoints.clear();
+						}
+						if(ganon != null) {
+							cannonPathsToDelete.add(ganon);
 						}
 					}
 				}
@@ -681,6 +744,21 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 						if(subCircleHelper.get(pop).containsKey(v)) {
 							push = pop;
 							tempPolys.get(pop).remove(pathHelper.get(subCircleHelper.get(pop).get(v)));
+							
+							//this might not always work
+							Vector3 end = subCircleHelper.get(pop).get(v).get(subCircleHelper.get(pop).get(v).size()-1);
+							for(Cannon can : GameSession.getInstance().cannons) {
+								
+								Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
+								
+								if(pos.dst(end) < 1) {
+									SinglePlayerGameScreen.cannonPathDoodles.remove(can);
+									SinglePlayerGameScreen.generatedCannonPathDoodles.remove(can);
+									can.path.clear();
+								}
+								
+							}
+							
 							subCircleHelper.get(pop).remove(v);
 						}
 					}
@@ -699,6 +777,25 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					
 					if(subCircleHelper.get(push).size() == 1) {
 						subCircleHelper.remove(push);
+					}
+				}
+			}
+			if(!cannonPathsToDelete.isEmpty()) {
+				for(Cannon cann : cannonPathsToDelete) {
+					for(Cannon camm : GameSession.getInstance().cannons) {
+						//because ganon != cann
+						if(cann.position.equals(camm.position)) {
+							SinglePlayerGameScreen.cannonPathDoodles.remove(cann);
+							SinglePlayerGameScreen.cannonPathDoodles.remove(camm);
+							SinglePlayerGameScreen.generatedCannonPathDoodles.remove(cann);
+							SinglePlayerGameScreen.generatedCannonPathDoodles.remove(camm);
+							camm.path.clear();
+							cann.path.clear();
+							break;
+						}
+						SinglePlayerGameScreen.cannonPathDoodles.remove(cann);
+						SinglePlayerGameScreen.generatedCannonPathDoodles.remove(cann);
+						cann.path.clear();
 					}
 				}
 			}
@@ -900,9 +997,10 @@ public class DrawController extends GestureAdapter implements InputProcessor {
 					
 					Vector3 pos = new Vector3(can.position.x, 0, can.position.y);
 					
-					if(pos.dst(pS.wayPoints.get(pS.wayPoints.size()-1)) < 40) {
+					if(pos.dst(pS.wayPoints.get(pS.wayPoints.size()-1)) < 1) {
 						hasCannon = true;
 						pS.walksToCannon = true;
+						pS.cannon = can;
 					}
 					
 				}

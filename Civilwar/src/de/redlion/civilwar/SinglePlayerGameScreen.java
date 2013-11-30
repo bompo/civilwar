@@ -94,7 +94,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 	public static HashMap<Cannon, ArrayList<Vector2>> generatedCannonPathDoodles; //maps cannons to their generated doodlepaths
 	//maps cannons to triangle strips that have been generated from their paths
 	public static HashMap<Cannon, ArrayList<Vector2>> generatedCannonPathTriangleStrips; 
-	public static ArrayList<Cannon> cannonHasPath;
 	
 //	public static Ray circleRay;
 
@@ -142,8 +141,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 		cannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
 		cannonPathTriangleStrips = new HashMap<Cannon, ArrayList<Vector2>>();
 		generatedCannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
-		generatedCannonPathDoodles = new HashMap<Cannon, ArrayList<Vector2>>();
-		cannonHasPath = new ArrayList<Cannon>();
+		generatedCannonPathTriangleStrips = new HashMap<Cannon, ArrayList<Vector2>>();
 
 		arrowhead = Resources.getInstance().arrowhead;
 		
@@ -200,7 +198,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			currentTriStrip.clear();
 			cannonPathDoodles.clear();
 			generatedCannonPathDoodles.clear();
-			cannonHasPath.clear();
 			cannonPathTriangleStrips.clear();
 			generatedCannonPathTriangleStrips.clear();
 			drawController.subCircleHelper.clear();
@@ -255,7 +252,6 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			generatedCannonPathDoodles.clear();
 			cannonPathTriangleStrips.clear();
 			generatedCannonPathTriangleStrips.clear();
-			cannonHasPath.clear();
 			drawController.subCircleHelper.clear();
 			drawController.tempPolys.clear();
 			drawController.pathHelper.clear();
@@ -432,6 +428,140 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 				
 			}
+			//draw cannon paths
+			for(Cannon can : cannonPathDoodles.keySet()) {
+				
+				ArrayList<Vector2> triangleStrip = cannonPathTriangleStrips.get(can);
+				
+				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
+					
+					r.setColor(0, 0, 1, 1);
+					r.begin(ShapeType.Filled);
+					
+					Vector2 p0 = triangleStrip.get(0);
+					Vector2 p1 = triangleStrip.get(1);
+
+					for(Vector2 p2 : triangleStrip) {
+
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
+						
+					}
+					r.end();
+				}
+				
+				ArrayList<Vector2> doodle = cannonPathDoodles.get(can);
+
+				// arrowhead.setPosition(doodle.get(doodle.size()-3).x -
+				// arrowhead.getOriginX(),doodle.get(doodle.size()-1).y -
+				// arrowhead.getOriginY());
+
+				Vector2 a = doodle.get(doodle.size() - 1).cpy();
+				Vector2 b = doodle.get(doodle.size() - 2).cpy();
+
+				Vector2 c = a.cpy().sub(b);
+
+				Vector2 d = new Vector2(0, 1);
+
+				// r.setColor(1, 1, 1, 1);
+				// r.begin(ShapeType.Line);
+				// r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+				// r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+				// r.end();
+
+				float dot = c.cpy().dot(d);
+				float angle = dot / (d.len() * c.len());
+
+				angle = (float) Math.acos(angle);
+				angle = (float) Math.toDegrees(angle);
+
+				if (a.x < b.x)
+					angle *= -1;
+
+				// Gdx.app.log("angle", angle + "");
+
+				// correction due to sprite?
+				angle += 60;
+
+				arrowhead.setPosition(a.x, a.y);
+				arrowhead.setRotation(-angle);
+				arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
+				batch.begin();
+				arrowhead.draw(batch);
+				batch.end();
+				
+			}
+			
+			for(Cannon can : generatedCannonPathDoodles.keySet()) {
+				
+
+				
+				ArrayList<Vector2> doodle = generatedCannonPathDoodles.get(can);
+				
+				ArrayList<Vector2> triangleStrip = generatedCannonPathTriangleStrips.get(can);
+				
+				if(triangleStrip != null && !triangleStrip.isEmpty()) {					
+					
+					r.setColor(0, 0, 1, 1);
+					r.begin(ShapeType.Filled);
+					
+					Vector2 p0 = triangleStrip.get(0);
+					Vector2 p1 = triangleStrip.get(1);
+
+					for(Vector2 p2 : triangleStrip) {
+
+						r.triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+						p0 = p1;
+						p1 = p2;
+						
+					}
+					r.end();
+					
+//					if(paths.containsKey(pol)) {
+					
+						Vector2 a = doodle.get(doodle.size()-1).cpy();
+						Vector2 b = doodle.get(doodle.size()-2).cpy();
+						
+						Vector2 c = a.cpy().sub(b);
+						
+						Vector2 d = new Vector2(0, 1);
+						
+	//					r.setColor(1, 1, 1, 1);
+	//					r.begin(ShapeType.Line);
+	//					r.line(a.x, a.y, c.x + a.x, c.y + a.y);
+	//					r.line(a.x, a.y, d.x + a.x, d.y + a.y + 100);
+	//					r.end();
+						
+						float dot = c.cpy().dot(d);
+						float angle = dot / (d.len() * c.len());
+						
+						angle = (float) Math.acos(angle);
+						angle = (float) Math.toDegrees(angle);
+						
+						if(a.x < b.x)
+							angle *= -1;
+						
+						
+	//					Gdx.app.log("angle", angle + "");
+						
+						//correction due to sprite?
+						angle += 60;
+						
+						arrowhead.setPosition(a.x, a.y);
+						arrowhead.setRotation(-angle);
+						arrowhead.translate(-arrowhead.getOriginX(), -arrowhead.getOriginY());
+						batch.begin();
+						arrowhead.draw(batch);
+						batch.end();
+//					}
+					
+				}
+				
+				
+			
+				
+			}
 			
 			for(Polygon pol : pathDoodles.keySet()) {
 				
@@ -453,6 +583,8 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 						
 					}
 					r.end();
+					
+					
 				}
 				
 //				if(paths.containsKey(pol)) {
@@ -593,7 +725,7 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 				
 			}
 			
-			//draw circle if any existing paths touch it
+			//draw circle if any existing paths touch a cannon
 			for(ArrayList<Vector2> path : pathDoodles.values()) {
 				
 				for(Cannon can : GameSession.getInstance().cannons) {
@@ -1149,6 +1281,29 @@ public class SinglePlayerGameScreen extends DefaultScreen {
 			
 			generatedPathDoodles.put(pol, (ArrayList<Vector2>) tempDoodle.clone());
 			generatedPathTriangleStrips.put(pol, drawController.makeTriangleStrip(tempDoodle,circles.get(pol).size(), true));
+			
+
+		}
+		
+		for(Cannon can : GameSession.getInstance().cannons) {
+			
+			ArrayList<Vector2> tempDoodle = new ArrayList<Vector2>();
+			
+//			Vector3 origin = new Vector3(pol.getOriginX(),0,pol.getOriginY());
+//			renderMap.cam.project(origin);
+//			//add origin for beauty reasons
+//			if(!pol.contains(paths.get(pol).get(0).x,paths.get(pol).get(0).y))
+//				tempDoodle.add(new Vector2(origin.x, origin.y));
+			for(Vector3 v : can.path) {
+				
+				Vector3 vCpy = v.cpy();
+				
+				renderMap.cam.project(vCpy);
+				tempDoodle.add(new Vector2(vCpy.x, vCpy.y));
+			}
+			
+			generatedCannonPathDoodles.put(can, (ArrayList<Vector2>) tempDoodle.clone());
+			generatedCannonPathTriangleStrips.put(can, drawController.makeTriangleStrip(tempDoodle,0, true));
 			
 
 		}

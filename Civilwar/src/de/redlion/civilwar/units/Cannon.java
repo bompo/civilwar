@@ -1,8 +1,11 @@
 package de.redlion.civilwar.units;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Cannon {
@@ -37,6 +40,8 @@ public class Cannon {
 	
 	public boolean alive = true;
 	public boolean stopped = false;
+	
+	public ArrayList<Vector3> path = new ArrayList<Vector3>();
 	
 	//render stuff
 	public BoundingBox instanceBB;

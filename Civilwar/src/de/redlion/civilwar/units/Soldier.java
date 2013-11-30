@@ -44,6 +44,7 @@ public class Soldier {
 	public boolean pushesCannon = false;
 	//since not everybody should be pushing the cannon, others should walk next to it
 	public boolean walksNextToCannon = false;
+	public Cannon cannon = null;
 	
 	//render stuff
 	public BoundingBox instanceBB;
